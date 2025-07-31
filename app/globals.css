@@ -2,22 +2,24 @@
 
 @font-face {
   font-family: "NanumSquare";
-  src: url("https://cdn.jsdelivr.net/gh/webfontworld/NanumSquare/NanumSquareR.woff2")
+  src: url("https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@latest/NanumSquareR.woff2")
       format("woff2"),
-    url("https://cdn.jsdelivr.net/gh/webfontworld/NanumSquare/NanumSquareR.woff")
+    url("https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@latest/NanumSquareR.woff")
       format("woff");
   font-weight: 400;
   font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
   font-family: "NanumSquare";
-  src: url("https://cdn.jsdelivr.net/gh/webfontworld/NanumSquare/NanumSquareB.woff2")
+  src: url("https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@latest/NanumSquareB.woff2")
       format("woff2"),
-    url("https://cdn.jsdelivr.net/gh/webfontworld/NanumSquare/NanumSquareB.woff")
+    url("https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@latest/NanumSquareB.woff")
       format("woff");
   font-weight: 700;
   font-style: normal;
+  font-display: swap;
 }
 
 /* 색상 및 폰트 변수 */
