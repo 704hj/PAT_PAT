@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import DraggableLetter from "./components/draggableLetter";
 import Character from "./components/character";
+import { StarsFalling } from "./components/star";
 
 export default function EmotionTrashPage() {
   const [isEating, setIsEating] = useState(false);
@@ -49,6 +50,8 @@ export default function EmotionTrashPage() {
 
       {/* 캐릭터 */}
       <Character isEating={isEating} isHover={isHover} ref={characterRef} />
+      {/* {isEating && <Firework />} */}
+      {isEating && <StarsFalling />}
     </div>
   );
 }
