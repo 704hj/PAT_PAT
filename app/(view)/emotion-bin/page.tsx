@@ -6,16 +6,27 @@ import Character from "./components/character";
 
 export default function EmotionTrashPage() {
   const [isEating, setIsEating] = useState(false);
+  const [isHover, setIsHover] = useState(false);
+
   const characterRef = useRef<HTMLDivElement>(null);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 bg-[#fefefe] text-[#333] relative">
-      {/* 편지 위치 확보 및 절대 위치 편지 */}
       <div className="relative w-full h-40 mb-8">
-        {" "}
-        {/* 높이 160px 확보 + 아래 여백 */}
         <DraggableLetter
-          onDrop={(letterRect) => {
+          onDrag={(letterRect) => {
+            const charRect = characterRef.current?.getBoundingClientRect();
+            if (charRect && letterRect) {
+              const isIntersecting =
+                letterRect.bottom > charRect.top &&
+                letterRect.top < charRect.bottom &&
+                letterRect.right > charRect.left &&
+                letterRect.left < charRect.right;
+
+              setIsHover(isIntersecting);
+            }
+          }}
+          onDragEnd={(letterRect) => {
             const charRect = characterRef.current?.getBoundingClientRect();
             if (charRect && letterRect) {
               const isIntersecting =
@@ -25,6 +36,7 @@ export default function EmotionTrashPage() {
                 letterRect.left < charRect.right;
 
               setIsEating(isIntersecting);
+              setIsHover(false); // 드래그 종료되면 hover 상태 초기화 가능
             }
           }}
         />
@@ -36,7 +48,7 @@ export default function EmotionTrashPage() {
       </p>
 
       {/* 캐릭터 */}
-      <Character isEating={isEating} ref={characterRef} />
+      <Character isEating={isEating} isHover={isHover} ref={characterRef} />
     </div>
   );
 }
