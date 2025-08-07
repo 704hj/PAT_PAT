@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import MbtiModal from "../components/mbtiModal";
+import MbtiModal from "../../components/mbtiModal";
 
 export default function HomePage() {
   const [showModal, setShowModal] = useState(false);
