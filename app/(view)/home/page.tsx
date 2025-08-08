@@ -1,46 +1,59 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import MbtiModal from "../../components/mbtiModal";
-
+import { motion } from "framer-motion";
 export default function HomePage() {
-  const [showModal, setShowModal] = useState(false);
-  useEffect(() => {
-    // localStorage 확인 후 없으면 모달 표시
-    const savedMbti = localStorage.getItem("mbti_tf");
-    if (!savedMbti) setShowModal(true);
-  }, []);
-
-  const handleClose = (type: "T" | "F") => {
-    localStorage.setItem("mbti_tf", type);
-    setShowModal(false);
-  };
   return (
-    <main className="min-h-screen bg-white flex flex-col items-center justify-center px-6 py-20 text-black max-w-lg mx-auto">
-      <h1 className="text-4xl font-semibold text-center max-w-md leading-snug mb-24">
-        오늘의 마음을 <br />
-        어디에 담아볼까요?
-      </h1>
+    <main className="min-h-screen bg-white flex flex-col items-center justify-start px-6 py-16 max-w-md mx-auto text-gray-900">
+      <motion.h1
+        initial={{ opacity: 0, y: -24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="text-7xl sm:text-6xl font-extrabold text-gray-500 tracking-widest text-center mb-12 drop-shadow-lg"
+        style={{
+          fontFamily: "var(--font-dongle), cursive, sans-serif",
+        }}
+      >
+        Pat Pat
+      </motion.h1>
 
-      <div className="flex flex-col gap-10 w-full max-w-md">
-        <Link href="/emotion-trash" passHref>
-          <button className="w-full py-5 rounded-xl bg-pink-200 text-pink-700 font-semibold text-2xl shadow-md hover:bg-pink-300 transition">
+      <div className="mt-[60px] flex flex-row gap-6 justify-center">
+        <Link href="/emotion-bin2" passHref>
+          <motion.button
+            whileHover={{
+              scale: 1.05,
+              boxShadow: "0 8px 20px rgba(219, 39, 119, 0.3)",
+            }}
+            whileTap={{ scale: 0.95 }}
+            className="flex flex-col items-center justify-center gap-2 w-36 h-36 rounded-xl bg-gray-100 text-gray-600 font-semibold text-lg transition-colors"
+          >
+            <img
+              src={"/images/icon/monster_default.svg"}
+              alt="캐릭터"
+              className="w-10 h-10 object-contain"
+            />
             감정 쓰레기통
-          </button>
+          </motion.button>
         </Link>
 
         <Link href="/gratitude" passHref>
-          <button className="w-full py-5 rounded-xl bg-sky-200 text-sky-700 font-semibold text-2xl shadow-md hover:bg-sky-300 transition">
-            감사 일기장
-          </button>
+          <motion.button
+            whileHover={{
+              scale: 1.05,
+              boxShadow: "0 8px 20px rgba(56, 189, 248, 0.3)",
+            }}
+            whileTap={{ scale: 0.95 }}
+            className="flex flex-col items-center justify-center gap-2 w-36 h-36 rounded-xl bg-gray-100 text-gray-600 font-semibold text-lg transition-colors"
+          >
+            <img
+              src={"/images/icon/cloud.svg"}
+              alt="구름"
+              className="w-10 h-10 object-contain"
+            />
+            감사 일기
+          </motion.button>
         </Link>
       </div>
-
-      <p className="mt-32 text-center text-gray-500 text-lg leading-relaxed select-none max-w-md">
-        가볍게 비워내고, <br /> 따뜻하게 채워보세요.
-      </p>
-      {showModal && <MbtiModal onClose={handleClose} />}
     </main>
   );
 }
