@@ -56,7 +56,7 @@ body {
   color: var(--color-accent);
 }
 
-button {
+/* button {
   all: unset;
   display: inline-block;
   width: 100%;
@@ -79,7 +79,7 @@ button:focus {
   color: white;
   box-shadow: 0 4px 12px rgba(0, 113, 227, 0.6);
   outline: none;
-}
+} */
 
 .fade-in-down {
   opacity: 0;
@@ -108,5 +108,55 @@ button:focus {
   100% {
     transform: translateY(110vh) rotate(360deg);
     opacity: 0;
+  }
+}
+@keyframes bgColorCycle {
+  0% {
+    background-color: #ff5757;
+  } /* 연분홍 */
+  10% {
+    background-color: #ff8f57;
+  } /* 연오렌지 */
+  28% {
+    background-color: #ffdb57;
+  } /* 금색 */
+  30% {
+    background-color: #caff57;
+  } /* 연초록 */
+  40% {
+    background-color: #57ff97;
+  } /* 연파랑 */
+  505% {
+    background-color: #57ffe9;
+  } /* 중간보라 */
+  60% {
+    background-color: #57b3ff;
+  } /* 진분홍 */
+  70% {
+    background-color: #5765ff;
+  } /* 청록 */
+  80% {
+    background-color: #9557ff;
+  } /* 연분홍 (처음으로 돌아감) */
+  90% {
+    background-color: #ff57a8;
+  } /* 연분홍 (처음으로 돌아감) */
+  100% {
+    background-color: #ff575a;
+  } /* 연분홍 (처음으로 돌아감) */
+}
+
+.cycle-bg {
+  animation: bgColorCycle 8s linear infinite;
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    text-shadow: 0 0 4px #db2777, 0 0 10px #db2777, 0 0 20px #db2777,
+      0 0 30px #db2777;
+  }
+  50% {
+    text-shadow: none;
   }
 }
