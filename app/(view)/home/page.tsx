@@ -14,8 +14,9 @@ export default function HomePage() {
           fontFamily: "var(--font-dongle), cursive, sans-serif",
         }}
       >
-        PAT-PAT
+        Pat Pat
       </motion.h1>
+
       <div className="mt-[60px] flex flex-row gap-6 justify-center">
         <Link href="/emotion-bin2" passHref>
           <motion.button

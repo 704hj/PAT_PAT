@@ -1,14 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { Dongle } from "next/font/google";
 
-const dongle = Dongle({
-  weight: ["400", "700"],
-  subsets: ["latin"],
-  variable: "--font-dongle",
-  display: "swap",
-});
 export default function Splash() {
   const router = useRouter();
   useEffect(() => {
