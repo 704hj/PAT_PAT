@@ -4,10 +4,11 @@ import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 
 interface Props {
-  onDrop: (rect: DOMRect | undefined) => void;
+  onDrag: (rect: DOMRect | undefined) => void;
+  onDragEnd: (rect: DOMRect | undefined) => void;
 }
 
-export default function DraggableLetter({ onDrop }: Props) {
+export default function DraggableLetter({ onDrag, onDragEnd }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const parentRef = useRef<HTMLDivElement>(null);
   const [constraints, setConstraints] = useState({
@@ -36,9 +37,13 @@ export default function DraggableLetter({ onDrop }: Props) {
       <motion.div
         drag
         dragConstraints={constraints}
+        onDrag={() => {
+          const letterRect = ref.current?.getBoundingClientRect();
+          onDrag(letterRect);
+        }}
         onDragEnd={() => {
           const letterRect = ref.current?.getBoundingClientRect();
-          onDrop(letterRect);
+          onDragEnd(letterRect);
         }}
         className="w-20 h-20 object-contain absolute top-[30%] left-1/2 -translate-x-1/2 -translate-y-1/2 cursor-pointer z-20"
         ref={ref}
