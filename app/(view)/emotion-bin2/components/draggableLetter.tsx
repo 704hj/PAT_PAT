@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import SuccessModal from "./modal";
 
 interface Props {
   onDrag: (rect: DOMRect | undefined) => void;
@@ -40,6 +39,12 @@ export default function DraggableLetter({
     }
   }, []);
 
+  useEffect(() => {
+    if (!isEating) {
+      setShowModal(false); // 다시 원상복귀시 모달 닫기
+    }
+  }, [isEating]);
+
   return (
     <div ref={parentRef} className="relative w-full h-[400px]">
       <motion.div
@@ -54,10 +59,10 @@ export default function DraggableLetter({
           onDragEnd(letterRect);
         }}
         ref={ref}
-        className="absolute top-[30%] left-1/2 -translate-x-1/2 -translate-y-1/2 cursor-pointer z-20 w-20 h-20"
+        className="absolute top-[30%] left-1/2 -translate-x-1/2 -translate-y-1/2 cursor-pointer z-16 w-20 h-16"
         animate={{
-          scale: isEating ? 0.2 : 1, // 크기 줄이기
-          opacity: isEating ? 0 : 1, // 투명도 줄이기
+          scale: isEating ? 0.2 : 1,
+          opacity: isEating ? 0 : 1,
         }}
         transition={{
           duration: 1,
@@ -65,23 +70,18 @@ export default function DraggableLetter({
         }}
         onAnimationComplete={() => {
           if (isEating) {
-            setShowModal(true); // 애니메이션 완료 후 모달 열기
+            setShowModal(true);
           }
         }}
+        dragElastic={0.2} // 드래그 탄성 추가해 더 자연스럽게
       >
         <img
-          src="/images/icon/rainbowLetter.svg"
+          src="/images/icon/piece.svg"
           alt="편지"
           className="w-full h-full object-contain"
+          draggable={false}
         />
       </motion.div>
-      {showModal && (
-        <SuccessModal
-          onClose={() => {
-            setShowModal(false);
-          }}
-        />
-      )}
     </div>
   );
 }
