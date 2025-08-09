@@ -73,6 +73,7 @@ export default function DraggableLetter({
           src="/images/icon/rainbowLetter.svg"
           alt="편지"
           className="w-full h-full object-contain"
+          draggable={false} // PC 화면에서 드래그
         />
       </motion.div>
       {showModal && (
