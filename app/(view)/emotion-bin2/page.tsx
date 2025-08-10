@@ -15,8 +15,8 @@ export default function EmotionTrashPage() {
       {/* 안내 문구 */}
       <p className="mb-4 text-center text-lg font-semibold max-w-xs">
         {isEating
-          ? "나쁜 감정을 다 처리할게요."
-          : "기억 조각을 드래그 해보세요"}
+          ? "천천히 감정을 삼키는 중입니다."
+          : "기억 조각을 움직여 보세요"}
       </p>
 
       {/* 드래그 조각 영역 */}
@@ -52,11 +52,8 @@ export default function EmotionTrashPage() {
       </div>
 
       {/* 캐릭터 영역 */}
-      <div
-        ref={characterRef}
-        className="w-full max-w-xs h-48 flex items-center justify-center"
-      >
-        <Character isEating={isEating} isHover={isHover} />
+      <div className="w-full max-w-xs h-48 flex items-center justify-center">
+        <Character isEating={isEating} isHover={isHover} ref={characterRef} />
       </div>
     </div>
   );

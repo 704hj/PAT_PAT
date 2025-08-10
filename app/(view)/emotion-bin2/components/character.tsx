@@ -14,7 +14,7 @@ interface Props {
 const Character = forwardRef<HTMLDivElement, Props>(
   ({ isEating, isHover }, ref) => {
     return (
-      <div ref={ref} className="mt-16 relative inline-block">
+      <div className="mt-16 relative inline-block">
         {isEating && (
           <div className="absolute -top-16 left-1/2 -translate-x-1/2 animate-bounce">
             <ProcessingBar
@@ -28,13 +28,15 @@ const Character = forwardRef<HTMLDivElement, Props>(
         )}
 
         {/* 캐릭터 이미지 */}
-        {isHover ? (
-          <MonsterHappy style="w-30 h-auto" />
-        ) : isEating ? (
-          <MonsterEat style="w-30 h-auto" />
-        ) : (
-          <MonsterDefault style="w-30 h-auto" />
-        )}
+        <div ref={ref}>
+          {isHover ? (
+            <MonsterHappy style="w-30 h-auto" />
+          ) : isEating ? (
+            <MonsterEat style="w-30 h-auto" />
+          ) : (
+            <MonsterDefault style="w-30 h-auto" />
+          )}
+        </div>
 
         {/* <img
           src={
