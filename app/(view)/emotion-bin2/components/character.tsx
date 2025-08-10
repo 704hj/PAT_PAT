@@ -20,7 +20,7 @@ const Character = forwardRef<HTMLDivElement, Props>(
             <ProcessingBar
               text=""
               width={120}
-              height={26}
+              height={10}
               backgroundColor="#eee"
               duration={6}
             />
@@ -29,11 +29,11 @@ const Character = forwardRef<HTMLDivElement, Props>(
 
         {/* 캐릭터 이미지 */}
         {isHover ? (
-          <MonsterHappy style="w-36 h-auto" />
+          <MonsterHappy style="w-30 h-auto" />
         ) : isEating ? (
-          <MonsterEat style="w-36 h-auto" />
+          <MonsterEat style="w-30 h-auto" />
         ) : (
-          <MonsterDefault style="w-36 h-auto" />
+          <MonsterDefault style="w-30 h-auto" />
         )}
 
         {/* <img

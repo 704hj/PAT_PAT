@@ -39,14 +39,8 @@ export default function DraggableLetter({
     }
   }, []);
 
-  useEffect(() => {
-    if (!isEating) {
-      setShowModal(false); // 다시 원상복귀시 모달 닫기
-    }
-  }, [isEating]);
-
   return (
-    <div ref={parentRef} className="relative w-full h-[400px]">
+    <div ref={parentRef} className="relative w-full h-[300px]">
       <motion.div
         drag
         dragConstraints={constraints}
@@ -78,7 +72,7 @@ export default function DraggableLetter({
         <img
           src="/images/icon/piece.svg"
           alt="편지"
-          className="w-full h-full object-contain"
+          className="w-full h-12 object-contain"
           draggable={false}
         />
       </motion.div>

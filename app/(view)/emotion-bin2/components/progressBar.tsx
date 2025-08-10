@@ -13,7 +13,7 @@ const ProcessingBar: React.FC<ProcessingBarProps> = ({
   text = "처리중...",
   width = 220,
   height = 80,
-  backgroundColor = "#2e2a3a", // 어두운 배경으로 몽환 느낌 강화
+  backgroundColor = "#2e2a3a",
   progressColors = [
     "#ff57a8",
     "#ff75c1",
@@ -40,9 +40,10 @@ const ProcessingBar: React.FC<ProcessingBarProps> = ({
         setProgress(percent);
         requestAnimationFrame(step);
       } else {
-        start = timestamp;
-        setProgress(0);
-        requestAnimationFrame(step);
+        return;
+        // start = timestamp;
+        // setProgress(0);
+        // requestAnimationFrame(step);
       }
     };
     requestAnimationFrame(step);
