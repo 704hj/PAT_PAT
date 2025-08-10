@@ -14,9 +14,7 @@ export default function EmotionTrashPage() {
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#212121] text-[#cdcdcd] px-6 py-8">
       {/* 안내 문구 */}
       <p className="mb-4 text-center text-lg font-semibold max-w-xs">
-        {isEating
-          ? "천천히 감정을 삼키는 중입니다."
-          : "기억 조각을 움직여 보세요"}
+        {isEating ? "정리하는 중입니다..." : "조각을 움직여 보세요"}
       </p>
 
       {/* 드래그 조각 영역 */}
