@@ -20,7 +20,7 @@ const Character = forwardRef<HTMLDivElement, Props>(
             <ProcessingBar
               text=""
               width={120}
-              height={26}
+              height={10}
               backgroundColor="#eee"
               duration={6}
             />
