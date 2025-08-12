@@ -1,22 +1,26 @@
-import type { StorybookConfig } from "@storybook/nextjs-vite";
+// .storybook/main.ts
+import path from "path";
 
-const config: StorybookConfig = {
-  "stories": [
-    "../stories/**/*.mdx",
-    "../stories/**/*.stories.@(js|jsx|mjs|ts|tsx)"
+export default {
+  framework: "@storybook/nextjs",
+  stories: [
+    "../stories/**/*.stories.@(ts|tsx|mdx)",
+    "../app/**/*.stories.@(ts|tsx|mdx)",
+    // 필요하면 아래를 나중에 추가
+    // '../components/**/*.stories.@(ts|tsx|mdx)',
   ],
-  "addons": [
-    "@chromatic-com/storybook",
+  addons: [
+    "@storybook/addon-essentials",
     "@storybook/addon-docs",
-    "@storybook/addon-a11y",
-    "@storybook/addon-vitest"
+    "@storybook/addon-vitest",
   ],
-  "framework": {
-    "name": "@storybook/nextjs-vite",
-    "options": {}
+  docs: { autodocs: "tag" },
+  webpackFinal: async (config: any) => {
+    config.resolve = config.resolve || {};
+    config.resolve.alias = {
+      ...(config.resolve.alias || {}),
+      "@": path.resolve(__dirname, ".."), // 프로젝트 루트 경로
+    };
+    return config;
   },
-  "staticDirs": [
-    "..\\public"
-  ]
 };
-export default config;
