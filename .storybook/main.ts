@@ -1,22 +1,29 @@
-import type { StorybookConfig } from "@storybook/nextjs-vite";
+import type { StorybookConfig } from "@storybook/nextjs";
+import path from "path";
 
 const config: StorybookConfig = {
-  "stories": [
-    "../stories/**/*.mdx",
-    "../stories/**/*.stories.@(js|jsx|mjs|ts|tsx)"
+  framework: { name: "@storybook/nextjs", options: {} },
+  stories: [
+    "../stories/**/*.stories.@(ts|tsx|mdx)",
+    "../app/**/*.stories.@(ts|tsx|mdx)",
   ],
-  "addons": [
-    "@chromatic-com/storybook",
+  addons: [
+    "@storybook/addon-essentials",
     "@storybook/addon-docs",
-    "@storybook/addon-a11y",
-    "@storybook/addon-vitest"
+    "@storybook/addon-vitest",
   ],
-  "framework": {
-    "name": "@storybook/nextjs-vite",
-    "options": {}
+  features: {
+    //@ts-ignore
+    autodocs: true,
   },
-  "staticDirs": [
-    "..\\public"
-  ]
+  webpackFinal: async (config) => {
+    config.resolve = config.resolve || {};
+    config.resolve.alias = {
+      ...(config.resolve.alias || {}),
+      "@": path.resolve(__dirname, ".."),
+    };
+    return config;
+  },
 };
+
 export default config;

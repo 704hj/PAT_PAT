@@ -1,0 +1,17 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "types": ["node", "react", "react-dom", "./storybook"]
+  },
+  "include": [
+    "../src/**/*.ts",
+    "../src/**/*.tsx",
+    "../src/**/*.mdx",
+    "./*.ts",
+    "./*.tsx",
+    "./**/*.ts",
+    "./**/*.tsx",
+    "./**/*.d.ts"
+  ]
+}
