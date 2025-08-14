@@ -4,14 +4,12 @@ import { useEffect, useState } from "react";
 
 export default function DiaryTestPage() {
   const photos = [
+    "white",
     "sky1.jpeg",
     "sky2.jpeg",
-    "sky3.jpeg",
     "sky6.jpeg",
     "sky7.jpeg",
     "sky9.jpeg",
-    "sky.gif",
-    "white",
   ];
 
   const cats = ["black_cat1.png", "black_cat2.png"];
