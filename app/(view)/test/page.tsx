@@ -11,6 +11,7 @@ export default function DiaryTestPage() {
     "sky7.jpeg",
     "sky9.jpeg",
     "sky.gif",
+    "white",
   ];
 
   const cats = ["black_cat1.png", "black_cat2.png"];
@@ -32,7 +33,10 @@ export default function DiaryTestPage() {
   return (
     <div
       className="relative min-h-screen bg-cover bg-center bg-no-repeat"
-      style={{ backgroundImage: `url(/images/bg/${photo})` }}
+      style={{
+        backgroundImage:
+          photo !== "white" ? `url(/images/bg/${photo})` : undefined,
+      }}
     >
       <button
         className="absolute top-4 left-4 px-4 py-2 text-sm text-cyan-100 font-bold"
