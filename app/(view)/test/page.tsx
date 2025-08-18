@@ -1,99 +1,59 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useRef, useState } from "react";
+import DraggableLetter from "./draggableLetter";
 
 export default function DiaryTestPage() {
-  const photos = [
-    "white",
-    "sky1.jpeg",
-    "sky2.jpeg",
-    "sky6.jpeg",
-    "sky7.jpeg",
-    "sky9.jpeg",
-  ];
+  const [isEating, setIsEating] = useState(false);
+  const [isHover, setIsHover] = useState(false);
 
-  const cats = ["black_cat1.png", "black_cat2.png"];
-  const [isOpen, setIsOpen] = useState(false);
+  const characterRef = useRef<HTMLDivElement>(null);
 
-  const [index, setIndex] = useState(0);
-  const photo = photos[index];
-
-  const [index2, setIndex2] = useState(0);
-  const cat = cats[index];
-
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "auto";
-    }
-  }, [isOpen]);
   return (
-    <div
-      className="relative min-h-screen bg-cover bg-center bg-no-repeat"
-      style={{
-        backgroundImage:
-          photo !== "white" ? `url(/images/bg/${photo})` : undefined,
-      }}
-    >
-      <button
-        className="absolute top-4 left-4 px-4 py-2 text-sm text-cyan-100 font-bold"
-        onClick={() => setIndex((prev) => (prev + 1) % photos.length)}
-      >
-        {photo.split(".")[0]}
-      </button>
-
-      <button
-        className="absolute bottom-4 right-4 px-4 py-2 text-sm text-gray-200 font-bold "
-        onClick={() => setIndex2((prev) => (prev + 1) % cats.length)}
-      >
-        {`cat${index2}`}
-      </button>
-
+    <div className="relative min-h-screen bg-cover bg-center bg-no-repeat bg-gray-100">
       {/* <img
-        src="/images/icon/star.png"
-        alt="star"
-        className="absolute top-5/12 left-20 transform -translate-x-1/2 max-w-[20%] h-auto transition-transform duration-150 ease-out active:translate-y-2 active:scale-95"
-      /> */}
-      <img
-        src="/images/icon/star2.png"
-        alt="star"
-        className="absolute top-10 right-10 transform -translate-x-1/2 max-w-[25%] h-auto transition-transform duration-150 ease-out active:translate-y-2 active:scale-95"
-      />
-
-      <img
-        src="/images/icon/cloud.png"
+        src="/images/icon/cloud_white.png"
         alt="cloud"
-        className="absolute top-40 left-20 transform -translate-x-1/2 max-w-[30%] h-auto transition-transform duration-150 ease-out active:translate-y-2 active:scale-95"
+        className="absolute top-15 left-1/2 transform -translate-x-1/2 max-w-[30%] h-auto transition-transform duration-150 ease-out active:translate-y-2 active:scale-95"
+      /> */}
+
+      <DraggableLetter
+        onDrag={(letterRect) => {
+          const charRect = characterRef.current?.getBoundingClientRect();
+          if (charRect && letterRect) {
+            const isIntersecting =
+              letterRect.bottom > charRect.top &&
+              letterRect.top < charRect.bottom &&
+              letterRect.right > charRect.left &&
+              letterRect.left < charRect.right;
+
+            setIsHover(isIntersecting);
+          }
+        }}
+        onDragEnd={(letterRect) => {
+          const charRect = characterRef.current?.getBoundingClientRect();
+          if (charRect && letterRect) {
+            const isIntersecting =
+              letterRect.bottom > charRect.top &&
+              letterRect.top < charRect.bottom &&
+              letterRect.right > charRect.left &&
+              letterRect.left < charRect.right;
+
+            setIsEating(isIntersecting);
+            setIsHover(false);
+          }
+        }}
+        isEating={isEating}
       />
 
-      <img
-        src="/images/icon/info.png"
-        alt="info"
-        className="absolute bottom-20 right-0 transform -translate-x-1/2 max-w-[15%] h-auto transition-transform duration-150 ease-out active:translate-y-2 active:scale-95 animate-glow cursor-pointer"
-        onClick={() => {
-          setIsOpen((prev) => !prev);
-        }}
-      />
-      {isOpen && (
-        <div className="absolute bottom-32 right-10 bg-white/90 backdrop-blur-sm rounded-xl p-4 max-w-xs shadow-lg z-40">
-          <h2 className="text-sm font-semibold mb-2">INFO</h2>
-          <p className="text-xs">여기에 INFP 관련 정보를 넣으세요.</p>
-        </div>
-      )}
-      {index2 % 2 === 0 ? (
+      {/* 캐릭터 영역 */}
+      <div ref={characterRef}>
         <img
-          src="/images/icon/black_cat1.png"
-          alt="고양이"
-          className="absolute bottom-10 left-1/2 transform -translate-x-1/2 max-w-[40%] h-auto"
+          src="/images/icon/trash2.png"
+          alt="trash can"
+          className="absolute bottom-10 left-1/2 transform -translate-x-1/2 max-w-[40%] h-auto transition-transform duration-150 ease-out active:translate-y-2 active:scale-95 "
         />
-      ) : (
-        <img
-          src="/images/icon/black_cat2.png"
-          alt="고양이"
-          className="absolute bottom-10 left-1/2 transform -translate-x-1/2 max-w-[60%] h-auto"
-        />
-      )}
+      </div>
     </div>
   );
 }

@@ -127,7 +127,7 @@ export default function DiaryForm() {
               className="bg-gray-500  border border-purple-300  text-white font-semibold text-lg py-3 px-8 rounded-full transition"
               onClick={(e) => {
                 e.preventDefault();
-                router.push("/emotion-bin2");
+                router.push("/emotion-bin");
               }}
             >
               보내기

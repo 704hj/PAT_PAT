@@ -1,9 +1,8 @@
 "use client";
 
 import { useRef, useState } from "react";
-import DraggableLetter from "./components/draggableLetter";
 import Character from "./components/character";
-import { StarsFalling } from "./components/star";
+import DraggableLetter from "./components/draggableLetter";
 
 export default function EmotionTrashPage() {
   const [isEating, setIsEating] = useState(false);
@@ -12,8 +11,14 @@ export default function EmotionTrashPage() {
   const characterRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 bg-[#fefefe] text-[#333] relative">
-      <div className="relative w-full h-40 mb-8">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#212121] text-[#cdcdcd] px-6 py-8">
+      {/* 안내 문구 */}
+      <p className="mb-4 text-center text-lg font-semibold max-w-xs">
+        {isEating ? "정리하는 중입니다..." : "깃털을 움직여 보세요"}
+      </p>
+
+      {/* 드래그 조각 영역 */}
+      <div className="w-full max-w-xs h-32 mb-6 relative">
         <DraggableLetter
           onDrag={(letterRect) => {
             const charRect = characterRef.current?.getBoundingClientRect();
@@ -37,21 +42,17 @@ export default function EmotionTrashPage() {
                 letterRect.left < charRect.right;
 
               setIsEating(isIntersecting);
-              setIsHover(false); // 드래그 종료되면 hover 상태 초기화 가능
+              setIsHover(false);
             }
           }}
+          isEating={isEating}
         />
       </div>
 
-      {/* 안내 문구 */}
-      <p className="mb-6 z-10 relative text-center text-lg font-medium">
-        편지를 드래그 해보세요
-      </p>
-
-      {/* 캐릭터 */}
-      <Character isEating={isEating} isHover={isHover} ref={characterRef} />
-      {/* {isEating && <Firework />} */}
-      {isEating && <StarsFalling />}
+      {/* 캐릭터 영역 */}
+      <div className="w-full max-w-xs h-48 flex items-center justify-center">
+        <Character isEating={isEating} isHover={isHover} ref={characterRef} />
+      </div>
     </div>
   );
 }
