@@ -1,6 +1,11 @@
 "use client";
 
+import Memo from "@/app/components/mbtiModal";
+import { useState } from "react";
+
 export default function HomePage() {
+  const [showMemo, setShowMemo] = useState<boolean>(false);
+
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center">
       {/* 고양이 캐릭터 */}
@@ -10,9 +15,19 @@ export default function HomePage() {
             src="/images/icon/cat.png"
             alt="character"
             className="max-w-[70%] h-auto transition-transform duration-150 ease-out active:translate-y-1 active:scale-95 cursor-pointer"
+            onClick={() => setShowMemo(true)}
           />
         </div>
       </div>
+
+      {/* 모달 */}
+      {showMemo && (
+        <Memo
+          onClick={() => {
+            setShowMemo((prev) => !prev);
+          }}
+        />
+      )}
     </div>
   );
 }
