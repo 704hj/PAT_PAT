@@ -40,7 +40,7 @@ export default function DraggableLetter({
   }, []);
 
   return (
-    <div ref={parentRef} className="relative w-full h-[300px]">
+    <div ref={parentRef} className="relative w-full h-screen">
       <motion.div
         drag
         dragConstraints={constraints}
@@ -53,7 +53,7 @@ export default function DraggableLetter({
           onDragEnd(letterRect);
         }}
         ref={ref}
-        className="absolute top-[30%] left-1/2 -translate-x-1/2 -translate-y-1/2 cursor-pointer z-16 w-20 h-16"
+        className="absolute bottom-1/6 left-1/2 -translate-x-1/2 -translate-y-1/2 cursor-pointer z-16 w-20 h-16"
         animate={{
           scale: isEating ? 0.2 : 1,
           opacity: isEating ? 0 : 1,
@@ -67,7 +67,7 @@ export default function DraggableLetter({
             setShowModal(true);
           }
         }}
-        dragElastic={0.2} // 드래그 탄성 추가해 더 자연스럽게
+        dragElastic={0.2}
       >
         <img
           src="/images/icon/paper.png"
