@@ -70,7 +70,7 @@ export default function DraggableLetter({
         dragElastic={0.2} // 드래그 탄성 추가해 더 자연스럽게
       >
         <img
-          src="/images/icon/feathers.svg"
+          src="/images/icon/paper.png"
           alt="편지"
           className="w-full h-12 object-contain"
           draggable={false}

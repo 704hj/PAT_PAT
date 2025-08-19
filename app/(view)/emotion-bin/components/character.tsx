@@ -28,7 +28,7 @@ const Character = forwardRef<HTMLDivElement, Props>(
         )}
 
         {/* 캐릭터 이미지 */}
-        <div ref={ref}>
+        {/* <div ref={ref}>
           {isHover ? (
             <MonsterHappy style="w-30 h-auto" />
           ) : isEating ? (
@@ -36,21 +36,23 @@ const Character = forwardRef<HTMLDivElement, Props>(
           ) : (
             <MonsterDefault style="w-30 h-auto" />
           )}
-        </div>
+        </div> */}
 
-        {/* <img
-          src={
-            isHover
-              ? "/images/icon/monster_happy.svg"
-              : isEating
-              ? "/images/icon/monster_open.svg"
-              : "/images/icon/monster_default.svg"
-          }
-          alt="캐릭터"
-          className={`w-45 h-45 object-contain transition-transform duration-300 ${
-            isEating ? "scale-110" : ""
-          }`}
-        /> */}
+        <div ref={ref}>
+          <img
+            src={
+              isHover
+                ? "/images/icon/simple_cat.png"
+                : isEating
+                ? "/images/icon/simple_cat.png"
+                : "/images/icon/simple_cat.png"
+            }
+            alt="캐릭터"
+            className={`w-45 h-45 object-contain transition-transform duration-300 ${
+              isEating ? "scale-110" : ""
+            }`}
+          />
+        </div>
       </div>
     );
   }
