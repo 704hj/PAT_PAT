@@ -1,101 +1,70 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useRef, useState } from "react";
+import DraggableLetter from "./draggableLetter";
 
 export default function DiaryTestPage() {
-  const photos = [
-    "sky1.jpeg",
-    "sky2.jpeg",
-    "sky3.jpeg",
-    "sky6.jpeg",
-    "sky7.jpeg",
-    "sky9.jpeg",
-    "sky.gif",
-    "white",
-  ];
+  const [isEating, setIsEating] = useState(false);
+  const [showBubble, setShowBubble] = useState(false);
+  const characterRef = useRef<HTMLDivElement>(null);
 
-  const cats = ["black_cat1.png", "black_cat2.png"];
-  const [isOpen, setIsOpen] = useState(false);
-
-  const [index, setIndex] = useState(0);
-  const photo = photos[index];
-
-  const [index2, setIndex2] = useState(0);
-  const cat = cats[index];
-
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "auto";
-    }
-  }, [isOpen]);
   return (
     <div
       className="relative min-h-screen bg-cover bg-center bg-no-repeat"
       style={{
-        backgroundImage:
-          photo !== "white" ? `url(/images/bg/${photo})` : undefined,
+        backgroundImage: `url(/images/bg/space.jpeg)`,
       }}
     >
-      <button
-        className="absolute top-4 left-4 px-4 py-2 text-sm text-cyan-100 font-bold"
-        onClick={() => setIndex((prev) => (prev + 1) % photos.length)}
-      >
-        {photo.split(".")[0]}
-      </button>
+      {/* 캐릭터 */}
+      <div className="absolute inset-0 flex justify-center items-end">
+        <div className="relative mb-4 left-1/4 " ref={characterRef}>
+          <img
+            src="/images/icon/simple_cat.png"
+            alt="character"
+            className="max-w-[40%] h-auto transition-transform duration-150 ease-out active:translate-y-1 active:scale-95 cursor-pointer"
+            onClick={() => setShowBubble((prev) => !prev)}
+          />
 
-      <button
-        className="absolute bottom-4 right-4 px-4 py-2 text-sm text-gray-200 font-bold "
-        onClick={() => setIndex2((prev) => (prev + 1) % cats.length)}
-      >
-        {`cat${index2}`}
-      </button>
+          {/* 말풍선 */}
+          {showBubble && (
+            <div className="absolute bottom-full left-1/4 -translate-x-1/2 w-max max-w-xs bg-white text-black text-sm px-3 py-2 rounded-lg shadow-lg border border-gray-200 text-center">
+              안좋은 일 안좋은일 안좋은 일
+              <div
+                className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0
+            border-l-4 border-l-transparent border-r-4 border-r-transparent border-t-4 border-t-white"
+              ></div>
+            </div>
+          )}
+        </div>
+      </div>
 
-      {/* <img
-        src="/images/icon/star.png"
-        alt="star"
-        className="absolute top-5/12 left-20 transform -translate-x-1/2 max-w-[20%] h-auto transition-transform duration-150 ease-out active:translate-y-2 active:scale-95"
-      /> */}
-      <img
-        src="/images/icon/star2.png"
-        alt="star"
-        className="absolute top-10 right-10 transform -translate-x-1/2 max-w-[25%] h-auto transition-transform duration-150 ease-out active:translate-y-2 active:scale-95"
-      />
-
-      <img
-        src="/images/icon/cloud.png"
-        alt="cloud"
-        className="absolute top-40 left-20 transform -translate-x-1/2 max-w-[30%] h-auto transition-transform duration-150 ease-out active:translate-y-2 active:scale-95"
-      />
-
-      <img
-        src="/images/icon/info.png"
-        alt="info"
-        className="absolute bottom-20 right-0 transform -translate-x-1/2 max-w-[15%] h-auto transition-transform duration-150 ease-out active:translate-y-2 active:scale-95 animate-glow cursor-pointer"
-        onClick={() => {
-          setIsOpen((prev) => !prev);
+      {/* 드래그 레터 */}
+      <DraggableLetter
+        targetRef={characterRef}
+        isEating={isEating}
+        onDrag={(rect) => {
+          const charRect = characterRef.current?.getBoundingClientRect();
+          if (charRect && rect) {
+            const intersect =
+              rect.bottom > charRect.top &&
+              rect.top < charRect.bottom &&
+              rect.right > charRect.left &&
+              rect.left < charRect.right;
+            // hover 감지 등 추가 로직 가능
+          }
+        }}
+        onDragEnd={(rect) => {
+          const charRect = characterRef.current?.getBoundingClientRect();
+          if (charRect && rect) {
+            const intersect =
+              rect.bottom > charRect.top &&
+              rect.top < charRect.bottom &&
+              rect.right > charRect.left &&
+              rect.left < charRect.right;
+            setIsEating(intersect);
+          }
         }}
       />
-      {isOpen && (
-        <div className="absolute bottom-32 right-10 bg-white/90 backdrop-blur-sm rounded-xl p-4 max-w-xs shadow-lg z-40">
-          <h2 className="text-sm font-semibold mb-2">INFO</h2>
-          <p className="text-xs">여기에 INFP 관련 정보를 넣으세요.</p>
-        </div>
-      )}
-      {index2 % 2 === 0 ? (
-        <img
-          src="/images/icon/black_cat1.png"
-          alt="고양이"
-          className="absolute bottom-10 left-1/2 transform -translate-x-1/2 max-w-[40%] h-auto"
-        />
-      ) : (
-        <img
-          src="/images/icon/black_cat2.png"
-          alt="고양이"
-          className="absolute bottom-10 left-1/2 transform -translate-x-1/2 max-w-[60%] h-auto"
-        />
-      )}
     </div>
   );
 }

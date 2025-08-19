@@ -6,11 +6,18 @@ import { useEffect, useRef, useState } from "react";
 interface Props {
   onDrag: (rect: DOMRect | undefined) => void;
   onDragEnd: (rect: DOMRect | undefined) => void;
+  isEating: boolean;
 }
 
-export default function DraggableLetter({ onDrag, onDragEnd }: Props) {
+export default function DraggableLetter({
+  onDrag,
+  onDragEnd,
+  isEating,
+}: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const parentRef = useRef<HTMLDivElement>(null);
+  const [showModal, setShowModal] = useState(false);
+
   const [constraints, setConstraints] = useState({
     top: 0,
     left: 0,
@@ -33,7 +40,7 @@ export default function DraggableLetter({ onDrag, onDragEnd }: Props) {
   }, []);
 
   return (
-    <div ref={parentRef} className="relative w-full h-[400px]">
+    <div ref={parentRef} className="relative w-full h-[300px]">
       <motion.div
         drag
         dragConstraints={constraints}
@@ -45,13 +52,28 @@ export default function DraggableLetter({ onDrag, onDragEnd }: Props) {
           const letterRect = ref.current?.getBoundingClientRect();
           onDragEnd(letterRect);
         }}
-        className="w-20 h-20 object-contain absolute top-[30%] left-1/2 -translate-x-1/2 -translate-y-1/2 cursor-pointer z-20"
         ref={ref}
+        className="absolute top-[30%] left-1/2 -translate-x-1/2 -translate-y-1/2 cursor-pointer z-16 w-20 h-16"
+        animate={{
+          scale: isEating ? 0.2 : 1,
+          opacity: isEating ? 0 : 1,
+        }}
+        transition={{
+          duration: 1,
+          ease: "easeInOut",
+        }}
+        onAnimationComplete={() => {
+          if (isEating) {
+            setShowModal(true);
+          }
+        }}
+        dragElastic={0.2} // 드래그 탄성 추가해 더 자연스럽게
       >
         <img
-          src="/images/icon/rainbowLetter.svg"
+          src="/images/icon/paper.png"
           alt="편지"
-          className="w-full h-full object-contain"
+          className="w-full h-12 object-contain"
+          draggable={false}
         />
       </motion.div>
     </div>
