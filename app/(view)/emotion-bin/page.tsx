@@ -17,21 +17,23 @@ export default function EmotionTrashPage() {
   }, []);
 
   return (
-    <div className="relative min-h-screen flex flex-col items-center justify-center ">
+    <div className="relative min-h-screen flex flex-col items-center justify-center">
       {/* 어두운 오버레이 */}
-      {darkOverlay && (
+      {/* {darkOverlay && (
         <div className="absolute inset-0 bg-black opacity-50 z-20 transition-opacity duration-500" />
-      )}
+      )} */}
 
       {/* 캐릭터 */}
-      <div className="absolute inset-0 flex justify-center items-end bottom-1/3 z-30">
-        <div className="relative mb-4 left-1/4" ref={characterRef}>
+      <div
+        className="absolute inset-0 flex justify-center items-end z-30"
+        style={{ top: "20%", left: "60%", transform: "translate(-20%, -50%)" }}
+      >
+        <div className="relative mb-4">
           <img
             src="/images/icon/cat.png"
             alt="character"
-            className="max-w-[70%] h-auto transition-transform duration-150 ease-out active:translate-y-1 active:scale-95 cursor-pointer"
+            className="max-w-[50%] h-auto transition-transform duration-150 ease-out active:translate-y-1 active:scale-95 cursor-pointer"
           />
-
           {/* 말풍선 */}
           {isEating && (
             <div className="absolute bottom-full left-1/4 -translate-x-1/2 w-max max-w-xs bg-white text-black text-sm px-3 py-2 rounded-lg shadow-lg border border-gray-200 text-center">
@@ -46,8 +48,11 @@ export default function EmotionTrashPage() {
       </div>
 
       {/* 사람 캐릭터 */}
-      <div className="absolute inset-0 flex justify-center items-end bottom-20 z-20">
-        <div className="relative mb-4 left-0 ">
+      <div
+        className="absolute inset-0 flex justify-center items-end  z-30"
+        style={{ top: "65%", left: "20%", transform: "translate(-20%, -50%)" }}
+      >
+        <div className="relative mb-4 ">
           <img
             src="/images/icon/girl.png"
             alt="character"
@@ -57,7 +62,7 @@ export default function EmotionTrashPage() {
       </div>
 
       {/* 드래그 조각 영역 */}
-      <div className="relative w-full h-[300px] z-20 flex justify-center items-center">
+      <div className="relative w-full h-[300px] z-40 flex justify-center items-center">
         <DraggableLetter
           onDrag={(letterRect) => {
             const charRect = characterRef.current?.getBoundingClientRect();
