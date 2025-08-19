@@ -18,7 +18,7 @@ export default function HomePage() {
       </motion.h1>
 
       <div className="mt-[60px] flex flex-row gap-6 justify-center">
-        <Link href="/emotion-trash" passHref>
+        <Link href="/emotion-bin" passHref>
           <motion.button
             whileHover={{
               scale: 1.05,
