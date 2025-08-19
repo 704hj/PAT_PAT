@@ -17,7 +17,7 @@ export default function EmotionTrashPage() {
   }, []);
 
   return (
-    <div className="relative min-h-screen flex flex-col items-center justify-center">
+    <div className="relative min-h-screen flex flex-col items-center justify-center ">
       {/* 어두운 오버레이 */}
       {darkOverlay && (
         <div className="absolute inset-0 bg-black opacity-50 z-20 transition-opacity duration-500" />
@@ -42,6 +42,17 @@ export default function EmotionTrashPage() {
               />
             </div>
           )}
+        </div>
+      </div>
+
+      {/* 사람 캐릭터 */}
+      <div className="absolute inset-0 flex justify-center items-end bottom-20 z-20">
+        <div className="relative mb-4 left-0 ">
+          <img
+            src="/images/icon/girl.png"
+            alt="character"
+            className="h-auto transition-transform duration-150 ease-out active:translate-y-1 active:scale-95 cursor-pointer"
+          />
         </div>
       </div>
 
