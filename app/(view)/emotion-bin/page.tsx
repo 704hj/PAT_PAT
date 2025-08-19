@@ -1,19 +1,18 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import DraggableLetter from "./components/draggableLetter";
 
 export default function EmotionTrashPage() {
   const [isEating, setIsEating] = useState(false);
   const [isHover, setIsHover] = useState(false);
-  const [showBubble, setShowBubble] = useState(false);
   const [darkOverlay, setDarkOverlay] = useState(true);
 
   const characterRef = useRef<HTMLDivElement>(null);
 
   // 화면 진입 후 1.5초 동안 어둡게
   useEffect(() => {
-    const timer = setTimeout(() => setDarkOverlay(false), 1000);
+    const timer = setTimeout(() => setDarkOverlay(false), 500);
     return () => clearTimeout(timer);
   }, []);
 
@@ -31,10 +30,6 @@ export default function EmotionTrashPage() {
             src="/images/icon/cat.png"
             alt="character"
             className="max-w-[70%] h-auto transition-transform duration-150 ease-out active:translate-y-1 active:scale-95 cursor-pointer"
-            onClick={(e) => {
-              e.preventDefault();
-              setShowBubble((prev) => !prev);
-            }}
           />
 
           {/* 말풍선 */}
