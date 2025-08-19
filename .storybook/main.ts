@@ -2,9 +2,16 @@ import type { StorybookConfig } from "@storybook/nextjs";
 import path from "path";
 import { fileURLToPath } from "url";
 
-// ESM 환경에서 __dirname 대체
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+let __dirnameGlobal: string;
+
+if (typeof __dirname !== "undefined") {
+  // CommonJS 환경
+  __dirnameGlobal = __dirname;
+} else {
+  // ESM 환경
+  const __filename = fileURLToPath(import.meta.url);
+  __dirnameGlobal = path.dirname(__filename);
+}
 
 const config: StorybookConfig = {
   framework: { name: "@storybook/nextjs", options: {} },
@@ -25,7 +32,7 @@ const config: StorybookConfig = {
     config.resolve = config.resolve || {};
     config.resolve.alias = {
       ...(config.resolve.alias || {}),
-      "@": path.resolve(__dirname, ".."),
+      "@": path.resolve(__dirnameGlobal, ".."),
     };
     return config;
   },
