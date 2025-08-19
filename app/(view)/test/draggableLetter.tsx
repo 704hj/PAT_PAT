@@ -1,26 +1,22 @@
 "use client";
 
 import { motion, useMotionValue } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { RefObject, useLayoutEffect, useRef, useState } from "react";
 
 interface Props {
   onDrag: (rect: DOMRect | undefined) => void;
   onDragEnd: (rect: DOMRect | undefined) => void;
   isEating: boolean;
+  targetRef: RefObject<HTMLDivElement | null>;
 }
 
 export default function DraggableLetter({
   onDrag,
   onDragEnd,
   isEating,
+  targetRef,
 }: Props) {
   const ref = useRef<HTMLDivElement>(null);
-  const parentRef = useRef<HTMLDivElement>(null);
-  const [showModal, setShowModal] = useState(false);
-  // x, y 위치값
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-
   const [constraints, setConstraints] = useState({
     top: 0,
     left: 0,
@@ -28,70 +24,57 @@ export default function DraggableLetter({
     bottom: 0,
   });
 
-  useEffect(() => {
-    if (parentRef.current && ref.current) {
-      const parentRect = parentRef.current.getBoundingClientRect();
-      const elRect = ref.current.getBoundingClientRect();
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
 
-      setConstraints({
-        top: -(elRect.top - parentRect.top),
-        left: -(elRect.left - parentRect.left),
-        right: parentRect.right - elRect.right,
-        bottom: parentRect.bottom - elRect.bottom,
-      });
-    }
-  }, []);
+  // 초기 위치 계산 및 dragConstraints 설정
+  useLayoutEffect(() => {
+    if (!ref.current || !targetRef.current) return;
 
-  // 초기 위치로 되돌리는 함수
+    const letterRect = ref.current.getBoundingClientRect();
+
+    const parentRect = document.body.getBoundingClientRect();
+
+    setConstraints({
+      top: -letterRect.top + parentRect.top,
+      left: -letterRect.left + parentRect.left,
+      right: parentRect.right - letterRect.right,
+      bottom: parentRect.bottom - letterRect.bottom,
+    });
+  }, [targetRef]);
+
   const resetPosition = () => {
-    x.set(0);
-    y.set(0);
+    if (!ref.current || !targetRef.current) return;
+    const letterRect = ref.current.getBoundingClientRect();
+    const charRect = targetRef.current.getBoundingClientRect();
+    x.set(charRect.left - letterRect.right - 10);
+    y.set(charRect.top - letterRect.top);
   };
 
   return (
-    <div
-      ref={parentRef}
-      className="fixed inset-0 flex justify-center items-start p-3"
-    >
+    <div className="fixed inset-0 z-[999] pointer-events-none">
       <motion.div
         drag
         dragConstraints={constraints}
-        style={{ x, y }} // drag 시 MotionValue로 위치 제어
         ref={ref}
-        onDrag={() => {
-          const letterRect = ref.current?.getBoundingClientRect();
-          onDrag(letterRect);
-        }}
-        onDragEnd={() => {
-          const letterRect = ref.current?.getBoundingClientRect();
-          onDragEnd(letterRect);
-        }}
-        className="inline-block cursor-pointer z-[9999] "
-        animate={{
-          scale: isEating ? 0.2 : 1,
-          opacity: isEating ? 0 : 1,
-        }}
-        transition={{
-          duration: 1,
-          ease: "easeInOut",
-        }}
-        onAnimationComplete={() => {
-          if (isEating) setShowModal(true);
-        }}
+        className="pointer-events-auto inline-block cursor-pointer"
         dragElastic={0.2}
+        onDrag={() => onDrag(ref.current?.getBoundingClientRect())}
+        onDragEnd={() => onDragEnd(ref.current?.getBoundingClientRect())}
+        animate={isEating ? { scale: 0.2, opacity: 0 } : undefined} // false일 때 animate undefined
+        transition={{ duration: 0.5, ease: "easeInOut" }}
       >
         <img
-          src="/images/icon/feathers.svg"
-          alt="cloud"
-          className="block object-contain"
+          src="/images/icon/paper.png"
+          alt="letter"
+          className="max-w-[20%] h-auto block object-contain"
           draggable={false}
         />
       </motion.div>
 
-      {/* 초기화 버튼 */}
       <button
         onClick={resetPosition}
-        className="absolute bottom-10 right-4 w-10 h-10 flex items-center justify-center "
+        className="absolute bottom-10 right-4 w-10 h-10 flex items-center justify-center pointer-events-auto"
       >
         <img
           src="/images/icon/reset.svg"
