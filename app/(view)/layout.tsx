@@ -3,15 +3,16 @@
 type TLayoutProps = {
   children: React.ReactNode;
 };
+
 export default function Layout({ children }: TLayoutProps) {
   return (
-    <div className="relative w-full min-h-screen flex flex-col overflow-auto">
-      <div
-        className="flex-1 bg-cover bg-center"
-        style={{ backgroundImage: `url(/images/bg/image.png)` }}
-      >
-        {children}
-      </div>
+    <div className="relative w-full min-h-screen">
+      <img
+        src="/images/bg/adobe.png"
+        alt="background"
+        className="w-full h-auto min-h-screen object-cover"
+      />
+      <div className="absolute top-0 left-0 w-full h-full">{children}</div>
     </div>
   );
 }
