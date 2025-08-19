@@ -1,6 +1,6 @@
 "use client";
 
-import Memo from "@/app/components/mbtiModal";
+import Memo from "@/app/components/memoModal";
 import { useState } from "react";
 
 export default function HomePage() {
