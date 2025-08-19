@@ -29,24 +29,31 @@ const ProcessingBar: React.FC<ProcessingBarProps> = ({
   const [colorIndex, setColorIndex] = useState(0);
   const gradientRef = useRef<HTMLDivElement>(null);
 
+  const startRef = useRef<number | null>(null); // <-- start를 useRef로 관리
+  const rafIdRef = useRef<number | null>(null); // <-- rAF ID 저장
+
   useEffect(() => {
-    let start: number | null = null;
+    startRef.current = null;
+
     const step = (timestamp: number) => {
-      if (!start) start = timestamp;
-      const elapsed = (timestamp - start) / 1000;
+      if (!startRef.current) startRef.current = timestamp;
+      const elapsed = (timestamp - startRef.current) / 1000;
       const percent = (elapsed / duration) * 100;
 
       if (percent <= 100) {
         setProgress(percent);
-        requestAnimationFrame(step);
+        rafIdRef.current = requestAnimationFrame(step);
       } else {
-        return;
-        // start = timestamp;
-        // setProgress(0);
-        // requestAnimationFrame(step);
+        setProgress(100); // 끝까지 채움
+        cancelAnimationFrame(rafIdRef.current!);
       }
     };
-    requestAnimationFrame(step);
+
+    rafIdRef.current = requestAnimationFrame(step);
+
+    return () => {
+      if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
+    };
   }, [duration]);
 
   useEffect(() => {
@@ -63,7 +70,7 @@ const ProcessingBar: React.FC<ProcessingBarProps> = ({
     let animId: number;
 
     const animate = () => {
-      pos = (pos + 1) % 200; // 0~200% 반복 이동
+      pos = (pos + 1) % 200;
       if (gradientRef.current) {
         gradientRef.current.style.backgroundPosition = `${pos}% 0%`;
       }
@@ -71,7 +78,6 @@ const ProcessingBar: React.FC<ProcessingBarProps> = ({
     };
 
     animate();
-
     return () => cancelAnimationFrame(animId);
   }, []);
 
@@ -84,7 +90,7 @@ const ProcessingBar: React.FC<ProcessingBarProps> = ({
         borderRadius: 12,
         position: "relative",
         overflow: "hidden",
-        boxShadow: "0 0 20px rgba(149, 87, 255, 0.6)", // 보라빛 은은한 빛 추가
+        boxShadow: "0 0 20px rgba(149, 87, 255, 0.6)",
       }}
     >
       <div
@@ -95,9 +101,9 @@ const ProcessingBar: React.FC<ProcessingBarProps> = ({
           borderRadius: 12,
           background: `linear-gradient(270deg, ${progressColors.join(", ")})`,
           backgroundSize: "400% 100%",
-          filter: "blur(1.5px) brightness(1.2)", // 살짝 흐릿하고 밝게
+          filter: "blur(1.5px) brightness(1.2)",
           transition: `width 0.1s linear`,
-          boxShadow: "0 0 15px 3px rgba(255, 87, 168, 0.8)", // 핑크빛 네온 광채
+          boxShadow: "0 0 15px 3px rgba(255, 87, 168, 0.8)",
         }}
       />
       <div
