@@ -13,7 +13,7 @@ export default function HomePage() {
         <div
           className="absolute inset-0 flex justify-center items-end z-30"
           style={{
-            top: "20%",
+            top: "25%",
             left: "60%",
             transform: "translate(-20%, -50%)",
           }}
@@ -32,8 +32,8 @@ export default function HomePage() {
         <div
           className="absolute inset-0 flex justify-center items-end  z-30"
           style={{
-            top: "65%",
-            left: "20%",
+            top: "30%",
+            left: "30%",
             transform: "translate(-20%, -50%)",
           }}
         >
@@ -41,7 +41,7 @@ export default function HomePage() {
             <img
               src="/images/icon/girl2.png"
               alt="character"
-              className="h-auto transition-transform duration-150 ease-out active:translate-y-1 active:scale-95 cursor-pointer"
+              className="h-auto max-w-[60%] transition-transform duration-150 ease-out active:translate-y-1 active:scale-95 cursor-pointer "
               onClick={() => setShowMemo(true)}
             />
           </div>
