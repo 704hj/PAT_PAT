@@ -49,7 +49,7 @@ export default function EmotionTrashPage() {
       <div className="absolute inset-0 flex justify-center items-end bottom-20 z-20">
         <div className="relative mb-4 left-0 ">
           <img
-            src="/images/icon/girl.png"
+            src="/images/icon/girl2.png"
             alt="character"
             className="h-auto transition-transform duration-150 ease-out active:translate-y-1 active:scale-95 cursor-pointer"
           />
