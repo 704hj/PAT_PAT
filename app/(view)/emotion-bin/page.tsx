@@ -24,16 +24,23 @@ export default function EmotionTrashPage() {
       )}
 
       {/* 캐릭터 */}
-      <div className="absolute inset-0 flex justify-center items-end bottom-1/3 z-30">
+      <div
+        className="absolute inset-0 flex justify-center items-end bottom-1/3 z-30"
+        style={{
+          top: "25%",
+          left: "60%",
+          transform: "translate(-10%, -47%)",
+        }}
+      >
         <div className="relative mb-4 left-1/4" ref={characterRef}>
           <img
             src="/images/icon/cat.png"
             alt="character"
-            className="max-w-[60%] h-auto transition-transform duration-150 ease-out active:translate-y-1 active:scale-95 cursor-pointer"
+            className="max-w-[50%] h-auto transition-transform duration-150 ease-out active:translate-y-1 active:scale-95 cursor-pointer"
             style={{
               top: "25%",
               left: "60%",
-              transform: "translate(-10%, -55%)",
+              transform: "translate(-50%, 145%)",
             }}
           />
 
@@ -51,23 +58,25 @@ export default function EmotionTrashPage() {
       </div>
 
       {/* 사람 캐릭터 */}
-      <div className="absolute inset-0 flex justify-center items-end  z-30">
-        <div className="relative mb-4 left-0 ">
+      <div
+        className="absolute inset-0 flex justify-center items-end  z-30"
+        style={{
+          top: "20%",
+          left: "30%",
+          transform: "translate(-10%, -41%)",
+        }}
+      >
+        <div className="relative mb-4">
           <img
             src="/images/icon/girl2.png"
             alt="character"
-            className="h-auto max-w-[50%] transition-transform duration-150 ease-out active:translate-y-1 active:scale-95 cursor-pointer "
-            style={{
-              top: "20%",
-              left: "30%",
-              transform: "translate(35%, -175%)",
-            }}
+            className="h-auto max-w-[65%] transition-transform duration-150 ease-out active:translate-y-1 active:scale-95 cursor-pointer "
           />
         </div>
       </div>
 
       {/* 드래그 조각 영역 */}
-      <div className="relative w-full h-[300px] z-20 flex justify-center items-center">
+      <div className="relative w-full h-[300px] z-40 flex justify-center items-center">
         <DraggableLetter
           onDrag={(letterRect) => {
             const charRect = characterRef.current?.getBoundingClientRect();

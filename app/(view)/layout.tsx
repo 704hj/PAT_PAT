@@ -8,7 +8,7 @@ export default function Layout({ children }: TLayoutProps) {
   return (
     <div className="relative w-full min-h-screen">
       <img
-        src="/images/bg/long.png"
+        src="/images/bg/image1.png"
         alt="background"
         className="w-full h-auto min-h-screen object-cover"
       />
