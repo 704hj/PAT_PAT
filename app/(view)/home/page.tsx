@@ -4,48 +4,55 @@ import Memo from "@/app/components/memoModal";
 import { useState } from "react";
 
 export default function HomePage() {
-  const [showMemo, setShowMemo] = useState<boolean>(false);
+  const [showMemo, setShowMemo] = useState(false);
 
   return (
-    <div className="relative min-h-screen flex flex-col items-center justify-center">
-      {/* 고양이 캐릭터 */}
-
-      <div
-        className="absolute inset-0 flex justify-center items-end z-30"
-        style={{ top: "20%", left: "60%", transform: "translate(-20%, -50%)" }}
+    // 페이지는 스크롤 가능
+    <div className="relative min-h-[100svh] overflow-x-hidden">
+      {/*배경 : 9:16 비율 고정 */}
+      <section
+        className="
+          relative mx-auto w-full max-w-[480px] aspect-[9/16]
+           bg-no-repeat bg-contain bg-center
+        "
       >
-        <div className="relative mb-4">
+        {/* 캐릭터는 '같은 배경'의 absolute 자식 */}
+        {/* 고양이 */}
+        <button
+          type="button"
+          className="
+            absolute z-30 flex justify-center items-end
+            top-[70%] left-[50%] -translate-x-[10%] -translate-y-[47%]
+          "
+          onClick={() => setShowMemo(true)}
+        >
           <img
             src="/images/icon/cat.png"
-            alt="character"
-            className="max-w-[50%] h-auto transition-transform duration-150 ease-out active:translate-y-1 active:scale-95 cursor-pointer"
-            onClick={() => setShowMemo(true)}
+            alt="cat"
+            className="max-w-[50%] h-auto transition-transform duration-150 ease-out active:translate-y-1 active:scale-95"
+            draggable={false}
           />
-        </div>
-      </div>
+        </button>
 
-      {/* 사람 캐릭터 */}
-      <div
-        className="absolute inset-0 flex justify-center items-end  z-30"
-        style={{ top: "65%", left: "20%", transform: "translate(-20%, -50%)" }}
-      >
-        <div className="relative mb-4 ">
+        {/* 사람 */}
+        <button
+          type="button"
+          className="
+            absolute z-30 flex justify-center items-end
+            top-[67%] left-[40%] -translate-x-[50%] -translate-y-[47%]
+          "
+          onClick={() => setShowMemo(true)}
+        >
           <img
-            src="/images/icon/girl.png"
-            alt="character"
-            className="h-auto transition-transform duration-150 ease-out active:translate-y-1 active:scale-95 cursor-pointer"
-            onClick={() => setShowMemo(true)}
+            src="/images/icon/girl2.png"
+            alt="girl"
+            className="max-w-[80%] h-auto transition-transform duration-150 ease-out active:translate-y-1 active:scale-95"
+            draggable={false}
           />
-        </div>
-      </div>
-      {/* 모달 */}
-      {showMemo && (
-        <Memo
-          onClick={() => {
-            setShowMemo((prev) => !prev);
-          }}
-        />
-      )}
+        </button>
+      </section>
+
+      {showMemo && <Memo onClick={() => setShowMemo((prev) => !prev)} />}
     </div>
   );
 }
