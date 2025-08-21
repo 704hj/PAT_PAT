@@ -20,12 +20,12 @@ export default function EmotionTrashPage() {
       {/* 스테이지: 모바일 세로 규격 고정(9:16). 필요시 max-w 조정 */}
       <section className="relative mx-auto w-full max-w-[480px] aspect-[9/16]">
         {/* 배경을 이미지로 쓰려면 아래 주석 해제 (9:16 권장) */}
-        {/* <img
+        <img
           src="/images/bg/room-9x16.png"
           alt=""
           className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
           draggable={false}
-        /> */}
+        />
 
         {/* 어두운 오버레이 */}
         {darkOverlay && (
