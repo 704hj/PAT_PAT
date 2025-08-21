@@ -29,7 +29,12 @@ export default function EmotionTrashPage() {
           <img
             src="/images/icon/cat.png"
             alt="character"
-            className="max-w-[70%] h-auto transition-transform duration-150 ease-out active:translate-y-1 active:scale-95 cursor-pointer"
+            className="max-w-[60%] h-auto transition-transform duration-150 ease-out active:translate-y-1 active:scale-95 cursor-pointer"
+            style={{
+              top: "25%",
+              left: "60%",
+              transform: "translate(-10%, -55%)",
+            }}
           />
 
           {/* 말풍선 */}
@@ -46,12 +51,17 @@ export default function EmotionTrashPage() {
       </div>
 
       {/* 사람 캐릭터 */}
-      <div className="absolute inset-0 flex justify-center items-end bottom-20 z-20">
+      <div className="absolute inset-0 flex justify-center items-end  z-30">
         <div className="relative mb-4 left-0 ">
           <img
             src="/images/icon/girl2.png"
             alt="character"
-            className="h-auto transition-transform duration-150 ease-out active:translate-y-1 active:scale-95 cursor-pointer"
+            className="h-auto max-w-[50%] transition-transform duration-150 ease-out active:translate-y-1 active:scale-95 cursor-pointer "
+            style={{
+              top: "20%",
+              left: "30%",
+              transform: "translate(35%, -175%)",
+            }}
           />
         </div>
       </div>
