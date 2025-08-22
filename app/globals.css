@@ -160,3 +160,26 @@ button:focus {
     text-shadow: none;
   }
 }
+
+@keyframes float {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+@keyframes sweep {
+  0% {
+    transform: translateX(-120%) rotate(12deg);
+  }
+  60% {
+    transform: translateX(220%) rotate(12deg);
+  }
+  100% {
+    transform: translateX(220%) rotate(12deg);
+  }
+}

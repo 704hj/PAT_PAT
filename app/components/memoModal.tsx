@@ -37,7 +37,7 @@ export default function Memo({ onClick }: MemoProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div
-        className="relative bg-white/20 rounded-2xl shadow-lg p-5 w-[90%] max-w-sm border-2 border-gray-200 overflow-hidden"
+        className="relative bg-white rounded-2xl shadow-lg p-5 w-[90%] max-w-sm border-2 border-gray-200 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* <h2 className="text-lg font-bold mb-3 text-gray-600 text-center">
@@ -48,7 +48,7 @@ export default function Memo({ onClick }: MemoProps) {
           value={memo}
           onChange={(e) => setMemo(e.target.value)}
           placeholder="버리고 싶은 기억을 써보세요."
-          className="w-full h-40 sm:h-48 border-2 border-gray-300 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400 bg-gray-300 resize-none"
+          className="w-full h-40 sm:h-48 border-2 border-gray-300 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400 bg-white resize-none"
         />
 
         <div className="mt-3">
@@ -86,25 +86,35 @@ export default function Memo({ onClick }: MemoProps) {
           </div>
         </div>
 
-        <div className="mt-4 flex justify-end space-x-2">
+        <div className="mt-4 flex justify-around space-x-2 align-middle">
           <button
-            className="flex-1 px-4 py-3  text-white transition text-base"
+            className="
+  w-[5%]                   
+    aspect-[1/1]                /* 1:1 비율 유지 */     
+      bg-[url('/images/icon/close.png')] bg-cover bg-center
+      flex items-center justify-center
+
+  "
             onClick={() => {
               console.log("메모:", memo);
               console.log("태그:", tags);
               onClick(); // 모달 닫기
             }}
           >
-            닫기
+            &nbsp;
           </button>
+
           <button
-            className="flex-1 px-4 py-3  text-white transition  text-base"
+            className="w-[10%] h-[40%]      
+      bg-[url('/images/icon/check.png')] bg-cover bg-center
+      flex items-center justify-center
+"
             onClick={() => {
               onClick();
               router.push("/emotion-bin");
             }}
           >
-            저장
+            &nbsp;
           </button>
         </div>
       </div>
