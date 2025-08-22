@@ -12,7 +12,7 @@ const Layout = forwardRef<HTMLImageElement, TLayoutProps>(
       <div className="relative w-full min-h-screen">
         <img
           ref={ref}
-          src="/images/bg/image1.png"
+          src="/images/bg/image2.png"
           alt="background"
           className="w-full h-auto min-h-screen object-cover"
         />
