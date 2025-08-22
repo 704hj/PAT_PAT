@@ -1,19 +1,21 @@
 "use client";
 
 import Memo from "@/app/components/memoModal";
+import ExplainLayout from "@/app/components/explainLayout";
 import { useState } from "react";
 
 export default function HomePage() {
   const [showMemo, setShowMemo] = useState(false);
-
+  //사용설명서
+  const [showExplain, setShowExplain] = useState(false);
   return (
     // 페이지는 스크롤 가능
     <div className="relative min-h-[100svh] overflow-x-hidden">
       {/*배경 : 9:16 비율 고정 */}
       <section
         className="
-          relative mx-auto w-full max-w-[480px] aspect-[9/16]
-           bg-no-repeat bg-contain bg-center
+        relative mx-auto w-full max-w-[480px] aspect-[9/16]
+        bg-no-repeat bg-contain bg-center
         "
       >
         {/* 캐릭터는 '같은 배경'의 absolute 자식 */}
@@ -21,8 +23,8 @@ export default function HomePage() {
         <button
           type="button"
           className="
-            absolute z-30 flex justify-center items-end
-            top-[70%] left-[50%] -translate-x-[10%] -translate-y-[47%]
+          absolute z-30 flex justify-center items-end
+          top-[70%] left-[50%] -translate-x-[10%] -translate-y-[47%]
           "
           onClick={() => setShowMemo(true)}
         >
@@ -38,9 +40,9 @@ export default function HomePage() {
         <button
           type="button"
           className="
-            absolute z-30 flex justify-center items-end
+          absolute z-30 flex justify-center items-end
             top-[67%] left-[40%] -translate-x-[50%] -translate-y-[47%]
-          "
+            "
           onClick={() => setShowMemo(true)}
         >
           <img
@@ -50,8 +52,20 @@ export default function HomePage() {
             draggable={false}
           />
         </button>
+        <button
+          type="button"
+          className="
+          absolute z-30 flex justify-center items-end
+            top-[10%] left-[80%] -translate-x-[50%] -translate-y-[47%]
+          text-yellow-50"
+          onClick={() => setShowExplain(true)}
+        >
+          설명서
+        </button>
+        {showExplain && (
+          <ExplainLayout onClick={() => setShowExplain((prev) => !prev)} />
+        )}
       </section>
-
       {showMemo && <Memo onClick={() => setShowMemo((prev) => !prev)} />}
     </div>
   );
