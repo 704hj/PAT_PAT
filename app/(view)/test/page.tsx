@@ -47,21 +47,19 @@ export default function WindowStars() {
 
   return (
     <div className="relative w-full flex justify-center">
-      <Layout ref={imgRef}>
-        {windowArea &&
-          stars.map((star) => (
-            <div
-              key={star.id}
-              className="absolute text-yellow-400"
-              style={{
-                top: windowArea.top + star.top,
-                left: windowArea.left + star.left,
-              }}
-            >
-              ⭐
-            </div>
-          ))}
-      </Layout>
+      {windowArea &&
+        stars.map((star) => (
+          <div
+            key={star.id}
+            className="absolute text-yellow-400"
+            style={{
+              top: windowArea.top + star.top,
+              left: windowArea.left + star.left,
+            }}
+          >
+            ⭐
+          </div>
+        ))}
     </div>
   );
 }
