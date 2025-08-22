@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import GlowButton from "./\bglowbutton";
+import GlowButton from "./glowbutton";
 
 export default function EmotionTrashPage() {
   const characterRef = useRef<HTMLDivElement>(null);
