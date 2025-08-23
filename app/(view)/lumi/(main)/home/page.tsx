@@ -21,7 +21,7 @@ function IconRelease() {
       <path
         d="M3 12h12M9 6l6 6-6 6"
         stroke="currentColor"
-        strokeWidth="1.8"
+        strokeWidth="1.8f"
         strokeLinecap="round"
         strokeLinejoin="round"
         fill="none"
@@ -114,12 +114,15 @@ export default function HomePage() {
                   0 / 1
                 </div>
               </div>
-              <Link
+              {/* <Link
                 href="/lumi/stats"
                 className="text-white/80 text-[13px] underline underline-offset-4 hover:text-white transition"
               >
                 통계 보기
-              </Link>
+              </Link> */}
+              <div className="text-white/80 text-[13px] underline underline-offset-4 hover:text-white transition">
+                통계 보기
+              </div>
             </div>
             <div className="mt-3 h-px bg-white/10" />
             <div className="mt-3 flex flex-wrap gap-2">

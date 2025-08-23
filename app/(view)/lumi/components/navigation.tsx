@@ -51,7 +51,7 @@ export default function BottomNav() {
           </li>
           <li>
             <Link
-              href="/lumi/journal"
+              href="/lumi/home"
               className="flex flex-col items-center gap-1 px-3 py-1 rounded-lg hover:bg-white/8 transition"
             >
               <IconJournal />
@@ -60,7 +60,7 @@ export default function BottomNav() {
           </li>
           <li>
             <Link
-              href="/lumi/profile"
+              href="/lumi/home"
               className="flex flex-col items-center gap-1 px-3 py-1 rounded-lg hover:bg-white/8 transition"
             >
               <IconUser />
