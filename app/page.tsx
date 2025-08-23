@@ -13,7 +13,7 @@ export default function Splash() {
       setMounted(true); // 페이드아웃 트리거
       // 페이드 이후 온보딩으로 이동
       setTimeout(() => router.replace("/lumi/start"), 420);
-    }, 1200);
+    }, 1500);
     return () => clearTimeout(t);
   }, [router]);
 
@@ -21,7 +21,7 @@ export default function Splash() {
     <main
       className={[
         "relative min-h-[100svh] overflow-hidden",
-        mounted ? "animate-splash-out" : "animate-none",
+        // mounted ? "animate-splash-out" : "animate-none",
       ].join(" ")}
       aria-label="루미 스플래시"
     >
