@@ -5,10 +5,10 @@
 import { memo, useMemo, useRef } from "react";
 
 //해당 DOM을 애니메이션 가능.
+// 빌드 에러 수정
 import { motion } from "framer-motion";
-
-import { TLetterBtnProps } from "../../../types/memory/star";
-import { pickIconPosition } from "../../../utils/pickRandomPosition";
+import { pickIconPosition } from "@/app/utils/pickRandomPosition";
+import { TLetterBtnProps } from "@/app/types/memory/star";
 
 //문자열(이미지 경로)
 const STAR_IMAGES = [
