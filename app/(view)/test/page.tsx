@@ -1,6 +1,5 @@
 "use client";
-import React, { useRef, useEffect, useState } from "react";
-import Layout from "../layout";
+import { useEffect, useRef, useState } from "react";
 
 export default function WindowStars() {
   const imgRef = useRef<HTMLImageElement | null>(null);
