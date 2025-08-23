@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import GlassCard from "../../(main)/home/component/glassCard";
+import GlassCard from "../../components/glassCard";
 
 // 상단에 추가 (컴포넌트 파일 최상단 근처)
 type MoodKey = "contentment" | "excited" | "happy" | "joy" | "love";
@@ -18,7 +18,7 @@ const EMOTIONS: { key: MoodKey; label: string; src: string }[] = [
   { key: "excited", label: "신남", src: "/images/icon/emotion/pos/exited.png" }, // 파일명이 exited로 주어짐
   // { key: "happy", label: "기쁨", src: "/images/icon/emotion/pos/happy.png" },
   { key: "joy", label: "즐거움", src: "/images/icon/emotion/pos/joy.png" },
-  { key: "love", label: "사랑", src: "/images/icon/emotion/pos/love.png" },
+  { key: "love", label: "행복", src: "/images/icon/emotion/pos/love.png" },
 ];
 
 // 백엔드에서 받아옴
