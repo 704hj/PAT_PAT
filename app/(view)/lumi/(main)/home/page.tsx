@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo } from "react";
 import ActionButton from "./component/actionBtn";
-import GlassCard from "./component/glassCard";
+import GlassCard from "../../components/glassCard";
 
 function IconStar() {
   return (
