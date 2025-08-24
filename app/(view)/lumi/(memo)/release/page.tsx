@@ -98,7 +98,7 @@ export default function ReleasePage() {
           {/* 강도 슬라이더 */}
           <GlassCard className="p-4">
             <div className="flex items-center justify-between">
-              <span className="text-white/85 text-[14px]">현재 강도</span>
+              <span className="text-white/85 text-[14px]">감정 강도</span>
               <span className="text-white/70 text-[13px]">{intensity}/5</span>
             </div>
             <div className="mt-3 px-1">
@@ -108,10 +108,10 @@ export default function ReleasePage() {
                 max={5}
                 value={intensity}
                 onChange={(e) => setIntensity(Number(e.target.value))}
-                className="w-full accent-cyan-300"
-                aria-label="걱정 강도"
+                className="w-full slider-star"
+                aria-label="감정 강도"
               />
-              <div className="mt-1 flex justify-between text-white/50 text-[12px]">
+              <div className="mt-2 flex justify-between text-white/50 text-[12px]">
                 <span>낮음</span>
                 <span>보통</span>
                 <span>높음</span>
