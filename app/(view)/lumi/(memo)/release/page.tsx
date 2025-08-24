@@ -1,10 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
-import GlassCard from "../../(main)/home/component/glassCard";
+import { useEffect, useMemo, useState } from "react";
+import GlassCard from "../../components/glassCard";
+import RitualCard from "../../components/ritualCard";
 
-const CATEGORIES = ["일", "관계", "건강", "금전", "자존감", "미래"] as const;
+type Ritual = "wind" | "wave" | "star" | "fire";
+const CATEGORIES = ["일", "관계", "건강", "금전", "자존감", "미래"];
 type Category = (typeof CATEGORIES)[number];
 
 export default function ReleasePage() {
@@ -14,9 +16,8 @@ export default function ReleasePage() {
   const [category, setCategory] = useState<Category | null>(null);
   const [intensity, setIntensity] = useState(3);
   const [text, setText] = useState("");
-  const [ritual, setRitual] = useState<
-    "별에 맡기기" | "바람에 띄우기" | "물결에 흘리기"
-  >("별에 맡기기");
+  const [ritual, setRitual] = useState<Ritual>("wind");
+
   const limit = 180;
 
   const canSubmit = useMemo(() => text.trim().length > 0, [text]);
@@ -31,9 +32,13 @@ export default function ReleasePage() {
       v.classList.add("opacity-100");
     }
     setTimeout(() => {
-      router.replace("/lumi/home");
+      router.push(`/lumi/release/sending?kind=${ritual}`); // ← 전용 전환 페이지로
     }, 900);
   };
+
+  useEffect(() => {
+    console.log("ritual ", ritual);
+  }, [ritual]);
 
   return (
     <div className="relative min-h-[100svh] overflow-hidden">
@@ -93,7 +98,7 @@ export default function ReleasePage() {
           {/* 강도 슬라이더 */}
           <GlassCard className="p-4">
             <div className="flex items-center justify-between">
-              <span className="text-white/85 text-[14px]">현재 강도</span>
+              <span className="text-white/85 text-[14px]">감정 강도</span>
               <span className="text-white/70 text-[13px]">{intensity}/5</span>
             </div>
             <div className="mt-3 px-1">
@@ -103,10 +108,10 @@ export default function ReleasePage() {
                 max={5}
                 value={intensity}
                 onChange={(e) => setIntensity(Number(e.target.value))}
-                className="w-full accent-cyan-300"
-                aria-label="걱정 강도"
+                className="w-full slider-star"
+                aria-label="감정 강도"
               />
-              <div className="mt-1 flex justify-between text-white/50 text-[12px]">
+              <div className="mt-2 flex justify-between text-white/50 text-[12px]">
                 <span>낮음</span>
                 <span>보통</span>
                 <span>높음</span>
@@ -144,47 +149,36 @@ export default function ReleasePage() {
           </GlassCard>
         </div>
 
-        {/* 의식(ritual) 선택 – 세계관 연결 */}
-        <div className="mt-4">
-          <GlassCard className="p-4">
-            <div className="flex items-center justify-between">
-              <span className="text-white/85 text-[14px]">
-                어떻게 흘려보낼까요?
-              </span>
-              <span className="text-white/60 text-[12px]">하나 선택</span>
-            </div>
-            <div className="mt-3 grid grid-cols-3 gap-2">
-              {(["별에 맡기기", "바람에 띄우기", "물결에 흘리기"] as const).map(
-                (opt) => (
-                  <button
-                    key={opt}
-                    onClick={() => setRitual(opt)}
-                    aria-pressed={ritual === opt}
-                    className={[
-                      "h-10 rounded-xl border text-[13px] transition",
-                      ritual === opt
-                        ? "bg-cyan-300/15 border-cyan-300/50 text-white"
-                        : "bg-white/6 border-white/12 text-white/80 hover:border-white/20",
-                    ].join(" ")}
-                  >
-                    {opt}
-                  </button>
-                )
-              )}
-            </div>
-            {/* 호흡 가이드 (짧게, 선택) */}
-            <div className="mt-3 rounded-lg bg-white/4 border border-white/8 p-3">
-              <div className="flex items-center gap-3">
-                <span
-                  aria-hidden
-                  className="inline-block h-6 w-6 rounded-full bg-white/30 animate-[breath_4s_ease-in-out_infinite]"
-                />
-                <p className="text-white/80 text-[13px]">
-                  3번만, 천천히 숨을 내쉬어요.
-                </p>
-              </div>
-            </div>
-          </GlassCard>
+        {/* 의식 선택 (라디오형 카드 + 미니 프리뷰) */}
+        <div className="mt-4 rounded-[12px] p-4 bg-white/6 border border-white/12">
+          <div className="flex items-center justify-between">
+            <span className="text-white/85 text-[14px]">흘려 보내는 방법</span>
+            <span className="text-white/60 text-[12px]">하나 선택</span>
+          </div>
+
+          <div className="mt-3 grid grid-cols-3 gap-2">
+            <RitualCard
+              active={ritual === "wind"}
+              onClick={() => setRitual("wind")}
+              label="바람에 띄우기"
+              desc="가볍게 위로"
+              preview={<WindPreview />}
+            />
+            <RitualCard
+              active={ritual === "wave"}
+              onClick={() => setRitual("wave")}
+              label="물결에 흘리기"
+              desc="잔물결에 실어"
+              preview={<WavePreview />}
+            />
+            <RitualCard
+              active={ritual === "fire"}
+              onClick={() => setRitual("fire")}
+              label="불에 태우기"
+              desc="불로 처리하기"
+              preview={<EmberSend />}
+            />
+          </div>
         </div>
 
         {/* 하단 CTA */}
@@ -257,5 +251,50 @@ export default function ReleasePage() {
         <div className="absolute inset-0 bg-[radial-gradient(80%_40%_at_50%_110%,rgba(79,140,255,0.22),transparent)] animate-[lift_0.9s_ease-out_forwards]" />
       </div>
     </div>
+  );
+}
+
+function WindPreview() {
+  return (
+    <div className="absolute inset-0">
+      <i className="wind-dot" style={{ left: "20%", bottom: "20%" }} />
+      <i className="wind-dot wind-d2" style={{ left: "60%", bottom: "15%" }} />
+      <i className="wind-dot wind-d3" style={{ left: "40%", bottom: "10%" }} />
+    </div>
+  );
+}
+
+function WavePreview() {
+  return (
+    <div className="absolute inset-0 overflow-hidden">
+      <div className="wave-line" />
+      <div className="wave-line wave-d2" />
+    </div>
+  );
+}
+
+function StarPreview() {
+  return (
+    <div className="absolute inset-0">
+      <i className="star-dot" style={{ left: "30%", top: "55%" }} />
+      <i className="star-dot star-d2" style={{ left: "70%", top: "60%" }} />
+    </div>
+  );
+}
+
+function EmberSend() {
+  return (
+    <>
+      {/* 따뜻한 빛 퍼짐 */}
+      <div
+        aria-hidden
+        className="absolute inset-0 rounded-full
+                   bg-[radial-gradient(50%_50%_at_50%_50%,rgba(255,186,120,0.22),transparent_70%)]
+                   animate-[emberGlow_1s_ease-out_forwards]"
+      />
+      {/* 미세 입자 2~3개 */}
+      <i className="ember-dot" style={{ left: "46%", top: "62%" }} />
+      <i className="ember-dot ember-d2" style={{ left: "56%", top: "66%" }} />
+    </>
   );
 }

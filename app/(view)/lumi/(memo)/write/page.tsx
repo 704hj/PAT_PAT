@@ -2,9 +2,24 @@
 
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import GlassCard from "../../(main)/home/component/glassCard";
+import GlassCard from "../../components/glassCard";
 
-type Mood = "😀" | "☺️" | "😌" | "😕" | "😢" | null;
+// 상단에 추가 (컴포넌트 파일 최상단 근처)
+type MoodKey = "contentment" | "excited" | "happy" | "joy" | "love";
+
+type Mood = MoodKey | null;
+
+const EMOTIONS: { key: MoodKey; label: string; src: string }[] = [
+  {
+    key: "contentment",
+    label: "평온",
+    src: "/images/icon/emotion/pos/contentment.png",
+  },
+  { key: "excited", label: "신남", src: "/images/icon/emotion/pos/exited.png" }, // 파일명이 exited로 주어짐
+  // { key: "happy", label: "기쁨", src: "/images/icon/emotion/pos/happy.png" },
+  { key: "joy", label: "즐거움", src: "/images/icon/emotion/pos/joy.png" },
+  { key: "love", label: "행복", src: "/images/icon/emotion/pos/love.png" },
+];
 
 // 백엔드에서 받아옴
 const TAGS = [
@@ -22,7 +37,7 @@ export default function StarWritePage() {
   const router = useRouter();
 
   // state
-  const [mood, setMood] = useState<Mood>(null);
+  const [mood, setMood] = useState<string | null>(null);
   const [intensity, setIntensity] = useState(3);
   const [text, setText] = useState("");
   const [tags, setTags] = useState<string[]>([]);
@@ -87,24 +102,55 @@ export default function StarWritePage() {
           <GlassCard className="p-4">
             <div className="flex items-center justify-between">
               <span className="text-white/85 text-[14px]">지금 감정</span>
-              <span className="text-white/60 text-[13px]">하나만 선택</span>
+              <span className="text-white/60 text-[13px]">
+                {EMOTIONS.find((item) => item.key === mood)?.label}
+              </span>
             </div>
-            <div className="mt-3 grid grid-cols-6 gap-2">
-              {(["😀", "☺️", "😌", "😕", "😢", "🥳"] as Mood[]).map((m) => (
-                <button
-                  key={m as string}
-                  onClick={() => setMood((prev) => (prev === m ? null : m))}
-                  className={[
-                    "h-11 rounded-xl bg-white/6 border text-[18px]",
-                    mood === m
-                      ? "border-cyan-300/60 text-white"
-                      : "border-white/10 text-white/85 hover:border-white/20",
-                  ].join(" ")}
-                  aria-pressed={mood === m}
-                >
-                  {m}
-                </button>
-              ))}
+
+            {/* 이미지 그리드 */}
+            <div className="mt-3 grid grid-cols-4 gap-2">
+              {EMOTIONS.map(({ key, label, src }) => {
+                const selected = mood === key;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() =>
+                      setMood((prev) => (prev === key ? null : key))
+                    }
+                    aria-pressed={selected}
+                    aria-label={label}
+                    className={[
+                      "group relative h-18 rounded-xl border transition focus:outline-none ",
+                      selected
+                        ? "border-cyan-300/70 bg-cyan-300/20 shadow-[0_0_0_4px_rgba(34,211,238,0.10)]"
+                        : "border-white/10 bg-white/6 hover:border-white/20",
+                    ].join(" ")}
+                  >
+                    {/* 아이콘 */}
+                    <img
+                      src={src}
+                      alt="" // 스크린리더 중복 방지: 라벨은 aria-label로 제공
+                      loading="lazy"
+                      className="mx-auto h-14 w-14 object-contain select-none pointer-events-none"
+                      draggable={false}
+                    />
+                    {/* 라벨 */}
+                    {/* <span className="mt-1 block text-[12px] text-white/80">
+                      {label}
+                    </span> */}
+
+                    {/* 선택 시 은은한 글로우 (과하지 않게) */}
+                    {selected && (
+                      <span
+                        aria-hidden
+                        className="pointer-events-none absolute inset-0 rounded-xl
+                           bg-[radial-gradient(60%_50%_at_50%_45%,rgba(56,189,248,0.18),transparent_70%)]"
+                      />
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </GlassCard>
         </div>
@@ -123,10 +169,10 @@ export default function StarWritePage() {
                 max={5}
                 value={intensity}
                 onChange={(e) => setIntensity(Number(e.target.value))}
-                className="w-full accent-cyan-300"
+                className="w-full slider-star"
                 aria-label="감정 강도"
               />
-              <div className="mt-1 flex justify-between text-white/50 text-[12px]">
+              <div className="mt-2 flex justify-between text-white/50 text-[12px]">
                 <span>낮음</span>
                 <span>보통</span>
                 <span>높음</span>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useState } from "react";
 function IconHome() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24">
@@ -30,6 +31,8 @@ function IconUser() {
   );
 }
 export default function BottomNav() {
+  const [selected, setSelected] = useState<string>("home");
+
   return (
     <nav
       className="
@@ -43,7 +46,12 @@ export default function BottomNav() {
           <li>
             <Link
               href="/lumi/home"
-              className="flex flex-col items-center gap-1 px-3 py-1 rounded-lg bg-white/8"
+              className={`flex flex-col items-center gap-1 px-3 py-1 rounded-lg ${
+                selected === "home" ? "bg-white/8" : ""
+              }`}
+              onClick={() => {
+                setSelected("home");
+              }}
             >
               <IconHome />
               <span className="text-[11px]">홈</span>
@@ -51,8 +59,13 @@ export default function BottomNav() {
           </li>
           <li>
             <Link
-              href="/lumi/home"
-              className="flex flex-col items-center gap-1 px-3 py-1 rounded-lg hover:bg-white/8 transition"
+              href="/lumi/journal"
+              className={`flex flex-col items-center gap-1 px-3 py-1 rounded-lg  ${
+                selected === "journal" ? "bg-white/8" : ""
+              } `}
+              onClick={() => {
+                setSelected("journal");
+              }}
             >
               <IconJournal />
               <span className="text-[11px]">기록</span>
@@ -60,8 +73,13 @@ export default function BottomNav() {
           </li>
           <li>
             <Link
-              href="/lumi/home"
-              className="flex flex-col items-center gap-1 px-3 py-1 rounded-lg hover:bg-white/8 transition"
+              href="/lumi/profile"
+              className={`flex flex-col items-center gap-1 px-3 py-1 rounded-lg  ${
+                selected === "profile" ? "bg-white/8" : ""
+              } `}
+              onClick={() => {
+                setSelected("profile");
+              }}
             >
               <IconUser />
               <span className="text-[11px]">내 정보</span>
