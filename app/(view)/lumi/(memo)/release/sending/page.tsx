@@ -1,29 +1,21 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import useSending from "@/app/hooks/useSending";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 type Ritual = "wind" | "wave" | "star";
 
-const SFX: Record<Ritual, string> = {
-  wind: "/sounds/wind.mp3",
-  wave: "/sounds/wave.mp3",
-  star: "/sounds/star.mp3",
-};
+// const SFX: Record<Ritual, string> = {
+//   wind: "/sounds/wind.mp3",
+//   wave: "/sounds/wave.mp3",
+//   star: "/sounds/star.mp3",
+// };
 
 export default function ReleaseSending() {
   const router = useRouter();
-  const sp = useSearchParams();
 
-  const kind = (sp.get("kind") as Ritual) || "wind";
-  const t = (sp.get("t") ?? "").trim();
-  const line =
-    t ||
-    (kind === "wind"
-      ? "가볍게 올려보내요"
-      : kind === "wave"
-      ? "잔물결에 실어 흘려보내요"
-      : "별빛에 잠깐 맡겨둘게요");
+  const { kind, line } = useSending();
 
   // ---- 오디오 ----
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -35,20 +27,20 @@ export default function ReleaseSending() {
     return () => clearTimeout(t);
   }, [router]);
 
-  useEffect(() => {
-    const audio = new Audio(SFX[kind]);
-    audioRef.current = audio;
-    audio.preload = "auto";
-    audio.volume = 0.7;
-    audio.muted = true;
-    audio.play().catch(() => setBlocked(true));
-    return () => {
-      try {
-        audio.pause();
-      } catch {}
-      audioRef.current = null;
-    };
-  }, [kind]);
+  // useEffect(() => {
+  //   const audio = new Audio(SFX[kind]);
+  //   audioRef.current = audio;
+  //   audio.preload = "auto";
+  //   audio.volume = 0.7;
+  //   audio.muted = true;
+  //   audio.play().catch(() => setBlocked(true));
+  //   return () => {
+  //     try {
+  //       audio.pause();
+  //     } catch {}
+  //     audioRef.current = null;
+  //   };
+  // }, [kind]);
 
   const handleEnableSound = async () => {
     const a = audioRef.current;
