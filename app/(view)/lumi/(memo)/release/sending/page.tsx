@@ -1,10 +1,12 @@
 "use client";
 
+
 import useSending from "@/app/hooks/useSending";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 type Ritual = "wind" | "wave" | "star";
+
 
 // const SFX: Record<Ritual, string> = {
 //   wind: "/sounds/wind.mp3",
@@ -27,6 +29,7 @@ export default function ReleaseSending() {
     return () => clearTimeout(t);
   }, [router]);
 
+
   // useEffect(() => {
   //   const audio = new Audio(SFX[kind]);
   //   audioRef.current = audio;
@@ -41,6 +44,7 @@ export default function ReleaseSending() {
   //     audioRef.current = null;
   //   };
   // }, [kind]);
+
 
   const handleEnableSound = async () => {
     const a = audioRef.current;
