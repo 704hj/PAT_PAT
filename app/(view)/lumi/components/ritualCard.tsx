@@ -13,7 +13,7 @@ export default function RitualCard({
   label: string;
   desc: string;
   icon?: React.ReactNode;
-  preview: React.ReactNode;
+  preview?: React.ReactNode;
 }) {
   return (
     <button
