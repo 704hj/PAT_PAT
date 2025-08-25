@@ -493,7 +493,7 @@ button:focus {
   height: 18px;
   border-radius: 9999px;
   background: radial-gradient(
-    100% 180% at 50% 50%,
+    ellipse 100% 180% at 50% 50%,
     rgba(255, 255, 255, 0.18),
     rgba(255, 255, 255, 0) 70%
   );
@@ -571,7 +571,7 @@ button:focus {
 /* wind: 위로 올라가는 연무 */
 #release-veil[data-kind="wind"] .release-layer {
   background: radial-gradient(
-    80% 40% at 50% 110%,
+    ellipse 80% 40% at 50% 110%,
     rgba(79, 140, 255, 0.22),
     transparent 60%
   );
@@ -591,7 +591,7 @@ button:focus {
 /* wave: 수평 리플이 아래로 사라짐 */
 #release-veil[data-kind="wave"] .release-layer {
   background: radial-gradient(
-    120% 60% at 50% 80%,
+    ellipse 120% 60% at 50% 80%,
     rgba(200, 230, 255, 0.16),
     transparent 60%
   );
@@ -618,17 +618,17 @@ button:focus {
 /* star: 점광이 위로 소수 떠오르며 페이드 */
 #release-veil[data-kind="star"] .release-layer {
   background: radial-gradient(
-      6px 6px at 48% 80%,
+      ellipse 6px 6px at 48% 80%,
       rgba(255, 255, 255, 0.6),
       transparent 60%
     ),
     radial-gradient(
-      4px 4px at 58% 76%,
+      ellipse 4px 4px at 58% 76%,
       rgba(255, 255, 255, 0.5),
       transparent 60%
     ),
     radial-gradient(
-      5px 5px at 40% 82%,
+      ellipse 5px 5px at 40% 82%,
       rgba(255, 255, 255, 0.55),
       transparent 60%
     );
@@ -719,7 +719,7 @@ button:focus {
   height: 18px;
   border-radius: 9999px;
   background: radial-gradient(
-    100% 180% at 50% 50%,
+    ellipse 100% 180% at 50% 50%,
     rgba(255, 255, 255, 0.18),
     rgba(255, 255, 255, 0) 70%
   );
@@ -844,7 +844,7 @@ button:focus {
   height: 18px;
   border-radius: 9999px;
   background: radial-gradient(
-    100% 180% at 50% 50%,
+    ellipse 100% 180% at 50% 50%,
     rgba(255, 255, 255, 0.18),
     rgba(255, 255, 255, 0) 70%
   );
@@ -1049,7 +1049,7 @@ button:focus {
   height: 18px;
   border-radius: 9999px;
   background: radial-gradient(
-    100% 180% at 50% 50%,
+    ellipse 100% 180% at 50% 50%,
     rgba(255, 255, 255, 0.18),
     rgba(255, 255, 255, 0) 70%
   );
