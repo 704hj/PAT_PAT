@@ -45,8 +45,10 @@ export default function Onboarding() {
             />
             <img
               src={CAT_SRC}
-              alt="루미"
-              className="relative mx-auto w-[240px] h-auto motion-safe:animate-[float_4s_ease-in-out_infinite]"
+              alt="루미(감정 정리 동반자)"
+              className="relative mx-auto w-[240px] h-auto
+             motion-safe:animate-[float_4s_ease-in-out_infinite]
+             motion-reduce:animate-none"
             />
           </div>
         </div>
