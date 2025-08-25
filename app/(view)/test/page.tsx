@@ -14,7 +14,7 @@ export default function HomePage() {
 
   return (
     <div>
-      <h1>Supabase 연결 테스트</h1>
+      <h1>Supabase 연결 테스트_</h1>
       <pre>{JSON.stringify(result, null, 2)}</pre>
     </div>
   );
