@@ -15,6 +15,7 @@ if (typeof __dirname !== "undefined") {
 
 const config: StorybookConfig = {
   framework: { name: "@storybook/nextjs", options: {} },
+  //스토리 파일 위치 정의
   stories: [
     "../stories/**/*.stories.@(ts|tsx|mdx)",
     "../app/**/*.stories.@(ts|tsx|mdx)",
