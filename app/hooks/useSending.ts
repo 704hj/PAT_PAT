@@ -1,7 +1,10 @@
+"use client";
+
 import { useSearchParams } from "next/navigation";
+
 type Ritual = "wind" | "wave" | "star";
 
-const ueeSending = () => {
+const useSending = () => {
   const searchParams = useSearchParams();
   const kind = (searchParams.get("kind") as Ritual) || "wind";
   const t = (searchParams.get("t") ?? "").trim();
@@ -16,4 +19,4 @@ const ueeSending = () => {
   return { kind, line };
 };
 
-export default ueeSending;
+export default useSending;
