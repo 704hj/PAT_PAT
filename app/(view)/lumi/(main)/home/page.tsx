@@ -17,11 +17,17 @@ function IconStar() {
 }
 function IconRelease() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" className="opacity-90">
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className="opacity-90"
+    >
       <path
         d="M3 12h12M9 6l6 6-6 6"
         stroke="currentColor"
-        strokeWidth="1.8f"
+        strokeWidth="1.8"
         strokeLinecap="round"
         strokeLinejoin="round"
         fill="none"
