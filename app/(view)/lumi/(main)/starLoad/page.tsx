@@ -1,69 +1,54 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import ConstellationCanvas from "../../components/constellationCanvas";
 
-type Point = { x: number; y: number };
 type Star = {
-  starCode: string; // 별자리 영어 이름
-  name_ko: string; // 별자리 한글 이름
-  startDay: string; // "MM-DD"
-  endDay: string; // "MM-DD"
-  primaryMonth: string; // 별자리 해당 월
-  points: Point[]; // 별자리 좌표
-  edges: number[][]; // 하나의 별자리에서 별들을 이은 선
-  pathIndex: number[]; //startDay-endDay
+  zodiac_code: string;
+  name_ko: string;
+  start_mmdd: string;
+  end_mmdd: string;
+  primary_month: string;
+  points: { x: number; y: number }[];
+  edges: number[][];
+  path_index: number[];
 };
 
-function mmdd(d: Date) {
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${m}-${day}`;
-}
-
-// 별자리 날짜 범위 포함 여부 (연도 경계 처리)
-function inRange(target: string, start: string, end: string) {
-  if (start <= end) return target >= start && target <= end; // 일반 범위
-  // 연도 걸치는 범위(예: 12-22 ~ 01-19)
-  return target >= start || target <= end;
-}
-
 export default function Page() {
-  // 예: 2025-02-15 → 물병자리 기간
-  const d = new Date(2025, 11, 15);
+  // 2025-12-24 (month는 0=1월, 11=12월)
+  const d = new Date(2025, 11, 24);
 
   const [star, setStar] = useState<Star | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
     let alive = true;
-    fetch("/mock/star.json", { cache: "no-store" })
+    fetch("/mock/star.json")
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json();
       })
-      .then((json: Star[]) => {
+      .then((json: Star[] | Star) => {
         if (!alive) return;
-        const key = mmdd(d);
-        const picked =
-          json.find((s) => inRange(key, s.startDay, s.endDay)) ?? null;
-        setStar(picked);
+        // 파일이 배열이면 capricorn 선택, 객체 하나면 그대로 사용
+        const cap = Array.isArray(json)
+          ? json.find((s) => s.zodiac_code === "capricorn") ?? null
+          : (json as Star);
+        setStar(cap);
       })
       .catch((e) => alive && setErr(String(e)));
-
     return () => {
       alive = false;
     };
-  }, [d]);
+  }, []);
 
   return (
     <main className="min-h-[100svh] px-5 pt-6">
       <h2 className="text-white/90 text-[16px] mb-3">
-        이달의 별자리 : {star?.name_ko ?? "로딩 중…"} <br />
-        기간 : {star ? `${star?.startDay}~${star?.endDay}` : "로딩 중…"}
+        이달의 별자리 : {star?.name_ko ?? "로딩 중…"}
       </h2>
       <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-        <ConstellationCanvas userId="demoUser" date={d} star={star} />
+        {/* ConstellationCanvas가 외부 데이터를 받을 수 있으면 star를 prop으로 전달 */}
+        <ConstellationCanvas userId="demoUser" date={d} />
       </div>
       {err && (
         <p className="text-red-400 text-sm mt-2">데이터 로드 실패: {err}</p>
