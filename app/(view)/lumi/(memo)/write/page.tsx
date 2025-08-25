@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import GlassCard from "../../components/glassCard";
+import ConstellationCanvas from "../../components/constellationCanvas";
+import { upsertStarMock } from "../../../../lib/zodiac";
 
 // 상단에 추가 (컴포넌트 파일 최상단 근처)
 type MoodKey = "contentment" | "excited" | "happy" | "joy" | "love";
@@ -55,12 +57,23 @@ export default function StarWritePage() {
       return [...prev, t];
     });
   };
-
+  //목데이터로 저장 테스트
   const submit = () => {
-    if (!canSubmit) return;
-    // TODO: 서버 전송
+    if (!canSubmit || !mood) return;
+    const userId = "demoUser";
+    const today = new Date();
+    const isSpecial = tags.some((t) =>
+      ["감사", "성취", "여행", "휴식"].includes(t)
+    );
+    upsertStarMock(userId, today, {
+      moodKey: mood,
+      intensity,
+      text: text.trim(),
+      tags,
+      isSpecial,
+    });
     alert("별이 저장되었어요 ✦");
-    router.replace("/lumi/home");
+    router.replace("/lumi/starLoad");
   };
 
   return (
@@ -236,7 +249,7 @@ export default function StarWritePage() {
         >
           <div className="grid grid-cols-2 gap-8">
             <button
-              onClick={() => router.replace("/lumi/home")}
+              onClick={() => router.replace("/lumi/write/starLoad")}
               className="h-12 rounded-[12px] text-[14px] font-medium text-white/85
                          bg-white/6 border border-white/12 hover:bg-white/10 transition"
             >
