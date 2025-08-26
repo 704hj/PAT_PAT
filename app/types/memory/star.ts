@@ -39,3 +39,16 @@ export interface TPositionProps {
   y: number;
   size?: number;
 }
+// app/(view)/lumi/types/star.ts
+export type TPoint = { x: number; y: number };
+
+export type TStar = {
+  starCode: string; // ex) "capricorn"
+  name_ko: string; // ex) "염소자리"
+  startDay: string; // "MM-DD"
+  endDay: string; // "MM-DD"
+  primaryMonth: string; // ex) "01"
+  points: TPoint[];
+  edges: number[][];
+  pathIndex: number[];
+};

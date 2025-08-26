@@ -59,7 +59,6 @@ function sampleAt(points: Pt[], seg: number[], acc: number[], s: number): Pt {
   };
 }
 
-/** ✅ 방어 추가: points가 없거나 1개 이하일 때도 안전 */
 export function samplePolyline(
   points: Pt[] | undefined | null,
   N: number
@@ -81,7 +80,6 @@ export function daysInMonth(year: number, month1to12: number) {
   return new Date(year, month1to12, 0).getDate();
 }
 
-/** ✅ path_index를 따라 윤곽을 만든 뒤 일수만큼 보간 */
 export function expandToDays(
   points: Pt[] | undefined,
   pathIndex: number[] | undefined,

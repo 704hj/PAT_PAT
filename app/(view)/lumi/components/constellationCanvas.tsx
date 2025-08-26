@@ -1,59 +1,58 @@
-// app/(view)/lumi/components/constellationCanvas.tsx
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import {
+  daysInMonth,
   loadTemplates,
   resolveZodiacByDate,
-  daysInMonth,
-  loadMonthStarsMock,
   type ZodiacTemplate,
 } from "../../../lib/zodiac";
-
-function dayToNodeIndex(day1: number, days: number, nodeCount: number) {
-  if (nodeCount <= 1 || days <= 1) return 0;
-  const t = (day1 - 1) / (days - 1);
-  return Math.round(t * (nodeCount - 1));
-}
+import { TStar } from "@/app/types/memory/star";
 
 export default function ConstellationCanvas({
   userId = "demoUser",
   date = new Date(),
+  star,
 }: {
   userId?: string;
   date?: Date;
+  star?: TStar | null;
 }) {
   const [z, setZ] = useState<ZodiacTemplate | null>(null);
-  const [stars, setStars] = useState<ReturnType<typeof loadMonthStarsMock>>([]);
 
-  // 항상 같은 순서/개수의 훅 호출
   const year = date.getFullYear();
   const month = date.getMonth() + 1;
   const days = daysInMonth(year, month);
 
-  // z가 없어도 빈 배열로 처리 -> 훅은 항상 호출됨
+  useEffect(() => {
+    if (star) {
+      setZ({
+        zodiac_code: star.starCode,
+        name_ko: star.name_ko,
+        start_mmdd: star.startDay,
+        end_mmdd: star.endDay,
+        primary_month: star.primaryMonth,
+        points: star.points,
+        edges: star.edges,
+        path_index: star.pathIndex,
+      } as unknown as ZodiacTemplate);
+      return;
+    }
+    (async () => {
+      const templates = await loadTemplates();
+      const target = resolveZodiacByDate(date, templates);
+      setZ(target);
+    })();
+  }, [star, date]);
+
   const nodes = z?.points ?? [];
   const edges = z?.edges ?? [];
 
   const selectedNodes = useMemo(() => {
     const s = new Set<number>();
-    for (const r of stars) {
-      s.add(dayToNodeIndex(r.dayIndex + 1, days, nodes.length));
-    }
     return s;
-  }, [stars, days, nodes.length]);
+  }, []);
 
-  useEffect(() => {
-    (async () => {
-      const templates = await loadTemplates();
-      const target = resolveZodiacByDate(date, templates);
-      setZ(target);
-      setStars(loadMonthStarsMock(userId, year, month));
-    })();
-  }, [userId, date, year, month]);
-
-  // 렌더
   if (nodes.length === 0) {
-    // hooks는 위에서 이미 다 호출됐으므로 여기서 early return 가능
     return <svg viewBox="0 0 100 100" className="w-full h-auto" />;
   }
 
@@ -64,7 +63,6 @@ export default function ConstellationCanvas({
       preserveAspectRatio="xMidYMid meet"
       role="img"
     >
-      {/* 윤곽선 */}
       {edges.map(([a, b], i) => {
         const p = nodes[a],
           q = nodes[b];
@@ -82,8 +80,6 @@ export default function ConstellationCanvas({
           />
         );
       })}
-
-      {/* 모든 노드(연한 점) */}
       {nodes.map((p, i) => (
         <circle
           key={`n-${i}`}
@@ -93,27 +89,9 @@ export default function ConstellationCanvas({
           fill="rgba(255,255,255,0.25)"
         />
       ))}
-
-      {/* 저장된 날 → 매핑된 노드만 강조 */}
       {Array.from(selectedNodes).map((i) => {
         const p = nodes[i];
-        const related = stars.filter(
-          (s) => dayToNodeIndex(s.dayIndex + 1, days, nodes.length) === i
-        );
-        const isSpecial = related.some((r) => r.isSpecial);
-        const avgIntensity =
-          related.reduce((a, r) => a + (r.intensity ?? 3), 0) /
-          Math.max(1, related.length);
-        const r = 1.6 + avgIntensity * 0.7;
-        return (
-          <circle
-            key={`star-${i}`}
-            cx={p.x}
-            cy={p.y}
-            r={r}
-            fill={isSpecial ? "#9b5de5" : "#FFC43D"}
-          />
-        );
+        return <circle key={`s-${i}`} cx={p.x} cy={p.y} r={2} fill="#FFC43D" />;
       })}
     </svg>
   );
