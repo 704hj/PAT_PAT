@@ -161,22 +161,21 @@ export default function ReleasePage() {
               active={ritual === "wind"}
               onClick={() => setRitual("wind")}
               label="바람에 띄우기"
-              desc="가볍게 위로"
               preview={<WindPreview />}
             />
             <RitualCard
               active={ritual === "wave"}
               onClick={() => setRitual("wave")}
               label="물결에 흘리기"
-              desc="잔물결에 실어"
               preview={<WavePreview />}
+              locked={true}
             />
             <RitualCard
               active={ritual === "fire"}
               onClick={() => setRitual("fire")}
               label="불에 태우기"
-              desc="불로 처리하기"
               preview={<EmberSend />}
+              locked={true}
             />
           </div>
         </div>
