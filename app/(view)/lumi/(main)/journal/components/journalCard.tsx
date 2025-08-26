@@ -3,6 +3,11 @@
 import Link from "next/link";
 import { memo, useRef, useState } from "react";
 import { Journal } from "../page";
+import {
+  IconDeleteFlame,
+  IconPinStar,
+  IconShareComet,
+} from "./style/lockStyles";
 
 const moodIcon: Record<string, string> = {
   contentment: "/images/icon/emotion/pos/contentment.png",
@@ -49,13 +54,11 @@ export const JournalCard = memo(function JournalCard({
 
   return (
     <div className="relative mb-2.5">
-      {" "}
       {/* 리스트 간격 규격화 */}
       {/* 배경 액션 */}
-      <div className="absolute inset-0 rounded-[14px] overflow-hidden select-none pointer-events-none">
+      <div className="absolute inset-0 rounded-[14px] overflow-hidden select-none">
         {/* 왼쪽: Pin / Share */}
-        {/* 왼쪽: Pin / Share */}
-        <div className="absolute inset-y-0 left-0 w-[72px] flex items-center gap-2 pl-2">
+        <div className="absolute inset-y-0 left-0 w-[72px] flex items-center gap-2 pl-2 pointer-events-auto">
           {/* 고정 */}
           <button
             onClick={onPin}
@@ -65,17 +68,19 @@ export const JournalCard = memo(function JournalCard({
                hover:text-yellow-300 hover:border-yellow-300/40
                transition active:scale-95"
           >
-            <svg
-              width="16"
-              height="16"
+            {/* <svg
+              className="w-5 h-5"
               viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth="1.6"
               fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
             >
               <path d="M14 3l-2 2 5 5-2 2-5-5-2 2" />
               <path d="M12 14l-7 7" />
-            </svg>
+            </svg> */}
+            <IconPinStar />
           </button>
 
           {/* 공유 */}
@@ -87,32 +92,34 @@ export const JournalCard = memo(function JournalCard({
                hover:text-cyan-300 hover:border-cyan-400/40
                transition active:scale-95"
           >
-            <svg
-              width="16"
-              height="16"
+            {/* <svg
+              className="w-5 h-5"
               viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth="1.6"
               fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
             >
               <path d="M18 8a3 3 0 1 0-2.83-4" />
               <path d="M6 14a3 3 0 1 0 2.83 4" />
               <path d="M8 14l8-4M8 10l8 4" />
-            </svg>
+            </svg> */}
+            <IconShareComet />
           </button>
         </div>
 
         {/* 오른쪽: Delete */}
-        <div className="absolute inset-y-0 right-0 w-[72px] flex items-center justify-end pr-2">
+        <div className="absolute inset-y-0 right-0 w-[72px] flex items-center justify-end pr-2 pointer-events-auto">
           <button
             onClick={onDelete}
             aria-label="삭제"
             className="h-9 w-9 rounded-lg flex items-center justify-center
                bg-white/6 border border-white/12 text-white/70
                hover:text-red-400 hover:border-red-400/40
-               transition active:scale-95"
+               transition `active:scale-95"
           >
-            <svg
+            {/* <svg
               width="16"
               height="16"
               viewBox="0 0 24 24"
@@ -122,7 +129,8 @@ export const JournalCard = memo(function JournalCard({
             >
               <path d="M3 6h18M8 6V4h8v2" />
               <path d="M9 6v14a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2V6" />
-            </svg>
+            </svg> */}
+            <IconDeleteFlame />
           </button>
         </div>
       </div>
