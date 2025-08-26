@@ -1,8 +1,4 @@
 "use client";
-
-import { useEffect, useState } from "react";
-("use client");
-
 import { useEffect, useState } from "react";
 import ConstellationCanvas from "../../components/constellationCanvas";
 
