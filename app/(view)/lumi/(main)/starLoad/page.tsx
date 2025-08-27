@@ -44,45 +44,26 @@ export default function Page() {
 
   const [err, setErr] = useState<string | null>(null);
 
+  const [stars, setStars] = useState<Star[]>([]);
+
   useEffect(() => {
-    // 컴포넌트가 마운트되거나 d가 바뀔 때 실행되는 사이드이펙트
-    // 언마운트 이후 setState 방지용 플래그,
-    // 비동기 통신(fetch)이 끝나기 전에 컴포넌트가 언마운트될 수도 있는데,
-    // 그 경우 setState를 호출하면 React에서 경고
-    // 따라서 alive를 두어서 “이 컴포넌트가 아직 살아있는지” 확인하고, 죽었다면(false) state 변경을 무시
-    let alive = true;
+    fetch("/api/star")
+      .then((res) => res.json())
+      .then(setStars)
+      .catch((err) => setErr(String(err)));
+  }, []); // 최초 1회만
 
-    fetch("/mock/star.json")
-      .then((res) => {
-        // HTTP 응답 객체 처리
-        // 200대가 아니면 에러로 처리
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json(); // 응답 본문을 JSON으로 파싱(비동기)
-      })
-      .then((json: Star[]) => {
-        // 파싱된 JSON 데이터(Star 배열)를 받음
-        // 이미 언마운트되었으면 더 진행하지 않음
-        if (!alive) return;
+  useEffect(() => {
+    if (stars.length === 0) return;
 
-        // d(Date)를 "MM-DD" 문자열로 변환 (예: "02-15")
-        const key = mmdd(date);
-
-        // 오늘 날짜(key)가 포함되는 별자리 하나를 찾음
-        const picked =
-          json.find((s) => inRange(key, s.startDay, s.endDay)) ?? null;
-        // 찾은 별자리를 state에 저장(없으면 null)
-        setStar(picked);
-      })
-      // 네트워크/파싱 에러 발생 시, 아직 살아있다면 에러 메시지 저장
-      .catch((err) => alive && setErr(String(err)));
-
-    return () => {
-      // 클린업 함수: 언마운트되거나 다음 이펙트 실행 직전에 호출
-      // 이후에 도착하는 비동기 작업이 setState 못 하게 막음
-      alive = false;
-    };
-  }, [date]);
-
+    const key = mmdd(nowDate ?? new Date());
+    const picked =
+      stars.find((s) => inRange(key, s.startDay, s.endDay)) ?? null;
+    setStar(picked);
+  }, [nowDate, stars]);
+  console.log("date##", date);
+  console.log("nowDate###", nowDate);
+  console.log("stars###", stars);
   return (
     <main className="min-h-[100svh] px-5 pt-6">
       <h2 className="text-white/90 text-[16px] mb-3">

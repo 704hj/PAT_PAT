@@ -11,7 +11,6 @@ import { TStar } from "@/app/types/memory/star";
 export default function ConstellationCanvas({
   userId = "demoUser",
   date = new Date(),
-
   star,
 }: {
   userId?: string;
