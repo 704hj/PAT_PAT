@@ -1,6 +1,6 @@
 "use client";
 
-import useSending from "@/app/hooks/useSending";
+import useSending from "@/app/hooks/ui/useSending";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 
