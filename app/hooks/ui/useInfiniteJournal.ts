@@ -1,7 +1,7 @@
 "use client";
 
+import { Journal } from "@/app/(view)/lumi/(main)/journal/page";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Journal } from "../(view)/lumi/(main)/journal/page";
 
 /** 데모용 페이징 소스 (API 연결 부분 교체) */
 function mockFetch(
