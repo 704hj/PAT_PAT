@@ -47,5 +47,5 @@ export async function GET(request: Request) {
   }
 
   // return NextResponse.redirect(`${origin}/lumi/auth/signin`);
-  return NextResponse.redirect(`${origin}/lumi/start`);
+  return NextResponse.redirect(`${origin}/lumi/home`);
 }
