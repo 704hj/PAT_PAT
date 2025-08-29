@@ -2,6 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import SocialButton from "../components/SocialLogin";
+import SocialLogin from "../components/SocialLogin";
 
 export default function SignInPage() {
   const router = useRouter();
@@ -84,20 +86,8 @@ export default function SignInPage() {
             </span>
           </div>
 
-          <div className="grid gap-2">
-            <button
-              onClick={() => social("google")}
-              className="h-11 rounded-[12px] bg-white/90 text-[#0b1d4a] font-medium hover:bg-white transition"
-            >
-              Google로 계속하기
-            </button>
-            <button
-              onClick={() => social("apple")}
-              className="h-11 rounded-[12px] bg-white/90 text-[#0b1d4a] font-medium hover:bg-white transition"
-            >
-              Apple로 계속하기
-            </button>
-          </div>
+          {/* Google 및 kakao */}
+          <SocialLogin />
 
           <div className="mt-4 text-center">
             <button
@@ -112,3 +102,9 @@ export default function SignInPage() {
     </main>
   );
 }
+// app/lumi/signin/page.tsx  (또는 src/app/...)
+// "use client";
+
+// export default function LumiSignInPage() {
+//   return <div style={{ padding: 24 }}>lumi/signin alive</div>;
+// }

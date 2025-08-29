@@ -3,7 +3,7 @@ import { signInWithKakao } from "@/app/utils/supabase/signinKakao";
 
 import React, { useState } from "react";
 
-export default function SocialButton() {
+export default function SocialLogin() {
   const [busy, setBusy] = useState(false);
 
   const social = async (provider: "google" | "kakao") => {
@@ -15,7 +15,8 @@ export default function SocialButton() {
         provider: "kakao",
         options: {
           //로컬 환경 주소
-          redirectTo: `${process.env.NEXT_PUBLIC_REDIRECT_URL}/auth/callback`,
+          redirectTo: `${process.env.NEXT_PUBLIC_REDIRECT_URL}/lumi/auth/callback`,
+          scopes: "profile_nickname profile_image account_email",
         },
       });
       // await api.oauthSignIn(provider)
