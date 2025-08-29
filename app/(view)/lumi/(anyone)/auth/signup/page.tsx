@@ -3,8 +3,9 @@
 import { supabase } from "@/app/lib/supabase/supbase";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import KakaoButton from "../components/SocialButton";
-import SocialButton from "../components/SocialButton";
+import KakaoButton from "../components/SocialLogin";
+import SocialButton from "../components/SocialLogin";
+import SocialLogin from "../components/SocialLogin";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -35,7 +36,7 @@ export default function SignUpPage() {
         provider: "kakao",
         options: {
           //로컬 환경 주소
-          redirectTo: `${process.env.NEXT_PUBLIC_REDIRECT_URL}/auth/callback`,
+          redirectTo: `${process.env.NEXT_PUBLIC_REDIRECT_URL}/lumi/auth/callback`,
         },
       });
       // await api.oauthSignIn(provider)
@@ -112,7 +113,7 @@ export default function SignUpPage() {
           </div>
 
           {/* Google 및 kakao */}
-          <SocialButton />
+          <SocialLogin />
 
           <div className="mt-4 text-center">
             <button
