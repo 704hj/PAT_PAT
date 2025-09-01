@@ -1,22 +1,12 @@
-"use client";
+// "use client"
+import { createSupabaseClient } from "@/app/utils/supabase/client";
 
-import { createSupabaseClient } from "./client";
-
-export const signInWithKakao = async () => {
+export async function signInWithKakao() {
   const supabase = createSupabaseClient();
-
-  const { data, error } = await supabase.auth.signInWithOAuth({
+  const redirectTo = `${window.location.origin}/lumi/auth/callback`; // 고정 ENV 대신 현재 도메인
+  const { error } = await supabase.auth.signInWithOAuth({
     provider: "kakao",
-    options: {
-      //로컬 환경 주소
-      redirectTo: `${process.env.NEXT_PUBLIC_REDIRECT_URL}/lumi/auth/callback`,
-
-      // http://localhost:3000 or https://배포한 도메인
-    },
+    options: { redirectTo },
   });
-
-  if (error) alert(error.message);
-
-  if (data) console.log(data);
-  return data;
-};
+  if (error) console.error(error);
+}
