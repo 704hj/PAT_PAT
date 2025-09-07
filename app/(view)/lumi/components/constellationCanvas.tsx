@@ -26,14 +26,14 @@ export default function ConstellationCanvas({
   useEffect(() => {
     if (star) {
       setZ({
-        zodiac_code: star.starCode,
+        zodiac_code: star.star_code,
         name_ko: star.name_ko,
-        start_mmdd: star.startDay,
-        end_mmdd: star.endDay,
-        primary_month: star.primaryMonth,
+        start_mmdd: star.start_day,
+        end_mmdd: star.end_day,
+        primary_month: star.primary_month,
         points: star.points,
         edges: star.edges,
-        path_index: star.pathIndex,
+        path_index: star.path_index,
       } as unknown as ZodiacTemplate);
       return;
     }
