@@ -1,19 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import ConstellationCanvas from "../../components/constellationCanvas";
 import CalendarView from "../../components/calendarView";
+import ConstellationCanvas from "../../components/constellationCanvas";
 
 type Point = { x: number; y: number };
 type Star = {
-  starCode: string; // 별자리 영어 이름
+  star_code: string; // 별자리 영어 이름
   name_ko: string; // 별자리 한글 이름
-  startDay: string; // "MM-DD"
-  endDay: string; // "MM-DD"
-  primaryMonth: string; // 별자리 해당 월
+  start_day: string; // "MM-DD"
+  end_day: string; // "MM-DD"
+  primary_month: string; // 별자리 해당 월
   points: Point[]; // 별자리 좌표
   edges: number[][]; // 하나의 별자리에서 별들을 이은 선
-  pathIndex: number[]; //startDay-endDay
+  path_index: number[]; //startDay-endDay
 };
 
 function mmdd(date: Date) {
@@ -47,29 +47,47 @@ export default function Page() {
   const [stars, setStars] = useState<Star[]>([]);
 
   useEffect(() => {
-    fetch("/api/star")
-      .then((res) => res.json())
-      .then(setStars)
-      .catch((err) => setErr(String(err)));
+    async function fetchConstellations() {
+      try {
+        const res = await fetch("/api/constellation");
+        const json = await res.json();
+
+        if (!json.ok) {
+          // 실패 처리
+          setErr(`[${json.code}] ${json.message}`);
+          return;
+        }
+
+        const stars = json.data;
+        setStars(stars);
+      } catch (err) {
+        setErr("네트워크 오류가 발생했어요.");
+      } finally {
+      }
+    }
+    fetchConstellations();
   }, []); // 최초 1회만
 
   useEffect(() => {
+    console.log("stars###", stars);
+    console.log("date##", date);
+    console.log("nowDate###", nowDate);
+
     if (stars.length === 0) return;
 
     const key = mmdd(nowDate ?? new Date());
     const picked =
-      stars.find((s) => inRange(key, s.startDay, s.endDay)) ?? null;
+      stars.find((s) => inRange(key, s.start_day, s.end_day)) ?? null;
+
     setStar(picked);
   }, [nowDate, stars]);
-  console.log("date##", date);
-  console.log("nowDate###", nowDate);
-  console.log("stars###", stars);
+
   return (
     <main className="min-h-[100svh] px-5 pt-6">
       <h2 className="text-white/90 text-[16px] mb-3">
         이달의 별자리 : {star?.name_ko ?? "로딩 중…"} <br />
         {/* {clickDate가 속해있는 기간을 가져와야함} */}
-        기간 : {clickDate ? `${star?.startDay}~${star?.endDay}` : "로딩 중…"}
+        기간 : {clickDate ? `${star?.start_day}~${star?.end_day}` : "로딩 중…"}
         <br />
         {/* ko-KR : 2025. 2. 15 */}
         선택한 날짜 :{" "}

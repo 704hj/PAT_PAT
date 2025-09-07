@@ -1,6 +1,6 @@
 "use client";
 
-import { supabase } from "@/app/lib/supabase/supbase";
+import { supabase } from "@/app/lib/supabase/server";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import KakaoButton from "../components/SocialLogin";
