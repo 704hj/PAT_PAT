@@ -14,8 +14,8 @@ export type ZodiacTemplate = {
 };
 
 export async function loadTemplates(): Promise<ZodiacTemplate[]> {
-  const res = await fetch("/mock/star.json", { cache: "no-store" });
-  if (!res.ok) throw new Error("failed to load star.json");
+  const res = await fetch("/api/star", { cache: "no-store" });
+  if (!res.ok) throw new Error("failed to load starAPI");
   return res.json();
 }
 

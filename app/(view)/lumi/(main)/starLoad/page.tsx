@@ -1,54 +1,86 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import ConstellationCanvas from "../../components/constellationCanvas";
+import CalendarView from "../../components/calendarView";
 
+type Point = { x: number; y: number };
 type Star = {
-  zodiac_code: string;
-  name_ko: string;
-  start_mmdd: string;
-  end_mmdd: string;
-  primary_month: string;
-  points: { x: number; y: number }[];
-  edges: number[][];
-  path_index: number[];
+  starCode: string; // 별자리 영어 이름
+  name_ko: string; // 별자리 한글 이름
+  startDay: string; // "MM-DD"
+  endDay: string; // "MM-DD"
+  primaryMonth: string; // 별자리 해당 월
+  points: Point[]; // 별자리 좌표
+  edges: number[][]; // 하나의 별자리에서 별들을 이은 선
+  pathIndex: number[]; //startDay-endDay
 };
 
+function mmdd(date: Date) {
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${mm}-${day}`;
+}
+
+// 별자리 날짜 범위 포함 여부 (연도 경계 처리)
+function inRange(target: string, start: string, end: string) {
+  if (start <= end) return target >= start && target <= end; // 일반 범위
+  // 연도 걸치는 범위(예: 12-22 ~ 01-19)
+  return target >= start || target <= end;
+}
+
 export default function Page() {
-  // 2025-12-24 (month는 0=1월, 11=12월)
-  const d = new Date(2025, 11, 24);
+  //달력에서 사용자가 선택한 날짜
+  const [clickDate, setClickDate] = useState("아직 선택하지 않았습니다.");
+
+  //Date객체 실제 계산용
+  const [nowDate, setNowDate] = useState<Date | null>(null);
+
+  // 예: 2025-02-15 → 물병자리 기간
+  // const date = new Date(2025, 11, 15);
+  const date = nowDate ?? new Date();
 
   const [star, setStar] = useState<Star | null>(null);
+
   const [err, setErr] = useState<string | null>(null);
 
-  useEffect(() => {
-    let alive = true;
-    fetch("/mock/star.json")
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json();
-      })
-      .then((json: Star[] | Star) => {
-        if (!alive) return;
-        // 파일이 배열이면 capricorn 선택, 객체 하나면 그대로 사용
-        const cap = Array.isArray(json)
-          ? json.find((s) => s.zodiac_code === "capricorn") ?? null
-          : (json as Star);
-        setStar(cap);
-      })
-      .catch((e) => alive && setErr(String(e)));
-    return () => {
-      alive = false;
-    };
-  }, []);
+  const [stars, setStars] = useState<Star[]>([]);
 
+  useEffect(() => {
+    fetch("/api/star")
+      .then((res) => res.json())
+      .then(setStars)
+      .catch((err) => setErr(String(err)));
+  }, []); // 최초 1회만
+
+  useEffect(() => {
+    if (stars.length === 0) return;
+
+    const key = mmdd(nowDate ?? new Date());
+    const picked =
+      stars.find((s) => inRange(key, s.startDay, s.endDay)) ?? null;
+    setStar(picked);
+  }, [nowDate, stars]);
+  console.log("date##", date);
+  console.log("nowDate###", nowDate);
+  console.log("stars###", stars);
   return (
     <main className="min-h-[100svh] px-5 pt-6">
       <h2 className="text-white/90 text-[16px] mb-3">
-        이달의 별자리 : {star?.name_ko ?? "로딩 중…"}
+        이달의 별자리 : {star?.name_ko ?? "로딩 중…"} <br />
+        {/* {clickDate가 속해있는 기간을 가져와야함} */}
+        기간 : {clickDate ? `${star?.startDay}~${star?.endDay}` : "로딩 중…"}
+        <br />
+        {/* ko-KR : 2025. 2. 15 */}
+        선택한 날짜 :{" "}
+        {nowDate
+          ? nowDate.toLocaleDateString("ko-KR")
+          : "아직 선택하지 않았습니다."}
       </h2>
+      {/* 부모(Page)에서 nowDate state 관리, CalendarView는 선택 시 setNowDate 호출 */}
+      <CalendarView onSelectDate={setNowDate} />
       <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-        {/* ConstellationCanvas가 외부 데이터를 받을 수 있으면 star를 prop으로 전달 */}
-        <ConstellationCanvas userId="demoUser" date={d} />
+        <ConstellationCanvas userId="demoUser" date={date} star={star} />
       </div>
       {err && (
         <p className="text-red-400 text-sm mt-2">데이터 로드 실패: {err}</p>

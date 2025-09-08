@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { useMemo, useRef, useState, useEffect, useCallback } from "react";
-import { useInfiniteJournal } from "@/app/hooks/useInfiniteJournal";
 import { Toolbar } from "./components/toolbar";
 import { StickyMonthHeader } from "./components/stickyMonthHeader";
 import { JournalCard } from "./components/journalCard";
+import { useInfiniteJournal } from "@/app/hooks/ui/useInfiniteJournal";
 
 export type EntryType = "star" | "release";
 export type Mood =

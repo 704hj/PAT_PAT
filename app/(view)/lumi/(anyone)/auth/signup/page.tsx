@@ -1,12 +1,17 @@
 "use client";
 
+import { supabase } from "@/app/lib/supabase/supbase";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import KakaoButton from "../components/SocialLogin";
+import SocialButton from "../components/SocialLogin";
+import SocialLogin from "../components/SocialLogin";
 
 export default function SignUpPage() {
   const router = useRouter();
   const [nickname, setNickname] = useState("");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const canSubmit = nickname.trim().length >= 2 && /\S+@\S+\.\S+/.test(email);
 
@@ -22,13 +27,22 @@ export default function SignUpPage() {
     }
   };
 
-  const social = async (provider: "google" | "apple") => {
+  const social = async (provider: "google" | "kakao") => {
     if (busy) return;
     try {
       setBusy(true);
-      // TODO: 소셜 로그인 연결
+      // kakao 소셜 로그인, sighInWithOAuth : 회원가입이 되어있지 않은 유저의 로그인 시도를 자동으로 회원가입 과정이 일어나게끔 해주는 기능 포함
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: "kakao",
+        options: {
+          //로컬 환경 주소
+          redirectTo: `${process.env.NEXT_PUBLIC_REDIRECT_URL}/lumi/auth/callback`,
+        },
+      });
       // await api.oauthSignIn(provider)
-      router.replace("/lumi/home");
+      // router.replace("/lumi/home");
+    } catch (error) {
+      console.error("kakao 로그인 에러");
     } finally {
       setBusy(false);
     }
@@ -98,20 +112,8 @@ export default function SignUpPage() {
             </span>
           </div>
 
-          <div className="grid gap-2">
-            <button
-              onClick={() => social("google")}
-              className="h-11 rounded-[12px] bg-white/90 text-[#0b1d4a] font-medium hover:bg-white transition"
-            >
-              Google로 계속하기
-            </button>
-            <button
-              onClick={() => social("apple")}
-              className="h-11 rounded-[12px] bg-white/90 text-[#0b1d4a] font-medium hover:bg-white transition"
-            >
-              Apple로 계속하기
-            </button>
-          </div>
+          {/* Google 및 kakao */}
+          <SocialLogin />
 
           <div className="mt-4 text-center">
             <button
