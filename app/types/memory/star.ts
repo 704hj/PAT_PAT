@@ -43,12 +43,12 @@ export interface TPositionProps {
 export type TPoint = { x: number; y: number };
 
 export type TStar = {
-  starCode: string; // ex) "capricorn"
+  star_code: string; // ex) "capricorn"
   name_ko: string; // ex) "염소자리"
-  startDay: string; // "MM-DD"
-  endDay: string; // "MM-DD"
-  primaryMonth: string; // ex) "01"
+  start_day: string; // "MM-DD"
+  end_day: string; // "MM-DD"
+  primary_month: string; // ex) "01"
   points: TPoint[];
   edges: number[][];
-  pathIndex: number[];
+  path_index: number[];
 };
