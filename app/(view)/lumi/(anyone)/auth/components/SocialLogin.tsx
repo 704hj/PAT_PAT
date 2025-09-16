@@ -1,4 +1,4 @@
-import { supabase } from "@/app/lib/supabase/server";
+import { supabase } from "@/app/lib/supabase/client";
 import { signInWithKakao } from "@/app/utils/supabase/signInWithKakao";
 
 import React, { useState } from "react";
