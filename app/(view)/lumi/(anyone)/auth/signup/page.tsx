@@ -1,10 +1,8 @@
 "use client";
 
-import { supabase } from "@/app/lib/supabase/server";
+import { supabase } from "@/app/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import KakaoButton from "../components/SocialLogin";
-import SocialButton from "../components/SocialLogin";
 import SocialLogin from "../components/SocialLogin";
 
 export default function SignUpPage() {
