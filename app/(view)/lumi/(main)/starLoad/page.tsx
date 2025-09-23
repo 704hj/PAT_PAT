@@ -46,26 +46,33 @@ export default function Page() {
 
   const [stars, setStars] = useState<Star[]>([]);
 
+  // useEffect(() => {
+  //   async function fetchConstellations() {
+  //     try {
+  //       const res = await fetch("/api/constellation");
+  //       const json = await res.json();
+
+  //       if (!json.ok) {
+  //         // 실패 처리
+  //         setErr(`[${json.code}] ${json.message}`);
+  //         return;
+  //       }
+
+  //       const stars = json.data;
+  //       setStars(stars);
+  //     } catch (err) {
+  //       setErr("네트워크 오류가 발생했어요.");
+  //     } finally {
+  //     }
+  //   }
+  //   fetchConstellations();
+  // }, []); // 최초 1회만
+
   useEffect(() => {
-    async function fetchConstellations() {
-      try {
-        const res = await fetch("/api/constellation");
-        const json = await res.json();
-
-        if (!json.ok) {
-          // 실패 처리
-          setErr(`[${json.code}] ${json.message}`);
-          return;
-        }
-
-        const stars = json.data;
-        setStars(stars);
-      } catch (err) {
-        setErr("네트워크 오류가 발생했어요.");
-      } finally {
-      }
-    }
-    fetchConstellations();
+    fetch("/api/star")
+      .then((res) => res.json())
+      .then(setStars)
+      .catch((err) => setErr(String(err)));
   }, []); // 최초 1회만
 
   useEffect(() => {
