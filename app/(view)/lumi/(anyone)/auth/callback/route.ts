@@ -1,64 +1,94 @@
-/*
- * 서버에서 세션 교환
- *  > 콜백 = 로그인 끝나고 돌아오는 자리
- *  > 세션 교환을 해줘야 로그인 상태가 됨
- */
-
-// app/lumi/auth/callback/route.ts
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
 const AFTER_LOGIN = "/lumi/home";
 const SIGNIN = "/lumi/auth/signin";
+const SAFE_PATHS = new Set([AFTER_LOGIN, "/"]); // 허용 리다이렉트 경로
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const origin = url.origin;
   const code = url.searchParams.get("code");
   const oauthErr =
     url.searchParams.get("error") ?? url.searchParams.get("error_description");
+  const next = url.searchParams.get("next"); // (선택) 돌아갈 경로
 
-  // 1) OAuth 단계에서 에러가 붙어 돌아온 경우 → 로그인 페이지로
+  // 1) OAuth 단계 에러
   if (oauthErr) {
-    return NextResponse.redirect(new URL(`${SIGNIN}?error=oauth`, origin));
+    return NextResponse.redirect(new URL(`${SIGNIN}?error=oauth`, origin), {
+      status: 303,
+    });
   }
-
-  // 2) code 자체가 없으면 잘못 진입 → 로그인 페이지로
+  // 2) code 없음
   if (!code) {
     return NextResponse.redirect(
-      new URL(`${SIGNIN}?error=missing_code`, origin)
+      new URL(`${SIGNIN}?error=missing_code`, origin),
+      { status: 303 }
     );
   }
 
-  // 3) 세션 교환
+  // 3) 서버 클라이언트
   const cookieStore = await cookies();
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value ?? null;
+        getAll() {
+          return cookieStore
+            .getAll()
+            .map((c) => ({ name: c.name, value: c.value }));
         },
-        set(name: string, value: string, options: any) {
-          cookieStore.set({ name, value, ...options });
-        },
-        remove(name: string, options: any) {
-          cookieStore.set({ name, value: "", ...options });
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            cookieStore.set({ name, value, ...options });
+          });
         },
       },
     }
   );
 
-  const { error } = await supabase.auth.exchangeCodeForSession(code);
+  // 4) 세션 교환 (user/session 반환됨)
+  const { data, error } = await supabase.auth.exchangeCodeForSession(code);
   if (error) {
-    // 교환 실패 → 로그인 페이지로
+    console.error("[auth/callback] exchange failed:", error.message);
     return NextResponse.redirect(
-      new URL(`${SIGNIN}?error=exchange_failed`, origin)
+      new URL(`${SIGNIN}?error=exchange_failed`, origin),
+      { status: 303 }
     );
   }
 
-  // 4) 성공 → 실제 존재하는 페이지로 (예: /lumi/home)
-  return NextResponse.redirect(new URL(AFTER_LOGIN, origin));
+  // 5) 사용자 정보로 users upsert
+  const user = data.user;
+  if (user) {
+    const provider = (user.app_metadata?.provider as string) ?? "kakao";
+    const nickname =
+      (user.user_metadata?.name as string) ??
+      (user.user_metadata?.nickname as string) ??
+      null;
+    const avatar =
+      (user.user_metadata?.avatar_url as string) ??
+      (user.user_metadata?.picture as string) ??
+      null;
+
+    const { error: upsertErr } = await supabase.from("users").upsert(
+      {
+        auth_user_id: user.id,
+        email: user.email ?? null,
+        signup_method: provider, // 'kakao' 등
+        // profile_image: avatar, // 테이블에 있으면 추가
+        // nickname,              // 테이블에 있으면 추가
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "auth_user_id" }
+    );
+
+    if (upsertErr) {
+      console.error("[auth/callback] users upsert failed:", upsertErr.message);
+    }
+  }
+
+  const targetPath = next && SAFE_PATHS.has(next) ? next : AFTER_LOGIN;
+  return NextResponse.redirect(new URL(targetPath, origin), { status: 303 });
 }
