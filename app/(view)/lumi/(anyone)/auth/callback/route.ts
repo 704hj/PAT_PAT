@@ -1,6 +1,5 @@
-import { NextResponse, NextRequest } from "next/server";
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { createServerSupabaseClient } from "@/app/utils/supabase/server";
+import { NextRequest, NextResponse } from "next/server";
 
 const AFTER_LOGIN = "/lumi/home";
 const SIGNIN = "/lumi/auth/signin";
@@ -29,25 +28,7 @@ export async function GET(request: NextRequest) {
   }
 
   // 3) 서버 클라이언트
-  const cookieStore = await cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore
-            .getAll()
-            .map((c) => ({ name: c.name, value: c.value }));
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            cookieStore.set({ name, value, ...options });
-          });
-        },
-      },
-    }
-  );
+  const supabase = await createServerSupabaseClient();
 
   // 4) 세션 교환 (user/session 반환됨)
   const { data, error } = await supabase.auth.exchangeCodeForSession(code);
