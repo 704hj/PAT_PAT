@@ -1,9 +1,8 @@
 "use client";
 
-import { createSupabaseClient } from "@/app/utils/supabase/client";
+import { supabase } from "@/app/utils/supabase/client";
 
 export async function signInWithGoogle(nextPath: string = "/") {
-  const supabase = createSupabaseClient();
   const origin = window.location.origin;
   const state = btoa(JSON.stringify({ next: nextPath, t: Date.now() }));
   /**
