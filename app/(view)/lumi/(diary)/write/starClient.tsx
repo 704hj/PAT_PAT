@@ -2,48 +2,25 @@
 
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import GlassCard from "../../components/glassCard";
-import ConstellationCanvas from "../../components/constellationCanvas";
 import { upsertStarMock } from "../../../../lib/zodiac";
+import GlassCard from "../../components/glassCard";
+import Loading from "./components/loading";
 
-// 상단에 추가 (컴포넌트 파일 최상단 근처)
-type MoodKey = "contentment" | "excited" | "happy" | "joy" | "love";
-
-type Mood = MoodKey | null;
-
-const EMOTIONS: { key: MoodKey; label: string; src: string }[] = [
-  {
-    key: "contentment",
-    label: "평온",
-    src: "/images/icon/emotion/pos/contentment.png",
-  },
-  { key: "excited", label: "신남", src: "/images/icon/emotion/pos/exited.png" }, // 파일명이 exited로 주어짐
-  // { key: "happy", label: "기쁨", src: "/images/icon/emotion/pos/happy.png" },
-  { key: "joy", label: "즐거움", src: "/images/icon/emotion/pos/joy.png" },
-  { key: "love", label: "행복", src: "/images/icon/emotion/pos/love.png" },
-];
-
-// 백엔드에서 받아옴
-const TAGS = [
-  "감사",
-  "성취",
-  "휴식",
-  "친구",
-  "자연",
-  "음악",
-  "운동",
-  "여행",
-] as const;
-
-export default function StarWritePage() {
+type Props = {
+  emotions: TEmotion[];
+  tags: TTag[];
+  limit: number;
+};
+export default function StarWritePage({ emotions, tags, limit }: Props) {
   const router = useRouter();
+
+  const loading = !emotions || !tags;
 
   // state
   const [mood, setMood] = useState<string | null>(null);
   const [intensity, setIntensity] = useState(3);
   const [text, setText] = useState("");
-  const [tags, setTags] = useState<string[]>([]);
-  const limit = 200;
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   const canSubmit = useMemo(
     () => !!mood && text.trim().length > 0,
@@ -51,7 +28,7 @@ export default function StarWritePage() {
   );
 
   const toggleTag = (t: string) => {
-    setTags((prev) => {
+    setSelectedTags((prev) => {
       if (prev.includes(t)) return prev.filter((x) => x !== t);
       if (prev.length >= 3) return prev; // 최대 3개
       return [...prev, t];
@@ -62,21 +39,27 @@ export default function StarWritePage() {
     if (!canSubmit || !mood) return;
     const userId = "demoUser";
     const today = new Date();
-    const isSpecial = tags.some((t) =>
+    const isSpecial = selectedTags.some((t) =>
       ["감사", "성취", "여행", "휴식"].includes(t)
     );
     upsertStarMock(userId, today, {
       moodKey: mood,
       intensity,
       text: text.trim(),
-      tags,
+      tags: selectedTags,
       isSpecial,
     });
     alert("별이 저장되었어요 ✦");
     router.replace("/lumi/starLoad");
   };
 
-  return (
+  {
+    /* 스켈레톤 UI */
+  }
+
+  return loading ? (
+    <Loading />
+  ) : (
     <div className="relative min-h-[100svh] overflow-y-auto">
       <section className="relative mx-auto w-full max-w-[480px] px-5 pb-[96px]">
         {/* 헤더 */}
@@ -116,23 +99,25 @@ export default function StarWritePage() {
             <div className="flex items-center justify-between">
               <span className="text-white/85 text-[14px]">지금 감정</span>
               <span className="text-white/60 text-[13px]">
-                {EMOTIONS.find((item) => item.key === mood)?.label}
+                {emotions?.find((item) => item.emotion === mood)?.emotion_ko}
               </span>
             </div>
 
             {/* 이미지 그리드 */}
             <div className="mt-3 grid grid-cols-4 gap-2">
-              {EMOTIONS.map(({ key, label, src }) => {
-                const selected = mood === key;
+              {emotions?.map((emotion) => {
+                const selected = mood === emotion.emotion;
                 return (
                   <button
-                    key={key}
+                    key={emotion.emotion}
                     type="button"
                     onClick={() =>
-                      setMood((prev) => (prev === key ? null : key))
+                      setMood((prev) =>
+                        prev === emotion.emotion ? null : emotion.emotion
+                      )
                     }
                     aria-pressed={selected}
-                    aria-label={label}
+                    aria-label={emotion.emotion_ko}
                     className={[
                       "group relative h-18 rounded-xl border transition focus:outline-none ",
                       selected
@@ -142,7 +127,7 @@ export default function StarWritePage() {
                   >
                     {/* 아이콘 */}
                     <img
-                      src={src}
+                      src={`/images/icon/emotion/pos/${emotion.emotion}.png`}
                       alt="" // 스크린리더 중복 방지: 라벨은 aria-label로 제공
                       loading="lazy"
                       className="mx-auto h-14 w-14 object-contain select-none pointer-events-none"
@@ -221,19 +206,19 @@ export default function StarWritePage() {
               </div>
             </div>
             <div className="mt-2 flex flex-wrap gap-2">
-              {TAGS.map((t) => (
+              {tags?.map((t) => (
                 <button
-                  key={t}
-                  onClick={() => toggleTag(t)}
+                  key={t.name}
+                  onClick={() => toggleTag(t.name_ko)}
                   className={[
                     "px-2.5 py-1 rounded-full text-[12px] border transition",
-                    tags.includes(t)
+                    selectedTags.includes(t.name_ko)
                       ? "bg-cyan-300/15 border-cyan-300/50 text-white"
                       : "bg-white/6 border-white/10 text-white/80 hover:border-white/20",
                   ].join(" ")}
-                  aria-pressed={tags.includes(t)}
+                  aria-pressed={selectedTags.includes(t.name_ko)}
                 >
-                  #{t}
+                  #{t.name_ko}
                 </button>
               ))}
             </div>
