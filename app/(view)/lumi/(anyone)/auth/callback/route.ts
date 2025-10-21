@@ -16,6 +16,8 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const origin = url.origin;
   const code = url.searchParams.get("code");
+  const state = url.searchParams.get("state");
+
   const oauthErr =
     url.searchParams.get("error") ?? url.searchParams.get("error_description");
 
@@ -53,6 +55,7 @@ export async function GET(request: Request) {
 
   const { error } = await supabase.auth.exchangeCodeForSession(code);
   if (error) {
+    console.error("OAuth exchange error:", error.message);
     // 교환 실패 → 로그인 페이지로
     return NextResponse.redirect(
       new URL(`${SIGNIN}?error=exchange_failed`, origin)
