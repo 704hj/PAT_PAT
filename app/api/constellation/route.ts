@@ -5,11 +5,13 @@ import {
   makeRequestId,
   mapSupabaseError,
 } from "@/app/api/_lib";
-import { supabase } from "@/app/lib/supabase/client";
+import { createServerSupabaseClient } from "@/app/utils/supabase/server";
 
 export async function GET() {
   const requestId = makeRequestId();
   try {
+    const supabase = await createServerSupabaseClient();
+
     const { data, error } = await supabase.from("constellation").select("*");
 
     if (error) throw mapSupabaseError(error);
