@@ -4,7 +4,7 @@ import { supabase } from "@/app/utils/supabase/client";
 
 export async function signInWithGoogle(nextPath: string = "/") {
   const origin = window.location.origin;
-  const state = btoa(JSON.stringify({ next: nextPath, t: Date.now() }));
+  // const state = btoa(JSON.stringify({ next: nextPath, t: Date.now() }));
   /**
    * 구글로 회원가입 클릭
    *  > signInWithOAuth -> 구글 로그인 페이지로 이동
@@ -16,11 +16,13 @@ export async function signInWithGoogle(nextPath: string = "/") {
   const { error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${origin}/lumi/auth/callback`,
+      redirectTo: `${origin}/lumi/auth/callback?next=${encodeURIComponent(
+        nextPath
+      )}`,
       queryParams: {
         access_type: "offline",
         prompt: "consent",
-        state,
+        // state,
       },
     },
   });
