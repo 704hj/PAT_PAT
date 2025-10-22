@@ -2,8 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import SocialButton from "../components/SocialLogin";
-import SocialLogin from "../components/SocialLogin";
+import SocialButton from "../components/socialLogin";
+import SocialLogin from "../components/socialLogin";
 
 export default function SignInPage() {
   const router = useRouter();
