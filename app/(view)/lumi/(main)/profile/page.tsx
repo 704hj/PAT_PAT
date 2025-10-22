@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import SocialLogout from "../../(anyone)/auth/components/socialLogout";
 
 export default function AccountPage() {
   const [notifOn, setNotifOn] = useState(true);
@@ -150,9 +151,10 @@ export default function AccountPage() {
 
           {/* 세션/위험영역 */}
           <div className="grid grid-cols-2 gap-3">
-            <button className="h-11 rounded-[12px] text-[13px] font-medium text-white/85 bg-white/6 border border-white/12 hover:bg-white/10 transition">
-              로그아웃
-            </button>
+            <SocialLogout
+              next="/lumi/auth/signin"
+              className="h-11 rounded-[12px] text-[13px] font-medium text-white/85 bg-white/6 border border-white/12 hover:bg-white/10 transition"
+            />
             <button className="h-11 rounded-[12px] text-[13px] font-medium text-white/80 bg-white/6 border border-white/12 hover:border-red-400/40 hover:text-red-300 hover:bg-red-500/10 transition">
               계정 삭제
             </button>
