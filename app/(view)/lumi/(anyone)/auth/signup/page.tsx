@@ -2,8 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import SocialLogin from "../components/SocialLogin";
 import { supabase } from "@/app/utils/supabase/client";
+import SocialLogin from "../components/socialLogin";
 
 export default function SignUpPage() {
   const router = useRouter();
