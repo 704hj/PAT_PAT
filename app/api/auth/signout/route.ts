@@ -1,9 +1,11 @@
-// app/api/auth/signout/route.ts
 import { NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
-export async function POST(request: Request) {
+/**
+ * 공통 처리 함수
+ */
+async function signout(request: Request) {
   const cookieStore = await cookies();
 
   const supabase = createServerClient(
@@ -15,19 +17,27 @@ export async function POST(request: Request) {
           return cookieStore.get(name)?.value ?? null;
         },
         set(name: string, value: string, options: any) {
-          cookieStore.set({ name, value, ...options });
+          cookieStore.set(name, value, options);
         },
-        remove(name: string, options: any) {
-          // next/headers엔 delete가 없으므로 set으로 무효화
-          cookieStore.set({ name, value: "", ...options });
+        remove(name: string) {
+          cookieStore.delete(name);
         },
       },
     }
   );
 
+  // 세션/리프레시 토큰 무효화
   await supabase.auth.signOut();
 
   const { origin, searchParams } = new URL(request.url);
   const next = searchParams.get("next") ?? "/lumi/auth/signin";
-  return NextResponse.redirect(new URL(next, origin), { status: 302 });
+  return NextResponse.redirect(new URL(next, origin), { status: 303 });
+}
+
+export async function POST(request: Request) {
+  return signout(request);
+}
+export async function GET(request: Request) {
+  // 브라우저에서 직접 테스트할 때 편의용
+  return signout(request);
 }
