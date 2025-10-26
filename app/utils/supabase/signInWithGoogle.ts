@@ -1,5 +1,6 @@
 "use client";
 //커밋 테스트
+//커밋 테스트2
 import { supabase } from "@/app/utils/supabase/client";
 
 export async function signInWithGoogle(nextPath: string = "/") {
