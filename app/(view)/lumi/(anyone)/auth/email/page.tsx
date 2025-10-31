@@ -248,7 +248,7 @@ export default function EmailLogin() {
                   setNicknameError("");
                 }}
                 placeholder="별빛의 사용자 이름"
-                className={`flex-1 rounded-2xl border ${
+                className={`w-auto rounded-2xl border ${
                   nicknameAvailable === true
                     ? "border-green-500"
                     : nicknameAvailable === false
@@ -315,7 +315,7 @@ export default function EmailLogin() {
                   setOtpError("");
                 }}
                 placeholder="인증번호 입력"
-                className={`flex-1 rounded-2xl border ${
+                className={`w-auto rounded-2xl border ${
                   otpVerified ? "border-green-500" : "border-slate-700/60"
                 } bg-[#101736] px-4 py-3 text-slate-100 placeholder:text-slate-500 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30`}
                 disabled={!otpSent}
@@ -337,7 +337,7 @@ export default function EmailLogin() {
                   ? "확인중..."
                   : otpSent
                   ? "인증하기"
-                  : "인증번호 보내기"}
+                  : "전송하기"}
               </button>
             </div>
             {otpError && (
