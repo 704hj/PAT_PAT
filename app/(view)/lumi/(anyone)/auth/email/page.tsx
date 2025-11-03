@@ -56,6 +56,12 @@ export default function EmailLogin() {
         body: JSON.stringify({ nickname: nickname.trim() }),
       });
 
+      // HTTP 오류 먼저 체크
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.message || `서버 오류(${res.status})`);
+      }
+
       const data = await res.json();
 
       if (data.ok) {
@@ -65,10 +71,10 @@ export default function EmailLogin() {
         setNicknameAvailable(false);
         setNicknameError(data.message || "이미 사용 중인 닉네임입니다.");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("닉네임 중복검사 오류:", error);
       setNicknameAvailable(false);
-      setNicknameError("서버 오류가 발생했습니다.");
+      setNicknameError(error.message || "서버 오류가 발생했습니다.");
     } finally {
       setNicknameChecking(false);
     }
@@ -187,28 +193,25 @@ export default function EmailLogin() {
 
     setBusy(true);
     try {
-      // 1) 현재 세션(verifyOtp 성공했다면 존재)
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error("인증된 사용자가 없습니다.");
-
-      // 2) 비밀번호 설정
-      const { error: updateError } = await supabase.auth.updateUser({
-        password,
+      // 서버 API를 통해 비밀번호 설정 (Admin API 사용)
+      const response = await fetch("/lumi/auth/password/set", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          password,
+          nickname: nickname.trim(),
+        }),
       });
-      if (updateError) throw updateError;
 
-      // 3) RPC로 내 스키마(users/user_profile/user_identity) 갱신
-      const { error: rpcErr } = await supabase.rpc("register_user_after_otp", {
-        _auth_user_id: user.id,
-        _email: user.email,
-        _nickname: nickname.trim(),
-        _signup_method: "email_otp",
-      });
-      if (rpcErr) throw rpcErr;
+      const result = await response.json();
 
-      // 4) 완료
+      if (!result.ok) {
+        throw new Error(result.message || "회원가입에 실패했습니다.");
+      }
+
+      // 완료 - 홈으로 이동
       router.push("/lumi/home");
     } catch (error: any) {
       console.error("회원가입 오류:", error);

@@ -50,8 +50,8 @@ export default function SignUpPage() {
           </p>
         </header>
 
-        <div className="mt-6 rounded-[16px] border border-white/12 bg-white/6 backdrop-blur p-5">
-          <label className="block text-white/80 text-[13px] mb-1">닉네임</label>
+        <div className="mt-6 rounded-[16px] border border-white/12 bg-white/6 backdrop-blur py-1">
+          {/* <label className="block text-white/80 text-[13px] mb-1">닉네임</label>
           <input
             value={nickname}
             onChange={(e) => setNickname(e.target.value)}
@@ -69,7 +69,7 @@ export default function SignUpPage() {
             placeholder="you@example.com"
             inputMode="email"
             className="w-full h-11 rounded-[12px] px-3 bg-white/6 border border-white/12 text-white/90 placeholder:text-white/45 outline-none focus:border-white/30"
-          />
+          /> */}
 
           <button
             onClick={emailLogin}
@@ -101,7 +101,7 @@ export default function SignUpPage() {
           <div className="mt-4 text-center">
             <button
               onClick={() => router.push("/lumi/auth/signin")}
-              className="text-white/85 text-[13px] underline underline-offset-4 hover:text-white transition"
+              className="text-white/85 text-[13px] underline underline-offset-4 hover:text-white transition py-7"
             >
               이미 계정이 있나요? 로그인
             </button>
