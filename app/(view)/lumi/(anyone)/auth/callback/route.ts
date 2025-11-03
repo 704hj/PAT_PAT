@@ -9,6 +9,8 @@ export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const origin = url.origin;
   const code = url.searchParams.get("code");
+  const state = url.searchParams.get("state");
+
   const oauthErr =
     url.searchParams.get("error") ?? url.searchParams.get("error_description");
   const next = url.searchParams.get("next"); // (선택) 돌아갈 경로
@@ -33,7 +35,8 @@ export async function GET(request: NextRequest) {
   // 4) 세션 교환 (user/session 반환됨)
   const { data, error } = await supabase.auth.exchangeCodeForSession(code);
   if (error) {
-    console.error("[auth/callback] exchange failed:", error.message);
+    console.error("OAuth exchange error:", error.message);
+    // 교환 실패 → 로그인 페이지로
     return NextResponse.redirect(
       new URL(`${SIGNIN}?error=exchange_failed`, origin),
       { status: 303 }

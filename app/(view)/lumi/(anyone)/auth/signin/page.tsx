@@ -2,8 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import SocialButton from "../components/SocialLogin";
-import SocialLogin from "../components/SocialLogin";
+import SocialButton from "../components/socialLogin";
+import SocialLogin from "../components/socialLogin";
 
 export default function SignInPage() {
   const router = useRouter();
@@ -55,18 +55,25 @@ export default function SignInPage() {
         </header>
 
         <div className="mt-6 rounded-[16px] border border-white/12 bg-white/6 backdrop-blur p-5">
-          <label className="block text-white/80 text-[13px] mb-1">이메일</label>
+          <p className="mt-1 text-white/70 text-[13px] center">
+            별빛 계정으로 로그인해주세요.
+          </p>
+          {/* 아이디 입력 */}
+          닉네임
           <input
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-            inputMode="email"
+            type="text"
+            placeholder="아이디"
             className="w-full h-11 rounded-[12px] px-3 bg-white/6 border border-white/12 text-white/90 placeholder:text-white/45 outline-none focus:border-white/30"
           />
-
+          {/* 비밀번호 입력 */}
+          비밀번호
+          <input
+            type="password"
+            placeholder="비밀번호"
+            className="w-full h-11 rounded-[12px] px-3 bg-white/6 border border-white/12 text-white/90 placeholder:text-white/45 outline-none focus:border-white/30"
+          />
+          {/* 로그인 버튼 */}
           <button
-            onClick={signin}
-            disabled={!canSubmit || busy}
             className={[
               "mt-5 w-full h-12 rounded-[12px] text-[15px] font-semibold text-white",
               "bg-[linear-gradient(180deg,#18326f_0%,#0b1d4a_100%)] border border-white/14",
@@ -76,19 +83,16 @@ export default function SignInPage() {
                 : "hover:brightness-[1.03] active:translate-y-[1px]",
             ].join(" ")}
           >
-            {busy ? "처리 중…" : "매직 링크 보내기"}
+            로그인
           </button>
-
           <div className="relative my-4">
             <div className="h-px bg-white/10" />
             <span className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 px-3 text-white/60 text-[12px] bg-transparent">
               또는
             </span>
           </div>
-
           {/* Google 및 kakao */}
           <SocialLogin />
-
           <div className="mt-4 text-center">
             <button
               onClick={() => router.push("/lumi/auth/signup")}
