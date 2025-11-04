@@ -27,9 +27,13 @@ export async function getEmotionsAndTags() {
     (e) => e.polarity === "positive" && e.emotion !== "excited"
   );
 
-  const posTags = (tJson.data as TTag[]).filter(
+  const posTage = (tJson.data as TTag[]).filter(
     (t) => t.polarity === "positive"
   );
 
-  return { emotions: posEmotions, tags: posTags };
+  const nagTags = (tJson.data as TTag[]).filter(
+    (t) => t.polarity === "negative"
+  );
+
+  return { emotions: posEmotions, posTage, nagTags };
 }
