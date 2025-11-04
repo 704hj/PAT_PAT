@@ -45,7 +45,7 @@ export default function Onboarding() {
             />
             <img
               src={CAT_SRC}
-              alt="루미(감정 정리 동반자)"
+              alt="루미"
               className="relative mx-auto w-[240px] h-auto
              motion-safe:animate-[float_4s_ease-in-out_infinite]
              motion-reduce:animate-none"
@@ -54,70 +54,39 @@ export default function Onboarding() {
         </div>
 
         {/* 하단 글래스 시트 */}
+        {/* 하단 글래스 시트 */}
         <div
-          className="absolute left-1/2 -translate-x-1/2 w-[92%] max-w-[420px]"
+          className="absolute left-1/2 -translate-x-1/2 w-[92%] max-w-[420px]
+           "
           style={{
-            bottom: "max(12px, calc(env(safe-area-inset-bottom) + 10px))",
+            bottom: "max(12px, calc(env(safe-area-inset-bottom) + 60px))",
           }}
         >
           <div
-            className="
-      rounded-[18px] border border-white/12 bg-white/7 backdrop-blur-[8px]
-      shadow-[0_12px_36px_rgba(7,17,40,0.35)]
-      px-4 pt-3 pb-3
-      /* 핵심: 시트 자체의 최대 높이와 내부 스크롤 허용 */
-      max-h-[38vh] overflow-auto
-    "
+            className="rounded-[18px] border border-white/12 bg-white/8 backdrop-blur-md
+               shadow-[0_12px_36px_rgba(7,17,40,0.35)]
+               px-6 pt-5 pb-5 text-center"
           >
-            {/* 버튼들 */}
-            <div className="mt-4 grid gap-2">
-              <button
-                onClick={() => router.replace("/lumi/home")}
-                className="h-12 rounded-[12px] text-[15px] font-medium
-                   text-white/92 bg-white/8 border border-white/12
-                   hover:bg-white/12 transition"
-              >
-                게스트로 계속하기
-              </button>
-
+            {/* 버튼 그룹 */}
+            <div className="flex flex-col gap-3">
               <button
                 onClick={() => router.push("/lumi/auth/signup")}
-                className="group relative h-12 rounded-[12px] text-[15px] font-semibold text-white
-                   bg-[linear-gradient(180deg,#18326f_0%,#0b1d4a_100%)] border border-white/14
-                   shadow-[0_6px_16px_rgba(10,18,38,0.32)] overflow-hidden
-                   hover:brightness-[1.03] active:translate-y-[1px]
-                   focus:outline-none focus-visible:ring-2 focus-visible:ring-white/28"
+                className="relative h-12 rounded-[12px] font-semibold text-[15px] text-white
+                   bg-[linear-gradient(180deg,#18326f_0%,#0b1d4a_100%)]
+                   border border-white/14 shadow-[0_6px_16px_rgba(10,18,38,0.32)]
+                   overflow-hidden transition-all
+                   hover:brightness-105 active:translate-y-[1px]
+                   focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
               >
                 <span className="relative z-10 inline-flex items-center justify-center gap-2">
                   별빛 계정 만들기
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    className="opacity-90"
-                  >
-                    <path
-                      d="M9 5l7 7-7 7"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.6"
-                      strokeLinecap="round"
-                    />
-                  </svg>
                 </span>
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute inset-0 -translate-x-full
-                     bg-[linear-gradient(120deg,transparent,rgba(255,255,255,0.16),transparent)]
-                     animate-[shimmer_5.2s_linear_infinite]"
-                />
               </button>
-            </div>
 
-            <div className="mt-3 text-center">
               <button
                 onClick={() => router.push("/lumi/auth/signin")}
-                className="text-white/80 text-[13px] underline underline-offset-4 hover:text-white transition"
+                className="text-[13px] text-white/80 underline underline-offset-4
+                   hover:text-white transition"
               >
                 이미 계정이 있나요? 로그인
               </button>
