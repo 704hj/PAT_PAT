@@ -4,7 +4,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {/* 모바일 9:16 비율 배경 이미지 */}
       <div className="absolute inset-0 w-full h-full flex justify-center items-center">
         <img
-          src="/images/bg/lumi4.png"
+          src="/images/bg/sky.png"
           alt="background"
           className="min-w-full min-h-full w-auto h-auto object-cover"
         />
