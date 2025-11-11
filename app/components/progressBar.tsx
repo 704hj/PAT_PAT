@@ -1,66 +1,62 @@
-import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function SmoothProgress() {
   const router = useRouter();
+  const [progress, setProgress] = useState(0);
+  const rafRef = useRef<number | null>(null);
 
-  const [p, setP] = useState(0);
-
-  const trackRef = useRef<HTMLDivElement>(null);
-  const starRef = useRef<HTMLImageElement>(null);
+  // 더 완만한 easing
+  const easeInOutSine = (t: number) => -(Math.cos(Math.PI * t) - 1) / 2;
 
   useEffect(() => {
-    let start = performance.now();
-    const D = 6500; // 전체 주기 (4초)
-    let raf = 0;
+    const DURATION = 5000;
+    const start = performance.now();
 
-    const loop = (t: number) => {
-      const elapsed = (t - start) % D;
-      const u = elapsed / (D / 2); // 0~2
-      const tri = u <= 1 ? u : 2 - u; // 삼각파 0→1→0
-      const eased = tri * tri * (3 - 2 * tri); // ease-in-out
-      setP(eased * 100);
-      raf = requestAnimationFrame(loop);
+    const loop = (now: number) => {
+      const elapsed = now - start;
+      const t = Math.min(elapsed / DURATION, 1);
+      const eased = easeInOutSine(t);
+      const percent = eased * 100;
+
+      setProgress(percent);
+
+      if (t < 1) {
+        setTimeout(() => requestAnimationFrame(loop), 16);
+      } else {
+        setProgress(100); // 깔끔하게 마무리
+
+        setTimeout(() => {
+          router.replace("/lumi/start");
+        }, 500);
+      }
     };
 
-    raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(raf);
-  }, []);
+    rafRef.current = requestAnimationFrame(loop);
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, [router]);
 
-  useEffect(() => {
-    if (p > 99) {
-      router.replace("/lumi/start");
-    }
-  }, [p]);
   return (
     <div className="relative w-[260px]">
-      {/* 트랙 */}
-      <div
-        ref={trackRef}
-        className="relative h-0.5 rounded-full bg-white/10 overflow-visible"
-      >
-        {/* 채움 */}
-        <span
-          className="relative block h-full bg-gradient-to-r from-indigo-300/80 to-white"
+      <div className="relative h-0.5 bg-white/10 rounded-full overflow-visible">
+        <div
+          className="h-full bg-gradient-to-r from-indigo-300/80 to-white transition-[width] duration-200 ease-in-out"
+          style={{ width: `${progress}%` }}
+        />
+        <img
+          src="/images/icon/star.svg"
+          alt="star"
+          className="absolute -top-6 select-none pointer-events-none transition-[left] duration-200 ease-in-out"
           style={{
-            width: `${p}%`,
-            transition: "width 0.03s ease-in-out", // 자연스러운 움직임
+            width: 30,
+            height: 30,
+            left: `${progress}%`,
+            transform: "translateX(-50%)",
+            filter: "drop-shadow(0 2px 6px rgba(255,255,200,.35))",
           }}
-        >
-          {/* 별 */}
-          <img
-            ref={starRef}
-            src="/images/icon/star.svg"
-            alt="star"
-            className="absolute -top-6 right-0 select-none pointer-events-none"
-            style={{
-              width: 30,
-              height: 30,
-              filter: "drop-shadow(0 2px 6px rgba(255,255,200,.35))",
-              transform: "translateX(10px)",
-            }}
-          />
-        </span>
+        />
       </div>
     </div>
   );
