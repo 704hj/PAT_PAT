@@ -24,6 +24,7 @@ export default function Onboarding() {
         <img
           src="/images/icon/lumi/lumi_start.svg"
           alt="Lumi 캐릭터"
+          className=" h-[150px]"
           // onLoad={() => setLoaded(true)}
           style={{
             opacity: loaded ? 1 : 0,
