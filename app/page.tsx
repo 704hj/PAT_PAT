@@ -16,7 +16,7 @@ export default function Splash() {
 
       <div className="flex flex-col items-center">
         <img
-          src="/images/icon/3d.png"
+          src="/images/icon/lumi/lumi_main.svg"
           alt="Lumi"
           className="relative w-[92px] h-[138px] object-contain"
         />
