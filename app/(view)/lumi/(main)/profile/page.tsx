@@ -43,7 +43,7 @@ export default function AccountPage() {
             <div className="flex items-center gap-3.5">
               <div className="relative w-[64px] h-[64px] rounded-2xl bg-white/8 border border-white/12 overflow-hidden flex items-center justify-center">
                 <img
-                  src="/images/icon/3d.png" // 루미 캐릭터(안 가리도록 좌측 고정)
+                  src="/images/icon/lumi/lumi_main.svg" // 루미 캐릭터(안 가리도록 좌측 고정)
                   alt="루미"
                   className="w-[56px] h-[56px] object-contain"
                 />
