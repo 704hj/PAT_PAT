@@ -1,27 +1,23 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import MinimalIntro from "./miniIntro";
 import LoginButton from "../../components/loginBtn";
 
-const CAT_SRC = "/images/icon/lumi/lumi_start.svg";
-
 export default function Onboarding() {
-  const router = useRouter();
-
   return (
     <div className="flex flex-col w-full items-center">
-      <div className="flex flex-col items-center">
-        <span className="font-dunggeunmis  text-white text-[50px] leading-[1.3] font-bold tracking-[-0.01em] mt-24">
+      <div className="flex flex-col items-center mt-24">
+        <span className="font-dunggeunmis text-white text-[50px] leading-[1.3] font-bold tracking-[-0.01em]">
           PAT PAT
         </span>
         <span className="text-[14px] text-[#B9B9B9] font-light mt-[18px]">
           “오늘도, 마음을 토닥토닥”
         </span>
       </div>
-      <div className="flex w-full items-start justify-end">
-        <img src={"/images/icon/lumi/lumi_start.svg"} className=""></img>
+
+      <div className="flex w-full justify-end mt-4">
+        <img src="/images/icon/lumi/lumi_start.svg" alt="Lumi 캐릭터" />
       </div>
+
       <div className="flex flex-col w-full px-4 items-center gap-5 mt-6">
         <LoginButton
           title="카카오로 시작하기"
@@ -40,14 +36,12 @@ export default function Onboarding() {
           onClickEvent={() => {}}
           style="bg-[#1E2843] text-[#FBFBFB]"
         />
-        <div className="bg-[#A0AFDA] h-[1px] w-full mt-12"></div>
-        <div className="flex flex-row w-full justify-around mt-1.5">
-          <a className="text-[#A6A6A6] text-[15px]" href="/lumi/auth/signup">
-            회원가입
-          </a>
-          <a className="text-[#A6A6A6] text-[15px]" href="/lumi/auth/signin">
-            로그인
-          </a>
+
+        <div className="bg-[#A0AFDA] h-[1px] w-full mt-12" />
+
+        <div className="flex justify-around w-full mt-1.5 text-[#A6A6A6] text-[15px]">
+          <a href="/lumi/auth/signup">회원가입</a>
+          <a href="/lumi/auth/signin">로그인</a>
         </div>
       </div>
     </div>
