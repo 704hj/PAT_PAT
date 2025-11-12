@@ -1,10 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import LoginButton from "../../components/loginBtn";
 
 export default function Onboarding() {
   const [loaded, setLoaded] = useState<boolean>(false);
+  useEffect(() => {
+    setLoaded(true);
+  }, []);
+
   return (
     <div className="flex flex-col w-full items-center">
       <div className="flex flex-col items-center mt-24">
@@ -20,8 +24,7 @@ export default function Onboarding() {
         <img
           src="/images/icon/lumi/lumi_start.svg"
           alt="Lumi 캐릭터"
-          className="w-[150px] h-[150px]"
-          onLoad={() => setLoaded(true)}
+          // onLoad={() => setLoaded(true)}
           style={{
             opacity: loaded ? 1 : 0,
             transition: "opacity 0.3s ease-in-out",
