@@ -59,6 +59,7 @@
   --font-dunggeunmis: "SchoolSafetyRoundedSmile", cursive, sans-serif;
   --font-surround: "Cafe24Surround", cursive, sans-serif;
   --font-pretendard: "Pretendard", sans-serif;
+  --min-app-width: 412px;
 }
 
 .font-surround {
@@ -74,16 +75,28 @@
 }
 
 body {
-  background-color: var(--color-bg);
+  background: radial-gradient(circle at center, #0b183d 0%, #070d1f 100%);
   color: var(--color-text);
   font-family: var(--font-pretendard);
   font-weight: 400;
   font-size: 18px;
   line-height: 1.6;
   margin: 0;
-
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: auto;
+  min-width: var(--min-app-width);
+}
+
+.container {
+  width: 100%;
+  max-width: 480px;
+  max-height: 912px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  overflow: auto;
 }
 
 .text-accent {
