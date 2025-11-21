@@ -21,7 +21,7 @@ export default function Splash() {
           className="relative w-[92px] h-[138px] object-contain"
         />
         {/* 앱 이름 */}
-        <h1 className="font-dunggeunmis  text-white text-[37px] leading-[1.3] font-bold tracking-[-0.01em]">
+        <h1 className="font-surround   text-white text-[37px] leading-[1.3] font-bold tracking-[-0.01em]">
           PAT PAT
         </h1>
         <p className="mt-1 text-[#C6C6C7] text-base font-extralight	">

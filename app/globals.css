@@ -31,6 +31,14 @@
 }
 
 @font-face {
+  font-family: "Cafe24Surround";
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2105_2@1.0/Cafe24Ssurround.woff")
+    format("woff");
+  font-weight: normal;
+  font-display: swap;
+}
+
+@font-face {
   font-family: "Pretendard";
   src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Medium.woff2")
     format("woff2");
@@ -49,7 +57,12 @@
     Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", Arial, sans-serif;
   --font-nanum-square: "NanumSquare", sans-serif;
   --font-dunggeunmis: "SchoolSafetyRoundedSmile", cursive, sans-serif;
+  --font-surround: "Cafe24Surround", cursive, sans-serif;
   --font-pretendard: "Pretendard", sans-serif;
+}
+
+.font-surround {
+  font-family: var(--font-surround);
 }
 
 .font-dunggeunmis {
