@@ -46,7 +46,7 @@ export default function SmoothProgress() {
           style={{ width: `${progress}%` }}
         />
         <img
-          src="/images/icon/star.svg"
+          src="/images/icon/menu/star.svg"
           alt="star"
           className="absolute -top-6 select-none pointer-events-none transition-[left] duration-200 ease-in-out"
           style={{

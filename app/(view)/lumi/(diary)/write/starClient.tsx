@@ -82,7 +82,7 @@ export default function StarWritePage({ emotions, tags, limit }: Props) {
           <GlassCard className="p-3">
             <div className="flex items-center gap-3">
               <img
-                src="/images/icon/3d.png"
+                src="/images/icon/lumi/lumi_main.svg"
                 alt="루미"
                 className="w-10 h-10 object-contain"
               />
