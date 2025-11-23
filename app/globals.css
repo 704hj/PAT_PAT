@@ -1311,3 +1311,22 @@ body {
     animation: none !important;
   }
 }
+
+.scroll-color::-webkit-scrollbar {
+  height: 2px; /* 세로 스크롤은 width: 6px */
+}
+
+.scroll-color::-webkit-scrollbar-track {
+  background: #6d95ff;
+  border-radius: 10px;
+}
+
+.scroll-color::-webkit-scrollbar-thumb {
+  background: white;
+  border-radius: 10px;
+  width: 60px !important;
+}
+
+.scroll-color::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(90deg, #89a8ff 0%, #6f8ce0 100%);
+}

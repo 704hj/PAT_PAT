@@ -6,10 +6,31 @@ import { useEffect, useState } from "react";
 import LoginButton from "../../components/loginBtn";
 export default function Onboarding() {
   const [loaded, setLoaded] = useState<boolean>(false);
+  const [busy, setBusy] = useState(false);
+
+  const onGoogle = async () => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      await signInWithGoogle("/lumi/home");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const onKakao = async () => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      await signInWithKakao();
+    } finally {
+      setBusy(false);
+    }
+  };
+
   useEffect(() => {
     setLoaded(true);
   }, []);
-
   return (
     <main
       className="
@@ -57,16 +78,19 @@ export default function Onboarding() {
         <div className="flex flex-col w-full px-4 items-center gap-5 mt-6">
           <LoginButton
             title="카카오로 시작하기"
-            onClickEvent={signInWithKakao}
+            onClickEvent={onKakao}
             icon="/images/icon/sns/kakao.svg"
             style="bg-[#FEE300] text-[#353C3B]"
+            disable={busy}
           />
           <LoginButton
             title="구글로 시작하기"
-            onClickEvent={signInWithGoogle}
+            onClickEvent={onGoogle}
             icon="/images/icon/sns/google.svg"
             style="bg-[#4B5672] text-[#FBFBFB]"
+            disable={busy}
           />
+
           <LoginButton
             title="이메일로 시작하기"
             onClickEvent={() => {}}

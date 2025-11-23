@@ -29,7 +29,7 @@ export default function SocialLogin() {
   };
 
   return (
-    <div className="grid gap-2">
+    <div>
       <LoginButton
         title="카카오로 시작하기"
         onClickEvent={onKakao}
