@@ -1,8 +1,9 @@
 "use client";
 
+import { signInWithGoogle } from "@/app/utils/supabase/signInWithGoogle";
+import { signInWithKakao } from "@/app/utils/supabase/signInWithKakao";
 import { useEffect, useState } from "react";
 import LoginButton from "../../components/loginBtn";
-
 export default function Onboarding() {
   const [loaded, setLoaded] = useState<boolean>(false);
   useEffect(() => {
@@ -56,13 +57,13 @@ export default function Onboarding() {
         <div className="flex flex-col w-full px-4 items-center gap-5 mt-6">
           <LoginButton
             title="카카오로 시작하기"
-            onClickEvent={() => {}}
+            onClickEvent={signInWithKakao}
             icon="/images/icon/sns/kakao.svg"
             style="bg-[#FEE300] text-[#353C3B]"
           />
           <LoginButton
             title="구글로 시작하기"
-            onClickEvent={() => {}}
+            onClickEvent={signInWithGoogle}
             icon="/images/icon/sns/google.svg"
             style="bg-[#4B5672] text-[#FBFBFB]"
           />

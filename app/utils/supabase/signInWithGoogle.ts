@@ -18,7 +18,7 @@ export async function signInWithGoogle(nextPath: string = "/") {
   const { error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${origin}/lumi/auth/callback?next=${encodeURIComponent(
+      redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(
         nextPath
       )}`,
       queryParams: {

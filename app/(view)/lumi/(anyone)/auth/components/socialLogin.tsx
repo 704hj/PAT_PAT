@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { signInWithKakao } from "@/app/utils/supabase/signInWithKakao";
 import { signInWithGoogle } from "@/app/utils/supabase/signInWithGoogle";
+import LoginButton from "../../../components/loginBtn";
 
 export default function SocialLogin() {
   const [busy, setBusy] = useState(false);
@@ -29,44 +30,18 @@ export default function SocialLogin() {
 
   return (
     <div className="grid gap-2">
-      {/* Google */}
-      <button
-        onClick={onGoogle}
-        disabled={busy}
-        aria-label="Google 로그인"
-        className={[
-          "w-full h-12 rounded-[12px] overflow-hidden",
-          "bg-transparent p-0 disabled:opacity-60",
-          "transition-[opacity,transform] hover:opacity-90 active:scale-[0.995]",
-        ].join(" ")}
-      >
-        <img
-          src="/images/icon/google_login_large_wide.png"
-          alt="Google 로그인"
-          className="w-full h-full object-contain pointer-events-none"
-          draggable={false}
-        />
-      </button>
-
-      {/* Kakao */}
-      <button
-        title="kakao 로그인"
-        onClick={onKakao}
-        disabled={busy}
-        aria-label="Kakao 로그인"
-        className={[
-          "w-full h-12 rounded-[12px] overflow-hidden",
-          "bg-transparent p-0 disabled:opacity-60",
-          "transition-[opacity,transform] hover:opacity-90 active:scale-[0.995]",
-        ].join(" ")}
-      >
-        <img
-          src="/images/icon/kakao_login_large_wide.png"
-          alt="kakao 로그인"
-          className="w-full h-full object-contain pointer-events-none"
-          draggable={false}
-        />
-      </button>
+      <LoginButton
+        title="카카오로 시작하기"
+        onClickEvent={onKakao}
+        icon="/images/icon/sns/kakao.svg"
+        style="bg-[#FEE300] text-[#353C3B]"
+      />
+      <LoginButton
+        title="구글로 시작하기"
+        onClickEvent={onGoogle}
+        icon="/images/icon/sns/google.svg"
+        style="bg-[#4B5672] text-[#FBFBFB]"
+      />
     </div>
   );
 }
