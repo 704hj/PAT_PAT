@@ -4,11 +4,9 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font-nanum-square)", "sans-serif"],
-        dongle: ["var(--font-dongle)", "cursive", "sans-serif"],
-      },
-      animation: {
-        "bounce-slow": "bounce 3s infinite",
+        sans: ["var(--font-pretendard)", "sans-serif"],
+        dunggeunmis: ["var(--font-dunggeunmis)"],
+        surround: ["var(--font-surround)"],
       },
     },
   },

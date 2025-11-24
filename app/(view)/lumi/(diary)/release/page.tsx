@@ -3,5 +3,5 @@ import ReleaseClient from "./releaseClient";
 
 export default async function Page() {
   const { nagTags } = await getEmotionsAndTags();
-  return <ReleaseClient tags={nagTags} limit={200} />;
+  return <ReleaseClient tags={nagTags || []} limit={200} />;
 }
