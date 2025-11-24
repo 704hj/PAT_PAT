@@ -34,7 +34,6 @@ export default function Splash() {
         </div>
       </div>
 
-      {/* 하단 작은 정보(선택): 버전/카피라이트 */}
       <footer
         className="absolute left-1/2 -translate-x-1/2 text-center text-white/45 text-[11px]"
         style={{ bottom: "max(12px, env(safe-area-inset-bottom))" }}
