@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ActionButton from "./component/actionBtn";
 import GlassCard from "../../components/glassCard";
+import { supabase } from "@/app/utils/supabase/client";
+import { useRouter } from "next/navigation";
 
 function IconStar() {
   return (
@@ -37,6 +39,10 @@ function IconRelease() {
 }
 
 export default function HomePage() {
+  const router = useRouter();
+  //세션에서 가져오는 닉네임
+  const [nickName, setNickName] = useState("");
+
   const today = useMemo(() => {
     const d = new Date();
     const mm = String(d.getMonth() + 1).padStart(2, "0");
@@ -61,6 +67,39 @@ export default function HomePage() {
     },
   ];
 
+  //session 값 가져오기
+  useEffect(() => {
+    async function loadSession() {
+      const { data, error } = await supabase.auth.getSession();
+
+      //세션 분기
+      if (error) {
+        return;
+      }
+
+      //세션 없는 경우
+      if (!data.session) {
+        //로그인 페이지로 이동
+        router.replace("/lumi/auth/signin");
+      }
+
+      //세션 있음
+      const user = data.session?.user;
+
+      //유저 프로필 조회
+      const { data: profileData } = await supabase
+        .from("user_profile")
+        .select("*")
+        .eq("user_id", user?.id)
+        .single();
+
+      //상태 저장
+      setNickName(profileData);
+    }
+
+    loadSession();
+  }, []);
+
   return (
     <div className="relative min-h-[100svh] overflow-hidden">
       {/* 9:16 안전영역 */}
@@ -77,6 +116,7 @@ export default function HomePage() {
         <div className="mt-5">
           <GlassCard className="p-4">
             <div className="flex items-center gap-4">
+              !!!{nickName}
               <img
                 src="/images/icon/3d.png"
                 alt="루미"
