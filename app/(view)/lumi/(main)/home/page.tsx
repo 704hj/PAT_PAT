@@ -37,6 +37,10 @@ function IconRelease() {
     </svg>
   );
 }
+=======
+import Image from "next/image";
+import MoodSelector from "../../components/moodSelector";
+>>>>>>> 1c73a462ff943e97cd9886f1b4ba3116f2ca2f9c
 
 export default function HomePage() {
   const router = useRouter();

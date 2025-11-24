@@ -1,29 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { supabase } from "@/app/utils/supabase/client";
+import LoginButton from "../../../components/loginBtn";
 import SocialLogin from "../components/socialLogin";
 
 export default function SignUpPage() {
   const router = useRouter();
-  const [nickname, setNickname] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [busy, setBusy] = useState(false);
-  const canSubmit = nickname.trim().length >= 2 && /\S+@\S+\.\S+/.test(email);
-
-  const submit = async () => {
-    if (!canSubmit || busy) return;
-    try {
-      setBusy(true);
-      // TODO: 여기에 회원가입 로직 연결 (예: 매직링크 발송)
-      // await api.signUp({ nickname, email })
-      router.replace("/lumi/home");
-    } finally {
-      setBusy(false);
-    }
-  };
 
   const emailLogin = async () => {
     router.push("/lumi/auth/email");
@@ -54,23 +36,11 @@ export default function SignUpPage() {
           className="flex flex-col items-center mt-6 rounded-[16px] border border-white/12 
              bg-white/6 backdrop-blur px-5 pt-5 pb-6 text-center shadow-[0_12px_36px_rgba(7,17,40,0.35)]"
         >
-          {/* 별빛 계정 만들기 버튼 */}
-          <button
-            onClick={emailLogin}
-            type="button"
-            disabled={!emailLogin || busy}
-            className={[
-              "w-full max-w-[360px] h-12 rounded-[12px] text-[15px] font-semibold text-white",
-              "bg-[linear-gradient(180deg,#18326f_0%,#0b1d4a_100%)] border border-white/14",
-              "shadow-[0_6px_16px_rgba(10,18,38,0.32)] transition-all",
-              busy || !emailLogin
-                ? "opacity-50 cursor-not-allowed"
-                : "hover:brightness-[1.03] active:translate-y-[1px]",
-            ].join(" ")}
-            tabIndex={0}
-          >
-            {busy ? "처리 중…" : "별빛 계정 만들기"}
-          </button>
+          <LoginButton
+            title={"이메일로 시작하기"}
+            onClickEvent={emailLogin}
+            style="bg-[#1E2843] text-[#FBFBFB]"
+          />
 
           {/* 구분선 */}
           <div className="relative w-full max-w-[360px] my-5">

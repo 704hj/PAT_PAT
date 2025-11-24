@@ -1,3 +1,7 @@
+import { headers } from "next/headers";
+
+export const dynamic = "force-dynamic";
+
 export type TEmotion = {
   emotion: string;
   emotion_ko: string;
@@ -10,11 +14,16 @@ export type TTag = {
 };
 
 export async function getEmotionsAndTags() {
+  const headerList = await headers(); // 즉시 반환
+  const host = headerList.get("host");
+  const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
+  const baseUrl = `${protocol}://${host}`;
+
   const [eRes, tRes] = await Promise.all([
-    fetch(`${process.env.BASE_URL}/api/emotion`, {
+    fetch(`${baseUrl}/api/emotion`, {
       next: { revalidate: 3600 },
     }),
-    fetch(`${process.env.BASE_URL}/api/tag`, {
+    fetch(`${baseUrl}/api/tag`, {
       next: { revalidate: 3600 },
     }),
   ]);
