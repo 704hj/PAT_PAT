@@ -6,6 +6,7 @@ module.exports = {
       fontFamily: {
         sans: ["var(--font-pretendard)", "sans-serif"],
         dunggeunmis: ["var(--font-dunggeunmis)"],
+        surround: ["var(--font-surround)"],
       },
     },
   },

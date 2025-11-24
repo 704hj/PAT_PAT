@@ -3,12 +3,14 @@ type Props = {
   title: string;
   icon?: string;
   style?: string;
+  disable?: boolean;
 };
 export default function LoginButton({
   onClickEvent,
   title,
   icon,
   style,
+  disable,
 }: Props) {
   return (
     <button

@@ -31,6 +31,14 @@
 }
 
 @font-face {
+  font-family: "Cafe24Surround";
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2105_2@1.0/Cafe24Ssurround.woff")
+    format("woff");
+  font-weight: normal;
+  font-display: swap;
+}
+
+@font-face {
   font-family: "Pretendard";
   src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Medium.woff2")
     format("woff2");
@@ -49,7 +57,13 @@
     Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", Arial, sans-serif;
   --font-nanum-square: "NanumSquare", sans-serif;
   --font-dunggeunmis: "SchoolSafetyRoundedSmile", cursive, sans-serif;
+  --font-surround: "Cafe24Surround", cursive, sans-serif;
   --font-pretendard: "Pretendard", sans-serif;
+  --min-app-width: 412px;
+}
+
+.font-surround {
+  font-family: var(--font-surround);
 }
 
 .font-dunggeunmis {
@@ -61,16 +75,28 @@
 }
 
 body {
-  background-color: var(--color-bg);
+  background: radial-gradient(circle at center, #0b183d 0%, #070d1f 100%);
   color: var(--color-text);
   font-family: var(--font-pretendard);
   font-weight: 400;
   font-size: 18px;
   line-height: 1.6;
   margin: 0;
-
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: auto;
+  min-width: var(--min-app-width);
+}
+
+.container {
+  width: 100%;
+  max-width: 480px;
+  max-height: 912px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  overflow: auto;
 }
 
 .text-accent {
@@ -1284,4 +1310,23 @@ body {
   .star::after {
     animation: none !important;
   }
+}
+
+.scroll-color::-webkit-scrollbar {
+  height: 2px; /* 세로 스크롤은 width: 6px */
+}
+
+.scroll-color::-webkit-scrollbar-track {
+  background: #6d95ff;
+  border-radius: 10px;
+}
+
+.scroll-color::-webkit-scrollbar-thumb {
+  background: white;
+  border-radius: 10px;
+  width: 60px !important;
+}
+
+.scroll-color::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(90deg, #89a8ff 0%, #6f8ce0 100%);
 }

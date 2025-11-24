@@ -2,38 +2,14 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import SocialButton from "../components/socialLogin";
 import SocialLogin from "../components/socialLogin";
+import LoginButton from "../../../components/loginBtn";
 
 export default function SignInPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [busy, setBusy] = useState(false);
   const canSubmit = /\S+@\S+\.\S+/.test(email);
-
-  const signin = async () => {
-    if (!canSubmit || busy) return;
-    try {
-      setBusy(true);
-      // TODO: 매직링크/이메일 로그인 연결
-      // await api.signInWithMagicLink(email)
-      router.replace("/lumi/home");
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const social = async (provider: "google" | "apple") => {
-    if (busy) return;
-    try {
-      setBusy(true);
-      // TODO: 소셜 로그인 연결
-      // await api.oauthSignIn(provider)
-      router.replace("/lumi/home");
-    } finally {
-      setBusy(false);
-    }
-  };
 
   return (
     <main className="relative min-h-[100svh] overflow-hidden">
@@ -54,37 +30,25 @@ export default function SignInPage() {
           <p className="mt-1 text-white/70 text-[13px]">기록을 다시 이어가요</p>
         </header>
 
-        <div className="mt-6 rounded-[16px] border border-white/12 bg-white/6 backdrop-blur p-5">
-          <p className="mt-1 text-white/70 text-[13px] center">
-            별빛 계정으로 로그인해주세요.
-          </p>
+        <div className=" flex flex-col mt-6 rounded-[16px] border border-white/12 bg-white/6 backdrop-blur p-5 gap-4">
           {/* 아이디 입력 */}
-          닉네임
           <input
             type="text"
             placeholder="아이디"
-            className="w-full h-11 rounded-[12px] px-3 bg-white/6 border border-white/12 text-white/90 placeholder:text-white/45 outline-none focus:border-white/30"
+            className="flex items-center gap-2 w-full text-[16px] justify-center py-4 rounded-2xl p-3 border border-white/12 text-[#ffffff]"
           />
           {/* 비밀번호 입력 */}
-          비밀번호
           <input
-            type="password"
+            type="text"
             placeholder="비밀번호"
-            className="w-full h-11 rounded-[12px] px-3 bg-white/6 border border-white/12 text-white/90 placeholder:text-white/45 outline-none focus:border-white/30"
+            className="flex items-center gap-2 w-full text-[16px] justify-center py-4 rounded-2xl p-3 border border-white/12 text-[#ffffff]"
           />
           {/* 로그인 버튼 */}
-          <button
-            className={[
-              "mt-5 w-full h-12 rounded-[12px] text-[15px] font-semibold text-white",
-              "bg-[linear-gradient(180deg,#18326f_0%,#0b1d4a_100%)] border border-white/14",
-              "shadow-[0_6px_16px_rgba(10,18,38,0.32)]",
-              busy || !canSubmit
-                ? "opacity-50 cursor-not-allowed"
-                : "hover:brightness-[1.03] active:translate-y-[1px]",
-            ].join(" ")}
-          >
-            로그인
-          </button>
+          <LoginButton
+            title={"로그인"}
+            onClickEvent={() => {}}
+            style="bg-[#1E2843] text-[#FBFBFB]"
+          />
           <div className="relative my-4">
             <div className="h-px bg-white/10" />
             <span className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 px-3 text-white/60 text-[12px] bg-transparent">
@@ -106,9 +70,3 @@ export default function SignInPage() {
     </main>
   );
 }
-// app/lumi/signin/page.tsx  (또는 src/app/...)
-// "use client";
-
-// export default function LumiSignInPage() {
-//   return <div style={{ padding: 24 }}>lumi/signin alive</div>;
-// }
