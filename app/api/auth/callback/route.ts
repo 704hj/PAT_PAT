@@ -15,6 +15,12 @@ export async function GET(request: NextRequest) {
     url.searchParams.get("error") ?? url.searchParams.get("error_description");
   const next = url.searchParams.get("next"); // (선택) 돌아갈 경로
 
+  // 디버깅 로그
+  console.log("[auth/callback] Request URL:", request.url);
+  console.log("[auth/callback] Origin:", origin);
+  console.log("[auth/callback] Next param:", next);
+  console.log("[auth/callback] Code exists:", !!code);
+
   // 1) OAuth 단계 에러
   if (oauthErr) {
     return NextResponse.redirect(new URL(`${SIGNIN}?error=oauth`, origin), {
@@ -74,5 +80,11 @@ export async function GET(request: NextRequest) {
   }
 
   const targetPath = next && SAFE_PATHS.has(next) ? next : AFTER_LOGIN;
-  return NextResponse.redirect(new URL(targetPath, origin), { status: 303 });
+
+  // 요청이 들어온 도메인(localhost or vercel.app)으로 리다이렉트
+  // 다른 도메인으로 잘못 이동하는 것을 방지
+  const redirectUrl = new URL(targetPath, origin);
+  console.log("[auth/callback] Final redirect URL:", redirectUrl.href);
+
+  return NextResponse.redirect(redirectUrl, { status: 303 });
 }

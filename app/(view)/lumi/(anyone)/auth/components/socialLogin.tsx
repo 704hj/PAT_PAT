@@ -22,7 +22,7 @@ export default function SocialLogin() {
     if (busy) return;
     setBusy(true);
     try {
-      await signInWithKakao();
+      await signInWithKakao("/lumi/home");
     } finally {
       setBusy(false);
     }
