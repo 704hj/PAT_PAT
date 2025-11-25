@@ -155,6 +155,7 @@ export default function HomePage() {
             label="걱정 내려놓기"
             variant="glass"
             icon={<IconRelease />}
+          />
           <Image
             src="/images/icon/lumi/lumi_main.svg"
             alt="lumi"
@@ -202,6 +203,7 @@ export default function HomePage() {
         </div>
       </div>
       <MoodSelector />
+    </div>
     </div>
   );
 }
