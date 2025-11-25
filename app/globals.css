@@ -22,6 +22,30 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: "SchoolSafetyRoundedSmile";
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/2408-5@1.0/HakgyoansimDunggeunmisoTTF-B.woff2")
+    format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Cafe24Surround";
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2105_2@1.0/Cafe24Ssurround.woff")
+    format("woff");
+  font-weight: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Pretendard";
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Medium.woff2")
+    format("woff2");
+  font-weight: 200;
+  font-display: swap;
+}
+
 /* 색상 및 폰트 변수 */
 :root {
   --color-bg: #ffffff;
@@ -29,57 +53,55 @@
   --color-accent: #0071e3; /* Apple 블루 */
   --color-accent-light: #e6f0ff;
 
-  --font-sans: "NanumSquare", -apple-system, BlinkMacSystemFont, "Segoe UI",
+  --font-sans: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI",
     Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", Arial, sans-serif;
   --font-nanum-square: "NanumSquare", sans-serif;
-  --font-dongle: "Dongle", cursive, sans-serif;
+  --font-dunggeunmis: "SchoolSafetyRoundedSmile", cursive, sans-serif;
+  --font-surround: "Cafe24Surround", cursive, sans-serif;
+  --font-pretendard: "Pretendard", sans-serif;
+  --min-app-width: 412px;
 }
 
-.font-dongle {
-  font-family: var(--font-dongle);
+.font-surround {
+  font-family: var(--font-surround);
+}
+
+.font-dunggeunmis {
+  font-family: var(--font-dunggeunmis);
+}
+
+.font-pretendard {
+  font-family: var(--font-pretendard);
 }
 
 body {
-  background-color: var(--color-bg);
+  background: radial-gradient(circle at center, #0b183d 0%, #070d1f 100%);
   color: var(--color-text);
-  font-family: var(--font-sans);
+  font-family: var(--font-pretendard);
   font-weight: 400;
   font-size: 18px;
   line-height: 1.6;
   margin: 0;
-
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: auto;
+  min-width: var(--min-app-width);
+}
+
+.container {
+  width: 100%;
+  max-width: 480px;
+  max-height: 912px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  overflow: auto;
 }
 
 .text-accent {
   color: var(--color-accent);
 }
-
-/* button {
-  all: unset;
-  display: inline-block;
-  width: 100%;
-  padding: 1rem 0;
-  text-align: center;
-  font-weight: 600;
-  font-size: 1.25rem;
-  border-radius: 12px;
-  cursor: pointer;
-  background-color: var(--color-accent-light);
-  color: var(--color-accent);
-  box-shadow: 0 2px 6px rgba(0, 113, 227, 0.3);
-  transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
-  user-select: none;
-}
-
-button:hover,
-button:focus {
-  background-color: var(--color-accent);
-  color: white;
-  box-shadow: 0 4px 12px rgba(0, 113, 227, 0.6);
-  outline: none;
-} */
 
 .fade-in-down {
   opacity: 0;
@@ -1216,4 +1238,95 @@ button:focus {
   100% {
     transform: rotate(-15deg) translateY(-6px);
   }
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.16),
+    transparent
+  );
+  animation: skeleton-shimmer 1.6s linear infinite;
+}
+
+/* 기본 별 포인트 */
+.star {
+  position: absolute;
+  width: 3.5px;
+  height: 3.5px;
+  border-radius: 9999px;
+
+  /* 중심이 더 밝고, 바깥으로 부드럽게 사라지는 점광원 */
+  background: radial-gradient(
+    closest-side,
+    rgba(255, 255, 255, 1) 0%,
+    /* 중심 완전 흰색 */ rgba(255, 255, 255, 0.6) 40%,
+    /* 밝은 코어 유지 */ rgba(255, 255, 255, 0.1) 70%,
+    /* 부드럽게 감소 */ rgba(255, 255, 255, 0) 100%
+  );
+
+  /* 글로우 — 넓게 확산 + 중심부 더 또렷 */
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.9),
+    /* 중심: 기존보다 20% 더 강한 광원 */ 0 0 30px rgba(255, 255, 255, 0.5),
+    /* 중간 확산 */ 0 0 65px rgba(255, 255, 255, 0.25); /* 넓고 부드러운 후광 */
+
+  animation: twinkle 6s ease-in-out infinite;
+}
+
+/* 깊이감 */
+.star.star-d2 {
+  transform: scale(1.25);
+  animation-duration: 3.2s;
+}
+
+.star.star-d3 {
+  transform: scale(0.9);
+  animation-duration: 2.8s;
+}
+
+/* 접근성: 모션 최소화 */
+@media (prefers-reduced-motion: reduce) {
+  .star,
+  .star::after {
+    animation: none !important;
+  }
+}
+
+.scroll-color::-webkit-scrollbar {
+  height: 2px; /* 세로 스크롤은 width: 6px */
+}
+
+.scroll-color::-webkit-scrollbar-track {
+  background: #6d95ff;
+  border-radius: 10px;
+}
+
+.scroll-color::-webkit-scrollbar-thumb {
+  background: white;
+  border-radius: 10px;
+  width: 60px !important;
+}
+
+.scroll-color::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(90deg, #89a8ff 0%, #6f8ce0 100%);
 }

@@ -1,49 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { supabase } from "@/app/utils/supabase/client";
+import LoginButton from "../../../components/loginBtn";
 import SocialLogin from "../components/socialLogin";
 
 export default function SignUpPage() {
   const router = useRouter();
-  const [nickname, setNickname] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [busy, setBusy] = useState(false);
-  const canSubmit = nickname.trim().length >= 2 && /\S+@\S+\.\S+/.test(email);
 
-  const submit = async () => {
-    if (!canSubmit || busy) return;
-    try {
-      setBusy(true);
-      // TODO: 여기에 회원가입 로직 연결 (예: 매직링크 발송)
-      // await api.signUp({ nickname, email })
-      router.replace("/lumi/home");
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const social = async (provider: "google" | "kakao") => {
-    if (busy) return;
-    try {
-      setBusy(true);
-      // kakao 소셜 로그인, sighInWithOAuth : 회원가입이 되어있지 않은 유저의 로그인 시도를 자동으로 회원가입 과정이 일어나게끔 해주는 기능 포함
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: "kakao",
-        options: {
-          //로컬 환경 주소
-          redirectTo: `${process.env.NEXT_PUBLIC_REDIRECT_URL}/lumi/auth/callback`,
-        },
-      });
-      // await api.oauthSignIn(provider)
-      // router.replace("/lumi/home");
-    } catch (error) {
-      console.error("kakao 로그인 에러");
-    } finally {
-      setBusy(false);
-    }
+  const emailLogin = async () => {
+    router.push("/lumi/auth/email");
   };
 
   return (
@@ -67,56 +32,38 @@ export default function SignUpPage() {
           </p>
         </header>
 
-        <div className="mt-6 rounded-[16px] border border-white/12 bg-white/6 backdrop-blur p-5">
-          <label className="block text-white/80 text-[13px] mb-1">닉네임</label>
-          <input
-            value={nickname}
-            onChange={(e) => setNickname(e.target.value)}
-            placeholder="별빛에 표시될 이름"
-            className="w-full h-11 rounded-[12px] px-3 bg-white/6 border border-white/12 text-white/90 placeholder:text-white/45 outline-none focus:border-white/30"
-            maxLength={20}
+        <div
+          className="flex flex-col items-center mt-6 rounded-[16px] border border-white/12 
+             bg-white/6 backdrop-blur px-5 pt-5 pb-6 text-center shadow-[0_12px_36px_rgba(7,17,40,0.35)]"
+        >
+          <LoginButton
+            title={"이메일로 시작하기"}
+            onClickEvent={emailLogin}
+            style="bg-[#1E2843] text-[#FBFBFB]"
           />
 
-          <label className="block text-white/80 text-[13px] mt-4 mb-1">
-            이메일
-          </label>
-          <input
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-            inputMode="email"
-            className="w-full h-11 rounded-[12px] px-3 bg-white/6 border border-white/12 text-white/90 placeholder:text-white/45 outline-none focus:border-white/30"
-          />
-
-          <button
-            onClick={submit}
-            disabled={!canSubmit || busy}
-            className={[
-              "mt-5 w-full h-12 rounded-[12px] text-[15px] font-semibold text-white",
-              "bg-[linear-gradient(180deg,#18326f_0%,#0b1d4a_100%)] border border-white/14",
-              "shadow-[0_6px_16px_rgba(10,18,38,0.32)]",
-              busy || !canSubmit
-                ? "opacity-50 cursor-not-allowed"
-                : "hover:brightness-[1.03] active:translate-y-[1px]",
-            ].join(" ")}
-          >
-            {busy ? "처리 중…" : "별빛 계정 만들기"}
-          </button>
-
-          <div className="relative my-4">
+          {/* 구분선 */}
+          <div className="relative w-full max-w-[360px] my-5">
             <div className="h-px bg-white/10" />
-            <span className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 px-3 text-white/60 text-[12px] bg-transparent">
-              또는
+            <span
+              className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 
+                 px-3 text-white/60 text-[16px] bg-[#0b1d4a]/50 backdrop-blur-sm rounded-full"
+            >
+              or
             </span>
           </div>
 
-          {/* Google 및 kakao */}
-          <SocialLogin />
+          {/* SNS 로그인 (SocialLogin 컴포넌트) */}
+          <div className="w-full max-w-[360px]">
+            <SocialLogin />
+          </div>
 
-          <div className="mt-4 text-center">
+          {/* 로그인 안내 */}
+          <div className="mt-5">
             <button
               onClick={() => router.push("/lumi/auth/signin")}
-              className="text-white/85 text-[13px] underline underline-offset-4 hover:text-white transition"
+              className="text-white/85 text-[13px] underline underline-offset-4 
+                 hover:text-white transition py-6"
             >
               이미 계정이 있나요? 로그인
             </button>

@@ -1,5 +1,6 @@
 "use server";
 import { createServerClient } from "@supabase/ssr";
+import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 
 /**
@@ -24,6 +25,23 @@ export async function createServerSupabaseClient() {
             cookieStore.set({ name, value, ...options });
           });
         },
+      },
+    }
+  );
+}
+
+/**
+ * Admin 권한이 필요한 작업(예: OTP 생성)에 사용
+ * Service Role Key 사용 - 환경변수에 SUPABASE_SERVICE_ROLE_KEY 필요
+ */
+export async function createSupabaseAdminClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
       },
     }
   );

@@ -1,7 +1,5 @@
 "use client";
-//커밋 테스트
-//커밋 테스트2
-//커밋 테스트3
+
 import { supabase } from "@/app/utils/supabase/client";
 
 export async function signInWithGoogle(nextPath: string = "/") {
@@ -18,7 +16,7 @@ export async function signInWithGoogle(nextPath: string = "/") {
   const { error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${origin}/lumi/auth/callback?next=${encodeURIComponent(
+      redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(
         nextPath
       )}`,
       queryParams: {

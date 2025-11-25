@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ActionButton from "./component/actionBtn";
 import GlassCard from "../../components/glassCard";
+import { supabase } from "@/app/utils/supabase/client";
+import { useRouter } from "next/navigation";
 
 function IconStar() {
   return (
@@ -35,8 +37,14 @@ function IconRelease() {
     </svg>
   );
 }
+import Image from "next/image";
+import MoodSelector from "../../components/moodSelector";
 
 export default function HomePage() {
+  const router = useRouter();
+  //세션에서 가져오는 닉네임
+  const [nickName, setNickName] = useState("");
+
   const today = useMemo(() => {
     const d = new Date();
     const mm = String(d.getMonth() + 1).padStart(2, "0");
@@ -61,22 +69,62 @@ export default function HomePage() {
     },
   ];
 
+  //session 값 가져오기
+  useEffect(() => {
+    async function loadSession() {
+      const { data, error } = await supabase.auth.getSession();
+
+      //세션 분기
+      if (error) {
+        return;
+      }
+
+      //세션 없는 경우
+      if (!data.session) {
+        //로그인 페이지로 이동
+        router.replace("/lumi/auth/signin");
+      }
+
+      //세션 있음
+      const user = data.session?.user;
+
+      //유저 프로필 조회
+      const { data: profileData } = await supabase
+        .from("user_profile")
+        .select("*")
+        .eq("user_id", user?.id)
+        .single();
+
+      //상태 저장
+      setNickName(profileData);
+    }
+
+    loadSession();
+  }, []);
+
   return (
-    <div className="relative min-h-[100svh] overflow-hidden">
-      {/* 9:16 안전영역 */}
-      <section className="relative mx-auto w-full max-w-[480px] aspect-[9/16] px-5">
-        {/* 헤더: 날짜 + 인사 */}
-        <header className="pt-6">
-          <div className="text-white/70 text-sm">{today}</div>
-          <h1 className="mt-1 text-white text-[20px] font-semibold tracking-tight">
-            오늘의 감정, 밤하늘에
-          </h1>
-        </header>
+    <div className="flex flex-col w-full overflow-auto items-start px-4 pt-14">
+      <div
+        className="inline-flex items-center gap-1 px-2 py-1 
+                  bg-[#676D82] rounded-2xl border border-white/50 w-auto mb-5"
+      >
+        <img src="/images/icon/common/star.svg" className="w-4 h-4" />
+        <span className="text-white text-sm">Star</span>
+        <span className="text-white text-sm">{"0"}</span>
+      </div>
+      <div className="relative w-full h-[80px]">
+        <div className="absolute bottom-0 left-0 flex flex-row items-center gap-20">
+          <div className="text-white text-xl leading-tight">
+            <span>루미님,</span>
+            <br />
+            <span>오늘의 감정을 기록해주세요.</span>
+          </div>
 
         {/* 히어로: 캐릭터 + 카피 */}
         <div className="mt-5">
           <GlassCard className="p-4">
             <div className="flex items-center gap-4">
+              !!!{nickName}
               <img
                 src="/images/icon/3d.png"
                 alt="루미"
@@ -107,96 +155,53 @@ export default function HomePage() {
             label="걱정 내려놓기"
             variant="glass"
             icon={<IconRelease />}
+          <Image
+            src="/images/icon/lumi/lumi_main.svg"
+            alt="lumi"
+            width={70}
+            height={90}
           />
         </div>
-
-        {/* 오늘의 상태(간단 지표) */}
-        <div className="mt-4">
-          <GlassCard className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-white/80 text-[14px]">오늘의 기록</div>
-                <div className="text-white text-[24px] font-semibold mt-1">
-                  0 / 1
-                </div>
-              </div>
-              {/* <Link
-                href="/lumi/stats"
-                className="text-white/80 text-[13px] underline underline-offset-4 hover:text-white transition"
-              >
-                통계 보기
-              </Link> */}
-              <div className="text-white/80 text-[13px] underline underline-offset-4 hover:text-white transition">
-                통계 보기
-              </div>
-            </div>
-            <div className="mt-3 h-px bg-white/10" />
-            <div className="mt-3 flex flex-wrap gap-2">
-              <span className="px-2.5 py-1 rounded-full text-[12px] bg-white/8 text-white/85 border border-white/10">
-                연속 기록 3일
-              </span>
-              <span className="px-2.5 py-1 rounded-full text-[12px] bg-white/8 text-white/85 border border-white/10">
-                이번 주 목표 5/7
-              </span>
-            </div>
-          </GlassCard>
+      </div>
+      <div className="flex flex-row items-center justify-between bg-[#192440] text-white w-full px-6 py-7 rounded-xl mt-10">
+        <span className="whitespace-pre text-[15px]">
+          {"기억하고 싶은 순간이 있었나요?\n별빛 아래에 편히 적어보아요."}
+        </span>
+        <button className="bg-[#657FC2] py-2 px-6 rounded-xl text-[16px]">
+          기록하기
+        </button>
+      </div>
+      <div className="flex flex-col w-full mt-5">
+        <div className="flex w-full bg-[#C1CEF1] rounded-t-2xl items-center justify-center ">
+          <Image
+            src="/images/icon/lumi/lumi_book.svg"
+            alt="lumi"
+            width={120}
+            height={200}
+          />
         </div>
+        <div className="w-full flex flex-row items-center justify-between bg-[#192440] rounded-b-2xl text-white px-7 py-5 ">
+          <div className="tracking-tight leading-[1.3]">
+            <span className="text-[16px]">
+              일주일 동안 기록을 확인할 수 있어요.
+            </span>
+            <br />
+            <span className="text-[12px] text-[#A6A6A6]">
+              평균적으로 기쁨의 날이 많아요.
+            </span>
+          </div>
 
-        {/* 최근 기록 */}
-        <div className="mt-4">
-          <GlassCard className="p-0">
-            <div className="flex items-center justify-between px-4 pt-4">
-              <h2 className="text-white text-[16px] font-semibold">
-                최근 기록
-              </h2>
-              <Link
-                href="/lumi/journal"
-                className="text-white/80 text-[13px] hover:text-white transition"
-              >
-                전체 보기
-              </Link>
-            </div>
-            <ul className="mt-2">
-              {recent.map((r) => (
-                <li
-                  key={r.id}
-                  className="px-4 py-3 flex items-start gap-3 border-t border-white/8 first:border-t-0"
-                >
-                  <div
-                    className={[
-                      "mt-0.5 h-2.5 w-2.5 rounded-full",
-                      r.type === "good" ? "bg-cyan-300/90" : "bg-white/60",
-                    ].join(" ")}
-                  />
-                  <div className="min-w-0">
-                    <p className="text-white/90 text-[14px] truncate">
-                      {r.text}
-                    </p>
-                    <p className="text-white/60 text-[12px] mt-0.5">{r.time}</p>
-                  </div>
-                </li>
-              ))}
-              {recent.length === 0 && (
-                <li className="px-4 py-6">
-                  <p className="text-white/70 text-[14px]">
-                    아직 기록이 없어요. 오늘의 별을 만들어 보세요.
-                  </p>
-                </li>
-              )}
-            </ul>
-          </GlassCard>
+          <div className="flex items-center justify-center rounded-full bg-[#657FC2] w-[46px] h-[46px]">
+            <Image
+              src="/images/icon/common/arrow.svg"
+              alt="arrow"
+              width={20}
+              height={20}
+            />
+          </div>
         </div>
-
-        {/* 루미 팁 (작은 배너) */}
-        <div className="mt-4">
-          <GlassCard className="px-4 py-3">
-            <p className="text-white/85 text-[14px]">
-              팁 · 힘든 감정은 “걱정 내려놓기”에서 짧게 비워보세요. 길게 쓰지
-              않아도 충분해요.
-            </p>
-          </GlassCard>
-        </div>
-      </section>
+      </div>
+      <MoodSelector />
     </div>
   );
 }
