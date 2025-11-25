@@ -1,4 +1,5 @@
 "use client";
+
 import { supabase } from "@/app/utils/supabase/client";
 
 export async function signInWithGoogle(nextPath: string = "/") {

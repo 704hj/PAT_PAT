@@ -78,7 +78,7 @@ export default function AccountPage() {
               label="로그인 방식"
               right={
                 <div className="flex items-center gap-2">
-                  <IdP pill="Apple" />
+                  <IdP pill="KAKAO" />
                   <IdP pill="Google" />
                 </div>
               }
@@ -295,35 +295,43 @@ function ToggleRow({
       label={label}
       desc={desc}
       right={
-        <button
-          type="button"
-          title="switch"
-          role="switch"
-          aria-checked={value ? true : false}
-          aria-label={label}
-          onClick={() => onChange(!value)}
-          className={[
-            "h-7 w-[46px] rounded-full border transition relative",
-            value
-              ? "bg-cyan-300/25 border-cyan-300/50"
-              : "bg-white/6 border-white/12",
-          ].join(" ")}
-        >
-          <span
-            aria-hidden
-            className={[
-              "absolute top-1/2 -translate-y-1/2 h-5 w-5 rounded-full bg-white shadow",
-              "transition",
-              value ? "left-[26px]" : "left-[4px]",
-            ].join(" ")}
-          />
-        </button>
+        value ? (
+          <button
+            type="button"
+            title="switch"
+            role="switch"
+            aria-checked="true"
+            aria-label={label}
+            onClick={() => onChange(!value)}
+            className="h-7 w-[46px] rounded-full border transition relative bg-cyan-300/25 border-cyan-300/50"
+          >
+            <span
+              aria-hidden
+              className="absolute top-1/2 -translate-y-1/2 h-5 w-5 rounded-full bg-white shadow transition left-[26px]"
+            />
+          </button>
+        ) : (
+          <button
+            type="button"
+            title="switch"
+            role="switch"
+            aria-checked="false"
+            aria-label={label}
+            onClick={() => onChange(!value)}
+            className="h-7 w-[46px] rounded-full border transition relative bg-white/6 border-white/12"
+          >
+            <span
+              aria-hidden
+              className="absolute top-1/2 -translate-y-1/2 h-5 w-5 rounded-full bg-white shadow transition left-[4px]"
+            />
+          </button>
+        )
       }
     />
   );
 }
 
-function IdP({ pill }: { pill: "Apple" | "Google" }) {
+function IdP({ pill }: { pill: "KAKAO" | "Google" }) {
   return (
     <span className="px-2.5 h-7 inline-flex items-center rounded-full text-[12px] bg-white/6 text-white/80 border border-white/12">
       {pill}
