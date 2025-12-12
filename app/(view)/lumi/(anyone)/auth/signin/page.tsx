@@ -12,7 +12,7 @@ export default function SignInPage() {
   const canSubmit = /\S+@\S+\.\S+/.test(email);
 
   return (
-    <main className="relative min-h-[100svh] overflow-hidden">
+    <main className="relative min-h-[100svh] overflow-y-auto">
       <div
         aria-hidden
         className="absolute inset-0 -z-20 bg-[radial-gradient(100%_70%_at_50%_100%,#0b1d4a_0%,#091430_48%,#070f24_100%)]"
@@ -22,7 +22,7 @@ export default function SignInPage() {
         className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_center,transparent_60%,rgba(0,0,0,0.28))]"
       />
 
-      <section className="relative mx-auto w-full max-w-[480px] aspect-[9/16] px-5">
+      <section className="relative mx-auto w-full max-w-[480px] min-h-[100svh] px-5 py-4">
         <header className="pt-8 text-center">
           <h1 className="text-white text-[20px] font-semibold tracking-tight">
             별빛 열기
