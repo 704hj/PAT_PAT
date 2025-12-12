@@ -222,8 +222,8 @@ export default function EmailLogin() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0a1230] to-[#0e143c] text-slate-200 p-6">
-      <div className="w-full max-w-md rounded-3xl bg-[rgba(24,32,64,0.85)] backdrop-blur-md shadow-2xl p-8">
+    <div className="min-h-screen flex justify-center bg-gradient-to-b from-[#0a1230] to-[#0e143c] text-slate-200 p-6 py-10 overflow-y-auto">
+      <div className="w-full max-w-md rounded-3xl bg-[rgba(24,32,64,0.85)] backdrop-blur-md shadow-2xl p-8 h-fit">
         <h2 className="text-2xl font-semibold text-slate-100 mb-1">
           별빛 계정 만들기
         </h2>
