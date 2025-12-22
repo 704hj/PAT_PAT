@@ -35,7 +35,7 @@ export default function BottomNav() {
           </li>
           <li>
             <Link
-              href="/lumi/journal"
+              href="/lumi/write"
               className={`flex flex-col items-center gap-1 px-3 py-1 rounded-lg  ${
                 selected === "journal" ? "bg-white/8" : ""
               } `}

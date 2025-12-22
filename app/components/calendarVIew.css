@@ -1,0 +1,82 @@
+/* react-calendar 기본 스타일을 우주톤으로 오버라이드 */
+.pp-calendar {
+  width: 100%;
+  border: none !important;
+  background: transparent !important;
+  color: rgba(255, 255, 255, 0.88);
+  font-family: inherit;
+}
+
+.pp-calendar .react-calendar__navigation {
+  margin-bottom: 8px;
+}
+
+.pp-calendar .react-calendar__navigation button {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 14px;
+  color: rgba(255, 255, 255, 0.85) !important;
+  min-width: 44px;
+  height: 40px;
+}
+
+.pp-calendar .react-calendar__navigation button:disabled {
+  opacity: 0.35;
+}
+
+.pp-calendar .react-calendar__month-view__weekdays {
+  text-transform: none;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 6px;
+}
+
+.pp-calendar .react-calendar__month-view__weekdays__weekday abbr {
+  text-decoration: none;
+}
+
+.pp-calendar .react-calendar__month-view__days {
+  gap: 6px;
+}
+
+.pp-calendar .react-calendar__tile {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 14px;
+  height: 42px;
+  color: rgba(255, 255, 255, 0.82) !important;
+}
+
+.pp-calendar .react-calendar__tile:enabled:hover {
+  background: rgba(255, 255, 255, 0.07) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+.pp-calendar .react-calendar__tile--now {
+  background: rgba(90, 210, 255, 0.1) !important;
+  border-color: rgba(90, 210, 255, 0.25) !important;
+}
+
+.pp-calendar .react-calendar__tile--active {
+  background: linear-gradient(
+    180deg,
+    rgba(40, 120, 255, 0.22),
+    rgba(160, 90, 255, 0.16)
+  ) !important;
+  border-color: rgba(170, 120, 255, 0.28) !important;
+  color: rgba(255, 255, 255, 0.95) !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
+}
+
+.pp-calendar .react-calendar__tile--active:enabled:hover {
+  filter: brightness(1.05);
+}
+
+.pp-calendar .react-calendar__month-view__days__day--neighboringMonth {
+  opacity: 0.35;
+}
+
+/* 주말 색 살짝 */
+.pp-calendar .react-calendar__month-view__days__day--weekend {
+  color: rgba(255, 255, 255, 0.78) !important;
+}

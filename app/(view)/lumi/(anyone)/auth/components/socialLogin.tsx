@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { signInWithKakao } from "@/app/utils/supabase/signInWithKakao";
 import { signInWithGoogle } from "@/app/utils/supabase/signInWithGoogle";
-import LoginButton from "../../../components/loginBtn";
+import LoginButton from "@/app/components/loginBtn";
 
 export default function SocialLogin() {
   const [busy, setBusy] = useState(false);

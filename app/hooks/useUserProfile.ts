@@ -5,10 +5,17 @@ import { supabase } from "@/app/utils/supabase/client";
 import { useAuth } from "./useAuth";
 
 interface UserProfile {
-  user_id: string;
-  nickname?: string;
-  profile_image?: string;
-  // 필요한 다른 필드 추가
+  user_id: number; // users.user_id bigint
+  auth_user_id: string; // users.auth_user_id uuid
+  email: string | null;
+  nickname: string | null;
+  profile_image: string | null;
+  signup_method: string | null;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+
+  // 필요하면 추가 필드
   [key: string]: any;
 }
 
@@ -19,17 +26,6 @@ interface UseUserProfileReturn {
   refetch: () => Promise<void>;
 }
 
-/**
- * 현재 로그인한 사용자의 프로필 정보를 가져오는 훅
- * useAuth와 함께 사용하여 인증 + 프로필 정보를 모두 가져옴
- *
- * @example
- * const { user, loading: authLoading } = useAuth()
- * const { profile, loading: profileLoading } = useUserProfile()
- *
- * if (authLoading || profileLoading) return <Loading />
- * return <div>{profile?.nickname}</div>
- */
 export function useUserProfile(): UseUserProfileReturn {
   const { user, loading: authLoading } = useAuth({ required: true });
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -38,6 +34,7 @@ export function useUserProfile(): UseUserProfileReturn {
 
   const fetchProfile = async () => {
     if (!user?.id) {
+      setProfile(null);
       setLoading(false);
       return;
     }
@@ -47,11 +44,10 @@ export function useUserProfile(): UseUserProfileReturn {
       setError(null);
 
       console.log(
-        "[useUserProfile] Fetching profile for auth_user_id:",
+        "[useUserProfile] Fetching users row for auth_user_id:",
         user.id
       );
 
-      // JOIN을 사용해서 한 번에 조회
       const { data, error: fetchError } = await supabase
         .from("users")
         .select(
@@ -59,14 +55,15 @@ export function useUserProfile(): UseUserProfileReturn {
           user_id,
           auth_user_id,
           email,
-          user_profile (
-            nickname,
-            created_at,
-            updated_at
-          )
+          nickname,
+          signup_method,
+          created_at,
+          updated_at,
+          deleted_at
         `
         )
         .eq("auth_user_id", user.id)
+        .is("deleted_at", null) // soft delete 쓸 거면 유지, 아니면 제거 가능
         .single();
 
       if (fetchError) {
@@ -75,36 +72,15 @@ export function useUserProfile(): UseUserProfileReturn {
       }
 
       if (!data) {
-        console.error("[useUserProfile] User not found");
         throw new Error("User not found");
       }
 
-      console.log("[useUserProfile] Users data:", data);
-
-      // user_profile이 배열로 올 수 있으므로 처리
-      const profileData = Array.isArray(data.user_profile)
-        ? data.user_profile[0]
-        : data.user_profile;
-
-      if (!profileData) {
-        console.error(
-          "[useUserProfile] Profile not found for user_id:",
-          data.user_id
-        );
-        throw new Error("Profile not found");
-      }
-
-      // 프로필 데이터에 user_id 포함
-      const profile = {
-        user_id: data.user_id,
-        ...profileData,
-      };
-
-      console.log("[useUserProfile] Profile loaded:", profile);
-      setProfile(profile);
+      console.log("[useUserProfile] Loaded users profile:", data);
+      setProfile(data as UserProfile);
     } catch (err) {
       console.error("[useUserProfile] Error:", err);
       setError(err instanceof Error ? err : new Error("Unknown error"));
+      setProfile(null);
     } finally {
       setLoading(false);
     }

@@ -2,9 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { upsertStarMock } from "../../../../lib/zodiac";
-import GlassCard from "../../components/glassCard";
-import Loading from "./components/loading";
+import { upsertStarMock } from "../../../../../lib/zodiac";
+import Loading from "./loading";
+import GlassCard from "@/app/components/glassCard";
 
 type Props = {
   emotions: TEmotion[];
