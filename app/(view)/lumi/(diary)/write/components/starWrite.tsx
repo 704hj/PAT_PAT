@@ -1,20 +1,10 @@
 "use client";
 
 import { createDiaryAction } from "@/app/actions/diary";
+import GlassCard from "@/app/components/glassCard";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-
-/**
- * ✅ 개선 포인트 반영
- * - STEP 라벨(사용자가 무엇부터 하는지 명확)
- * - 감정 아이콘에 텍스트 라벨(의미 불명확 문제 해결)
- * - 강도 라벨을 평가가 아닌 상태 묘사로 변경
- * - 해시태그는 접힘(선택 사항으로 격하)
- * - 카운트는 입력 포커스 전에는 덜 압박되게(원하면 hide도 가능)
- *
- * ⚠️ emotion 데이터는 하드코딩
- * - 이미지 경로는 기존처럼 /images/icon/emotion/... 사용 가정
- */
+import StepPill from "./StepPill";
 
 type MoodKey = "calm" | "okay" | "good" | "tough";
 type Polarity = "POSITIVE" | "NEGATIVE" | "UNSET";
@@ -54,34 +44,6 @@ const MOODS: Array<{
 
 const LIMIT = 200;
 const MAX_TAGS = 3;
-
-function GlassCard({
-  className = "",
-  children,
-}: {
-  className?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div
-      className={[
-        "rounded-2xl border border-white/10 bg-white/5",
-        "shadow-[0_10px_30px_rgba(0,0,0,0.25)] backdrop-blur-md",
-        className,
-      ].join(" ")}
-    >
-      {children}
-    </div>
-  );
-}
-
-function StepPill({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="inline-flex items-center rounded-full px-2 py-1 text-[12px] font-semibold tracking-[-0.01em] bg-white/8 border border-white/12 text-white/80">
-      {children}
-    </span>
-  );
-}
 
 function intensityLabel(v: number) {
   if (v <= 2) return "잔잔해요";
@@ -132,14 +94,6 @@ export default function StarWrite({ tags }: Props) {
     if (!canSubmit || !selectedMood) return;
     setIsSubmitting(true);
     try {
-      /**
-       * 여기서 서버(API/RPC) 호출하면 됨.
-       * 예:
-       * await fetch("/api/diary", { method:"POST", body: JSON.stringify({ ... }) })
-       * 또는 supabase.rpc("create_diary_entry", { ... })
-       */
-      // 데모:
-
       const res = await createDiaryAction({
         entry_date: new Date().toDateString(),
         polarity: selectedMood?.polarity,
@@ -152,17 +106,6 @@ export default function StarWrite({ tags }: Props) {
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  //
-
-  const postWriteDiary = async () => {
-    // const res = await createDiaryAction({
-    //   entry_date,
-    //   polarity,
-    //   content,
-    // });
-    // if (!res.ok) toast(res.error);
   };
 
   return (

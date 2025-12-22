@@ -1,5 +1,5 @@
 import { getTagsAction } from "@/app/actions/tag";
-import StarWrite from "./starWrite";
+import StarWrite from "./components/starWrite";
 
 export default async function Page() {
   // const { emotions, posTage } = await getEmotionsAndTags();

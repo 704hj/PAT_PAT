@@ -1,8 +1,8 @@
 "use client";
 
+import MoodSelector from "@/app/components/moodSelector";
 import { useUserProfile } from "@/app/hooks/useUserProfile";
 import Image from "next/image";
-import MoodSelector from "../../components/moodSelector";
 import { useRouter } from "next/navigation";
 
 export default function HomePage() {
