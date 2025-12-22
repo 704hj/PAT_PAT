@@ -1,9 +1,9 @@
 "use client";
 
+import GlassCard from "@/app/components/glassCard";
+import RitualCard from "@/app/components/ritualCard";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import GlassCard from "../../components/glassCard";
-import RitualCard from "../../components/ritualCard";
 import { ta } from "zod/locales";
 
 type Ritual = "wind" | "wave" | "star" | "fire";
