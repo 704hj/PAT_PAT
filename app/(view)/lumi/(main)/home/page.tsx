@@ -2,52 +2,14 @@
 
 import { useUserProfile } from "@/app/hooks/useUserProfile";
 import Image from "next/image";
-import { useMemo } from "react";
 import MoodSelector from "../../components/moodSelector";
-
-function IconStar() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" className="opacity-90">
-      <path
-        d="M12 3.8l2.2 4.5 5 0.7-3.6 3.6 0.8 5-4.4-2.3-4.4 2.3 0.8-5L4.8 9l5-0.7L12 3.8z"
-        fill="currentColor"
-      />
-    </svg>
-  );
-}
-function IconRelease() {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-      className="opacity-90"
-    >
-      <path
-        d="M3 12h12M9 6l6 6-6 6"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
-      />
-    </svg>
-  );
-}
+import { useRouter } from "next/navigation";
 
 export default function HomePage() {
   // 공통 훅으로 세션 + 프로필 정보 한 번에 가져오기
   const { profile, loading } = useUserProfile();
 
-  const today = useMemo(() => {
-    const d = new Date();
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const dd = String(d.getDate()).padStart(2, "0");
-    const wk = ["일", "월", "화", "수", "목", "금", "토"][d.getDay()];
-    return `${mm}.${dd} (${wk})`;
-  }, []);
-
+  const router = useRouter();
   // 샘플 최근 기록 데이터 (연동 전까지 임시)
   const recent = [
     {
@@ -86,7 +48,7 @@ export default function HomePage() {
       <div className="relative w-full h-[80px]">
         <div className="absolute bottom-0 left-0 flex flex-row items-center gap-20">
           <div className="text-white text-xl leading-tight">
-            <span>루미님,</span>
+            <span>{profile?.nickname} 님,</span>
             <br />
             <span>오늘의 감정을 기록해주세요.</span>
           </div>
@@ -103,7 +65,10 @@ export default function HomePage() {
         <span className="whitespace-pre text-[15px]">
           {"기억하고 싶은 순간이 있었나요?\n별빛 아래에 편히 적어보아요."}
         </span>
-        <button className="bg-[#657FC2] py-2 px-6 rounded-xl text-[16px]">
+        <button
+          className="bg-[#657FC2] py-2 px-6 rounded-xl text-[16px]"
+          onClick={() => router.push("/lumi/write")}
+        >
           기록하기
         </button>
       </div>
