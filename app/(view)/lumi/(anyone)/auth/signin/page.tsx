@@ -49,14 +49,14 @@ export default function SignInPage() {
             onClickEvent={() => {}}
             style="bg-[#1E2843] text-[#FBFBFB]"
           />
-          <div className="relative my-4">
+          {/* <div className="relative my-4">
             <div className="h-px bg-white/10" />
             <span className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 px-3 text-white/60 text-[12px] bg-transparent">
               또는
             </span>
-          </div>
+          </div> */}
           {/* Google 및 kakao */}
-          <SocialLogin />
+          {/* <SocialLogin /> */}
           <div className="mt-4 text-center">
             <button
               onClick={() => router.push("/lumi/auth/signup")}

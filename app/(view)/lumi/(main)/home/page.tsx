@@ -10,21 +10,6 @@ export default function HomePage() {
   const { profile, loading } = useUserProfile();
 
   const router = useRouter();
-  // 샘플 최근 기록 데이터 (연동 전까지 임시)
-  const recent = [
-    {
-      id: 1,
-      type: "good",
-      text: "햇살이 좋아서 산책했어요",
-      time: "오늘 14:20",
-    },
-    {
-      id: 2,
-      type: "release",
-      text: "회의 스트레스 흘려보냄",
-      time: "어제 22:10",
-    },
-  ];
 
   // 로딩 중이면 로딩 UI 표시
   if (loading) {
