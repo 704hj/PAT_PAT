@@ -1,28 +1,8 @@
-import { createSupabaseAdminClient } from "@/app/utils/supabase/server";
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import {
+  createServerSupabaseClient,
+  createSupabaseAdminClient,
+} from "@/app/utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
-
-async function createUserServerClient() {
-  const store = await cookies();
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return store.get(name)?.value;
-        },
-        set(name: string, value: string, options: any) {
-          store.set(name, value, options);
-        },
-        remove(name: string, options: any) {
-          store.delete(name);
-        },
-      },
-    }
-  );
-}
 
 export async function POST(req: NextRequest) {
   try {
@@ -43,7 +23,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 현재 로그인된 사용자 확인 (OTP 인증 완료된 상태)
-    const userClient = await createUserServerClient();
+    const userClient = await createServerSupabaseClient();
     const {
       data: { user },
       error: userError,
@@ -93,6 +73,12 @@ export async function POST(req: NextRequest) {
     console.log("RPC 결과:", rpcData);
     console.log("RPC 에러:", rpcErr);
     console.log("===== RPC 호출 완료 =====");
+
+    if (!user.email)
+      return NextResponse.json(
+        { ok: false, message: "이메일이 없습니다." },
+        { status: 400 }
+      );
 
     if (rpcErr) {
       console.error("프로필 저장 오류:", rpcErr);
