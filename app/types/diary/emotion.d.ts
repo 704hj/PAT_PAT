@@ -9,3 +9,12 @@ type TTag = {
   name: string;
   name_ko: string;
 };
+
+type Journal = {
+  id: string;
+  date: string; // YYYY-MM-DD
+  time: string; // HH:mm
+  text: string;
+  tags?: string[];
+  pinned?: boolean;
+};
