@@ -40,14 +40,6 @@ export default function SplashStar() {
           />
         ))}
       </div>
-
-      {/* 고양이(하단 중앙 고정) */}
-      <img
-        src="/cat.png"
-        alt=""
-        aria-hidden
-        className="absolute bottom-4 left-1/2 -translate-x-1/2 w-[160px] select-none pointer-events-none"
-      />
     </div>
   );
 }
