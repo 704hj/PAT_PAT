@@ -1,6 +1,5 @@
 "use client";
 
-import { Journal } from "@/app/(view)/lumi/(main)/diary/page";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 /** 데모용 페이징 소스 (API 연결 부분 교체) */
