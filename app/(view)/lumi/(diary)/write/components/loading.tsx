@@ -2,7 +2,7 @@ import {
   GlassCardSkeleton,
   SkeletonCircle,
   SkeletonLine,
-} from "@/app/components/skeletons";
+} from "@/app/components/skeleton/skeletons";
 
 export default function Loading() {
   return (

@@ -7,6 +7,7 @@ import { useMemo } from "react";
 import Pill from "../home/component/pill";
 import PrimaryButton from "../home/component/primaryButton";
 import SecondaryButton from "../home/component/secondaryButton";
+import HomeSkeleton from "./component/homeSkeleton";
 
 type TodayState = {
   hasEntry: boolean;
@@ -27,9 +28,7 @@ function pct(value: number, max: number) {
 }
 
 export default function HomeReLayoutSingleCTA() {
-  // 공통 훅으로 세션 + 프로필 정보 한 번에 가져오기
   const { profile, loading } = useUserProfile();
-
   const router = useRouter();
 
   const today: TodayState = {
@@ -44,7 +43,7 @@ export default function HomeReLayoutSingleCTA() {
     insight: "이번 주는 조용히 남긴 날이 많아요.",
   };
 
-  const headerTitle = "yun 님,";
+  const headerTitle = `${profile?.nickname ?? "사용자"} 님,`;
   const headerSubtitle = "오늘을 한 줄로 정리해볼까요?";
 
   const todayTitle = useMemo(() => {
@@ -63,14 +62,7 @@ export default function HomeReLayoutSingleCTA() {
     return today.hasEntry ? "오늘의 하늘 · 빛남" : "오늘의 하늘 · 고요함";
   }, [today.hasEntry]);
 
-  // 로딩 중이면 로딩 UI 표시
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-white">Loading...</div>
-      </div>
-    );
-  }
+  if (loading) return <HomeSkeleton />;
 
   return (
     <div className="relative min-h-[100svh] overflow-y-auto">
@@ -103,7 +95,7 @@ export default function HomeReLayoutSingleCTA() {
           </div>
         </header>
 
-        {/* (1) 오늘 상태: 정보 카드 (CTA 제거) */}
+        {/* (1) 오늘 상태 */}
         <div className="mt-6">
           <GlassCard className="p-4">
             <div className="flex items-start justify-between gap-3">
@@ -114,29 +106,26 @@ export default function HomeReLayoutSingleCTA() {
                 <div className="mt-1 text-white/70 text-[13px] leading-snug">
                   {todayDesc}
                 </div>
-
-                {/* 허전함 해결용 "시간성" 한 줄 */}
                 <div className="mt-3 text-white/55 text-[12px]">
                   오늘이 지나가고 있어요.
                 </div>
               </div>
 
-              {/* 대신 오른쪽에는 작은 장식(또는 빈 공간)으로 정리 */}
-              <div className=" w-10 h-10 rounded-2xl border border-white/10 bg-white/4 flex items-center justify-center text-white/60 text-[12px]">
+              <div className="w-10 h-10 rounded-2xl border border-white/10 bg-white/4 flex items-center justify-center text-white/60 text-[12px]">
                 ✦
               </div>
             </div>
           </GlassCard>
         </div>
 
-        {/* (2) 메인 CTA 단 하나 */}
+        {/* (2) 메인 CTA */}
         <div className="mt-4">
           <PrimaryButton onClick={() => router.push("/lumi/write")}>
             오늘 정리하기
           </PrimaryButton>
         </div>
 
-        {/* (3) 주간 요약 (정보 소비 영역) */}
+        {/* (3) 주간 요약 */}
         <div className="mt-6">
           <GlassCard className="p-4">
             <div className="flex items-center justify-between">

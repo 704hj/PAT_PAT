@@ -64,7 +64,7 @@ export default function JournalArchivePage() {
   }, [filtered]);
 
   return (
-    <main className="min-h-[100svh] bg-[#050b1c] text-white">
+    <main className="min-h-[100svh]  text-white">
       <section className="mx-auto max-w-[480px] px-5 pb-24">
         {/* 헤더 */}
         <header className="pt-6 pb-4 flex items-center justify-between">
