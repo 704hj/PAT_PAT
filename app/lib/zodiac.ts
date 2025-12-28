@@ -2,12 +2,14 @@
 export type Pt = { x: number; y: number };
 
 export type ZodiacTemplate = {
-  zodiac_code: string;
+  zodiac_code?: string; // API에서는 star_code 사용
+  star_code?: string; // API 응답 형식
   name_ko: string;
-  start_mmdd: string; // 'MM-DD'
-  end_mmdd: string; // 'MM-DD'
+  start_mmdd?: string; // API에서는 start_day 사용
+  start_day?: string; // API 응답 형식
+  end_mmdd?: string; // API에서는 end_day 사용
+  end_day?: string; // API 응답 형식
   primary_month?: string;
-  // ✅ 새 JSON 구조
   points: Pt[];
   path_index?: number[]; // 없으면 [0..points.length-1]
   edges?: [number, number][];
@@ -16,7 +18,22 @@ export type ZodiacTemplate = {
 export async function loadTemplates(): Promise<ZodiacTemplate[]> {
   const res = await fetch("/api/star", { cache: "no-store" });
   if (!res.ok) throw new Error("failed to load starAPI");
-  return res.json();
+  const data = await res.json();
+  
+  // API 응답을 ZodiacTemplate 형식으로 변환
+  return data.map((item: any) => ({
+    zodiac_code: item.star_code || item.zodiac_code,
+    star_code: item.star_code,
+    name_ko: item.name_ko,
+    start_mmdd: item.start_day || item.start_mmdd,
+    start_day: item.start_day,
+    end_mmdd: item.end_day || item.end_mmdd,
+    end_day: item.end_day,
+    primary_month: item.primary_month,
+    points: item.points || [],
+    path_index: item.path_index,
+    edges: item.edges,
+  }));
 }
 
 export function inRange(mmdd: string, start: string, end: string) {
@@ -29,7 +46,11 @@ export function resolveZodiacByDate(date: Date, list: ZodiacTemplate[]) {
   const mm = String(date.getMonth() + 1).padStart(2, "0");
   const dd = String(date.getDate()).padStart(2, "0");
   const mmdd = `${mm}-${dd}`;
-  return list.find((z) => inRange(mmdd, z.start_mmdd, z.end_mmdd)) ?? list[0];
+  return list.find((z) => {
+    const start = z.start_mmdd || z.start_day || "";
+    const end = z.end_mmdd || z.end_day || "";
+    return inRange(mmdd, start, end);
+  }) ?? list[0];
 }
 
 /* ---------- polyline sampling ---------- */
@@ -78,6 +99,154 @@ export function samplePolyline(
 
 export function daysInMonth(year: number, month1to12: number) {
   return new Date(year, month1to12, 0).getDate();
+}
+
+/* ---------- 별자리 시즌 계산 (요구사항) ---------- */
+export type ZodiacSign =
+  | "capricorn"
+  | "aquarius"
+  | "pisces"
+  | "aries"
+  | "taurus"
+  | "gemini"
+  | "cancer"
+  | "leo"
+  | "virgo"
+  | "libra"
+  | "scorpio"
+  | "sagittarius";
+
+export type ZodiacSeasonRange = {
+  start: Date;
+  end: Date;
+  daysCount: number;
+  dates: string[]; // "YYYY-MM-DD" 형식
+};
+
+// 별자리 정의 (MM-DD 형식)
+const ZODIAC_DEFINITIONS: Record<
+  ZodiacSign,
+  { name_ko: string; start_mmdd: string; end_mmdd: string }
+> = {
+  capricorn: { name_ko: "염소자리", start_mmdd: "12-22", end_mmdd: "01-19" },
+  aquarius: { name_ko: "물병자리", start_mmdd: "01-20", end_mmdd: "02-18" },
+  pisces: { name_ko: "물고기자리", start_mmdd: "02-19", end_mmdd: "03-20" },
+  aries: { name_ko: "양자리", start_mmdd: "03-21", end_mmdd: "04-19" },
+  taurus: { name_ko: "황소자리", start_mmdd: "04-20", end_mmdd: "05-20" },
+  gemini: { name_ko: "쌍둥이자리", start_mmdd: "05-21", end_mmdd: "06-21" },
+  cancer: { name_ko: "게자리", start_mmdd: "06-22", end_mmdd: "07-22" },
+  leo: { name_ko: "사자자리", start_mmdd: "07-23", end_mmdd: "08-22" },
+  virgo: { name_ko: "처녀자리", start_mmdd: "08-23", end_mmdd: "09-22" },
+  libra: { name_ko: "천칭자리", start_mmdd: "09-23", end_mmdd: "10-22" },
+  scorpio: { name_ko: "전갈자리", start_mmdd: "10-23", end_mmdd: "11-21" },
+  sagittarius: { name_ko: "사수자리", start_mmdd: "11-22", end_mmdd: "12-21" },
+};
+
+/**
+ * 날짜 기준으로 별자리를 반환
+ */
+export function getZodiacSign(date: Date): ZodiacSign {
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  const mmdd = `${mm}-${dd}`;
+
+  for (const [sign, def] of Object.entries(ZODIAC_DEFINITIONS)) {
+    if (inRange(mmdd, def.start_mmdd, def.end_mmdd)) {
+      return sign as ZodiacSign;
+    }
+  }
+
+  // 기본값 (염소자리)
+  return "capricorn";
+}
+
+/**
+ * 날짜와 별자리 기준으로 시즌 범위를 계산 (연도 경계 포함)
+ * 예: 2025-12-28의 염소자리 시즌 = 2025-12-22 ~ 2026-01-19
+ */
+export function getZodiacSeasonRange(
+  date: Date,
+  sign: ZodiacSign
+): ZodiacSeasonRange {
+  const def = ZODIAC_DEFINITIONS[sign];
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+
+  // 시작일/종료일 파싱
+  const [startMonth, startDay] = def.start_mmdd.split("-").map(Number);
+  const [endMonth, endDay] = def.end_mmdd.split("-").map(Number);
+
+  let startYear = year;
+  let endYear = year;
+
+  // 연도 경계를 넘는 경우 (예: 염소자리 12-22 ~ 01-19)
+  const crossesYear = startMonth > endMonth || (startMonth === endMonth && startDay > endDay);
+
+  if (crossesYear) {
+    // 현재 날짜가 시작일(12-22) 이후이면
+    if (month > startMonth || (month === startMonth && day >= startDay)) {
+      // 시작일은 올해, 종료일은 다음 해
+      startYear = year;
+      endYear = year + 1;
+    } else {
+      // 현재 날짜가 시작일 이전이면 (1월 초 등)
+      // 시작일은 전년도, 종료일은 올해
+      startYear = year - 1;
+      endYear = year;
+    }
+  } else {
+    // 연도 경계를 넘지 않는 경우
+    if (month < startMonth || (month === startMonth && day < startDay)) {
+      startYear = year - 1;
+    }
+    if (month > endMonth || (month === endMonth && day > endDay)) {
+      endYear = year + 1;
+    }
+  }
+
+  const start = new Date(startYear, startMonth - 1, startDay);
+  const end = new Date(endYear, endMonth - 1, endDay);
+
+  // 날짜 리스트 생성
+  const dates: string[] = [];
+  const current = new Date(start);
+  while (current <= end) {
+    dates.push(toDateString(current));
+    current.setDate(current.getDate() + 1);
+  }
+
+  const daysCount = dates.length;
+
+  return { start, end, daysCount, dates };
+}
+
+/**
+ * Date를 "YYYY-MM-DD" 형식으로 변환
+ */
+export function toDateString(date: Date): string {
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+/**
+ * Date를 "YYYY.MM.DD" 형식으로 표시
+ */
+export function displayDate(date: Date | string): string {
+  const d = typeof date === "string" ? new Date(date) : date;
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}.${mm}.${dd}`;
+}
+
+/**
+ * 별자리 한글명 반환
+ */
+export function getZodiacNameKo(sign: ZodiacSign): string {
+  return ZODIAC_DEFINITIONS[sign].name_ko;
 }
 
 export function expandToDays(
