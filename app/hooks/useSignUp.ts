@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/app/utils/supabase/client";
 import { validatePassword, validateEmail } from "@/app/utils/validation";
+import { checkEmailProviders } from "@/app/utils/auth/providerCheck";
 
 interface UseSignUpReturn {
   // 폼 상태
@@ -140,6 +141,15 @@ export function useSignUp(): UseSignUpReturn {
     setOtpError("");
 
     try {
+      // Provider 확인: Email 가입 시도 전에 다른 provider로 가입되어 있는지 확인
+      const providerCheck = await checkEmailProviders(email);
+      if (!providerCheck.canUseEmail) {
+        setOtpError(providerCheck.errorMessage || "이미 다른 방법으로 가입된 이메일입니다.");
+        setSendingOtp(false);
+        return;
+      }
+
+      // Provider 확인 통과 후 OTP 발송 진행
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
