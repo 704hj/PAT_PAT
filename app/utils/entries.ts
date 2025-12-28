@@ -107,8 +107,16 @@ export async function getEntryByDate(
     endDate.setHours(23, 59, 59, 999);
 
     // diary_type 컬럼이 없는 경우 대비
+    type DiaryRow = {
+      diary_id: number;
+      content: string | null;
+      created_at: string;
+      updated_at: string | null;
+      diary_type?: string;
+    };
+
     let selectFields = "diary_id, content, created_at, updated_at, diary_type";
-    let { data: diaries, error } = await supabase
+    let { data: diariesData, error } = await supabase
       .from("diary")
       .select(selectFields)
       .eq("user_id", userData.user_id)
@@ -116,6 +124,8 @@ export async function getEntryByDate(
       .lte("created_at", endDate.toISOString())
       .order("created_at", { ascending: false })
       .limit(1);
+
+    let diaries: DiaryRow[] | null = (diariesData as unknown) as DiaryRow[] | null;
 
     // diary_type 컬럼이 없는 경우 fallback
     if (error && (error.code === "42703" || error.message.includes("does not exist"))) {
@@ -129,8 +139,12 @@ export async function getEntryByDate(
         .order("created_at", { ascending: false })
         .limit(1);
       
-      if (!errorFallback) {
-        diaries = diariesFallback;
+      if (!errorFallback && diariesFallback) {
+        // diary_type이 없는 경우 기본값 추가
+        diaries = (diariesFallback as unknown as DiaryRow[]).map((d) => ({
+          ...d,
+          diary_type: "star", // 기본값
+        }));
         error = null;
       }
     }
@@ -153,7 +167,7 @@ export async function getEntryByDate(
       date: dateString,
       content: diary.content || "",
       createdAt: diary.created_at,
-      updatedAt: diary.updated_at,
+      updatedAt: diary.updated_at || undefined, // null을 undefined로 변환
       diary_id: diary.diary_id,
       diary_type: (diary.diary_type || "star") as "star" | "worry" | undefined, // 기본값
       tag_ids: tagIds,
