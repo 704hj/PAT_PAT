@@ -1,6 +1,5 @@
 "use client";
 
-import { createDiaryAction } from "@/app/actions/diary";
 import { getEntryByDate } from "@/app/utils/entries";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -69,7 +68,7 @@ interface UseStarWriteReturn {
   selectedTags: string[];
   isSubmitting: boolean;
   loading: boolean;
-  selectedMood: typeof MOODS[0] | undefined;
+  selectedMood: (typeof MOODS)[0] | undefined;
   canSubmit: boolean;
 
   // 액션
@@ -81,7 +80,9 @@ interface UseStarWriteReturn {
   submit: () => Promise<void>;
 }
 
-export function useStarWrite({ editDate }: UseStarWriteProps = {}): UseStarWriteReturn {
+export function useStarWrite({
+  editDate,
+}: UseStarWriteProps = {}): UseStarWriteReturn {
   const router = useRouter();
 
   const [mood, setMood] = useState<MoodKey | null>(null);
@@ -90,7 +91,9 @@ export function useStarWrite({ editDate }: UseStarWriteProps = {}): UseStarWrite
   const [tagOpen, setTagOpen] = useState(false);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [existingDiaryId, setExistingDiaryId] = useState<number | undefined>(undefined);
+  const [existingDiaryId, setExistingDiaryId] = useState<number | undefined>(
+    undefined
+  );
   const [loading, setLoading] = useState(!!editDate); // 수정 모드면 로딩 시작
 
   const selectedMood = useMemo(() => MOODS.find((m) => m.key === mood), [mood]);
@@ -151,22 +154,24 @@ export function useStarWrite({ editDate }: UseStarWriteProps = {}): UseStarWrite
     if (!canSubmit || !selectedMood) return;
     setIsSubmitting(true);
     try {
-      const res = await createDiaryAction({
-        entry_date: editDate || new Date().toISOString().split("T")[0],
-        polarity: selectedMood?.polarity,
-        content: text,
-        tag_ids: selectedTags,
-        diary_id: existingDiaryId, // 수정 모드일 때 기존 diary_id 전달
-      });
-
-      console.log("res ", res);
-      if (res.ok) {
-        router.replace("/lumi/starLoad");
-      } else {
-        // 에러 발생 시 사용자에게 알림
-        console.error("[useStarWrite] Failed to create/update diary:", res.error);
-        alert(`일기 저장에 실패했습니다: ${res.error || "알 수 없는 오류"}`);
-      }
+      // const res = await createDiaryAction({
+      //   entry_date: editDate || new Date().toISOString().split("T")[0],
+      //   polarity: selectedMood?.polarity,
+      //   content: text,
+      //   tag_ids: selectedTags,
+      //   diary_id: existingDiaryId, // 수정 모드일 때 기존 diary_id 전달
+      // });
+      // console.log("res ", res);
+      // if (res.ok) {
+      //   router.replace("/lumi/starLoad");
+      // } else {
+      //   // 에러 발생 시 사용자에게 알림
+      //   console.error(
+      //     "[useStarWrite] Failed to create/update diary:",
+      //     res.error
+      //   );
+      //   alert(`일기 저장에 실패했습니다: ${res.error || "알 수 없는 오류"}`);
+      // }
     } catch (err) {
       console.error("[useStarWrite] Unexpected error:", err);
       alert("일기 저장 중 오류가 발생했습니다.");
@@ -193,4 +198,3 @@ export function useStarWrite({ editDate }: UseStarWriteProps = {}): UseStarWrite
     submit,
   };
 }
-
