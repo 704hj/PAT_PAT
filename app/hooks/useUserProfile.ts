@@ -71,16 +71,28 @@ export function useUserProfile(): UseUserProfileReturn {
       }
 
       // 2. user_profile 테이블에서 프로필 정보 가져오기
-      const { data: profileData, error: profileError } = await supabase
+      let profileData = null;
+      const { data: profileDataResult, error: profileError } = await supabase
         .from("user_profile")
         .select("nickname, created_at, updated_at")
         .eq("user_id", userData.user_id)
         .single();
 
       // 프로필이 없어도 에러로 처리하지 않음 (신규 사용자일 수 있음)
-      if (profileError && profileError.code !== "PGRST116") {
+      if (profileError) {
         // PGRST116은 "no rows returned" 에러 (프로필이 없는 경우)
-        console.warn("[useUserProfile] Profile fetch error:", profileError);
+        // PGRST205는 "table not found" 에러 (테이블이 없는 경우)
+        if (profileError.code === "PGRST116") {
+          // 프로필이 없는 경우 - 정상
+          console.log("[useUserProfile] Profile not found (new user)");
+        } else if (profileError.code === "PGRST205") {
+          // 테이블이 없는 경우 - 배포 환경 스키마 문제
+          console.warn("[useUserProfile] user_profile table not found:", profileError);
+        } else {
+          console.warn("[useUserProfile] Profile fetch error:", profileError);
+        }
+      } else {
+        profileData = profileDataResult;
       }
 
       console.log("[useUserProfile] Users data:", userData);

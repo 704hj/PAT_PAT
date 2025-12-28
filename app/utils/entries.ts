@@ -106,14 +106,34 @@ export async function getEntryByDate(
     const endDate = new Date(dateString);
     endDate.setHours(23, 59, 59, 999);
 
-    const { data: diaries, error } = await supabase
+    // diary_type 컬럼이 없는 경우 대비
+    let selectFields = "diary_id, content, created_at, updated_at, diary_type";
+    let { data: diaries, error } = await supabase
       .from("diary")
-      .select("diary_id, content, created_at, updated_at, diary_type")
+      .select(selectFields)
       .eq("user_id", userData.user_id)
       .gte("created_at", startDate.toISOString())
       .lte("created_at", endDate.toISOString())
       .order("created_at", { ascending: false })
       .limit(1);
+
+    // diary_type 컬럼이 없는 경우 fallback
+    if (error && (error.code === "42703" || error.message.includes("does not exist"))) {
+      console.warn("[getEntryByDate] diary_type column not found, using fallback");
+      const { data: diariesFallback, error: errorFallback } = await supabase
+        .from("diary")
+        .select("diary_id, content, created_at, updated_at")
+        .eq("user_id", userData.user_id)
+        .gte("created_at", startDate.toISOString())
+        .lte("created_at", endDate.toISOString())
+        .order("created_at", { ascending: false })
+        .limit(1);
+      
+      if (!errorFallback) {
+        diaries = diariesFallback;
+        error = null;
+      }
+    }
 
     if (error || !diaries || diaries.length === 0) {
       return null;
@@ -135,7 +155,7 @@ export async function getEntryByDate(
       createdAt: diary.created_at,
       updatedAt: diary.updated_at,
       diary_id: diary.diary_id,
-      diary_type: diary.diary_type as "star" | "worry" | undefined,
+      diary_type: (diary.diary_type || "star") as "star" | "worry" | undefined, // 기본값
       tag_ids: tagIds,
     };
   } catch (error) {
