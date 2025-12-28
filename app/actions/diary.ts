@@ -1,15 +1,16 @@
 "use server";
+import { createServerSupabaseClientReadOnly } from "@/app/utils/supabase/server";
 
-import { createServerSupabaseClient } from "@/app/utils/supabase/server";
 type CreateDiaryInput = {
   entry_date: string;
   polarity: "POSITIVE" | "NEGATIVE" | "UNSET";
   content: string;
+  intensity: number;
   tag_ids?: string[]; // uuid[]
 };
 
 export async function createDiaryAction(input: CreateDiaryInput) {
-  const supabase = await createServerSupabaseClient();
+  const supabase = await createServerSupabaseClientReadOnly();
 
   const { data: auth } = await supabase.auth.getUser();
   if (!auth?.user)
@@ -20,6 +21,7 @@ export async function createDiaryAction(input: CreateDiaryInput) {
     p_entry_date: input.entry_date,
     p_polarity: input.polarity,
     p_content: input.content,
+    p_emotion_intensity: input.intensity,
     p_tag_ids: input.tag_ids ?? [],
   });
 

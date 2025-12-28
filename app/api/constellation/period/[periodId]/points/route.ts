@@ -1,5 +1,5 @@
+import { createServerSupabaseClientReadOnly } from "@/app/utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
-import { createServerSupabaseClient } from "@/app/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +17,7 @@ export async function GET(
     );
   }
 
-  const supabase = await createServerSupabaseClient();
+  const supabase = await createServerSupabaseClientReadOnly();
 
   const { data, error } = await supabase
     .from("constellation_period_day_point")

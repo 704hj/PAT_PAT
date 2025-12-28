@@ -5,12 +5,12 @@ import {
   makeRequestId,
   mapSupabaseError,
 } from "@/app/api/_lib";
-import { createServerSupabaseClient } from "@/app/utils/supabase/server";
+import { createServerSupabaseClientReadOnly } from "@/app/utils/supabase/server";
 
 export async function GET() {
   const requestId = makeRequestId();
   try {
-    const supabase = await createServerSupabaseClient();
+    const supabase = await createServerSupabaseClientReadOnly();
 
     const { data, error } = await supabase.from("emotion").select("*");
 

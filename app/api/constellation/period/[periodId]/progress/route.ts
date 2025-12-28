@@ -1,5 +1,5 @@
+import { createServerSupabaseClientReadOnly } from "@/app/utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
-import { createServerSupabaseClient } from "@/app/utils/supabase/server";
 
 export const dynamic = "force-dynamic"; // (선택) 캐시/정적화 간섭 방지
 
@@ -17,7 +17,7 @@ export async function GET(
     );
   }
 
-  const supabase = await createServerSupabaseClient();
+  const supabase = await createServerSupabaseClientReadOnly();
 
   // 인증
   const { data: auth, error: authErr } = await supabase.auth.getUser();

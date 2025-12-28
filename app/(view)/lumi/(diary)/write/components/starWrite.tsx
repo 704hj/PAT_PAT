@@ -66,6 +66,7 @@ export default function StarWrite({ tags }: Props) {
         entry_date: new Date().toISOString().slice(0, 10),
         polarity,
         content: text,
+        intensity,
         tag_ids: selectedTags,
       });
       if (res.ok) router.replace("/lumi/starLoad");
