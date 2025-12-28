@@ -3,11 +3,32 @@
 import { useState } from "react";
 import Link from "next/link";
 import SocialLogout from "../../(anyone)/auth/components/socialLogout";
+import { useUserProfile } from "@/app/hooks/useUserProfile";
+import { useDiaryStats } from "@/app/hooks/useDiaryStats";
+import { useAuth } from "@/app/hooks/useAuth";
 
 export default function AccountPage() {
+  const { user } = useAuth({ required: true });
+  const { profile, loading: profileLoading } = useUserProfile();
+  const { stats, loading: statsLoading } = useDiaryStats();
+  
   const [notifOn, setNotifOn] = useState(true);
   const [soundOn, setSoundOn] = useState(false);
   const [privateMode, setPrivateMode] = useState(false);
+
+  const loading = profileLoading || statsLoading;
+
+  if (loading) {
+    return (
+      <main className="relative min-h-[100svh] overflow-hidden flex items-center justify-center">
+        <div
+          aria-hidden
+          className="absolute inset-0 -z-20 bg-[radial-gradient(100%_70%_at_50%_100%,#0b1d4a_0%,#091430_48%,#070f24_100%)]"
+        />
+        <div className="text-white/70">로딩 중...</div>
+      </main>
+    );
+  }
 
   return (
     <main className="relative min-h-[100svh] overflow-hidden">
@@ -43,7 +64,7 @@ export default function AccountPage() {
             <div className="flex items-center gap-3.5">
               <div className="relative w-[64px] h-[64px] rounded-2xl bg-white/8 border border-white/12 overflow-hidden flex items-center justify-center">
                 <img
-                  src="/images/icon/lumi/lumi_main.svg" // 루미 캐릭터(안 가리도록 좌측 고정)
+                  src="/images/icon/lumi/lumi_main.svg"
                   alt="루미"
                   className="w-[56px] h-[56px] object-contain"
                 />
@@ -54,32 +75,38 @@ export default function AccountPage() {
               </div>
               <div className="min-w-0">
                 <p className="text-white/90 text-[15px] leading-snug truncate">
-                  안녕하세요, 별빛 기록가님 ✨
+                  안녕하세요, {profile?.nickname || "별빛 기록가"}님 ✨
                 </p>
                 <div className="mt-2 flex flex-wrap gap-1.5">
-                  <Badge>연속 기록 3일</Badge>
-                  <Badge>이번 주 목표 5/7</Badge>
+                  {stats?.weeklyMood && (
+                    <Badge>이번 주 감정: {stats.weeklyMood}</Badge>
+                  )}
+                  <Badge>
+                    총 {(stats?.totalStars ?? 0) + (stats?.totalWorries ?? 0)}개 기록
+                  </Badge>
                 </div>
               </div>
             </div>
 
             <div className="mt-4 grid grid-cols-3 divide-x divide-white/10 rounded-[12px] overflow-hidden border border-white/10">
-              <StatCell label="오늘의 별" value="12" />
-              <StatCell label="걱정 비움" value="7" />
-              <StatCell label="전체 기록" value="86" />
+              <StatCell label="오늘의 별" value={String(stats?.totalStars ?? 0)} />
+              <StatCell label="걱정 비움" value={String(stats?.totalWorries ?? 0)} />
+              <StatCell label="전체 기록" value={String((stats?.totalStars ?? 0) + (stats?.totalWorries ?? 0))} />
             </div>
           </GlassCard>
 
           {/* 계정 */}
           <GlassCard className="p-1.5">
             <SectionTitle>계정</SectionTitle>
-            <SettingRow label="이메일" desc="user@starlumi.app" />
+            <SettingRow label="이메일" desc={user?.email || "이메일 없음"} />
             <SettingRow
               label="로그인 방식"
               right={
                 <div className="flex items-center gap-2">
-                  <IdP pill="KAKAO" />
-                  <IdP pill="Google" />
+                  {user?.app_metadata?.provider === "kakao" && <IdP pill="KAKAO" />}
+                  {user?.app_metadata?.provider === "google" && <IdP pill="Google" />}
+                  {user?.app_metadata?.provider === "email" && <IdP pill="Email" />}
+                  {!user?.app_metadata?.provider && <IdP pill="Email" />}
                 </div>
               }
             />
@@ -331,7 +358,7 @@ function ToggleRow({
   );
 }
 
-function IdP({ pill }: { pill: "KAKAO" | "Google" }) {
+function IdP({ pill }: { pill: "KAKAO" | "Google" | "Email" }) {
   return (
     <span className="px-2.5 h-7 inline-flex items-center rounded-full text-[12px] bg-white/6 text-white/80 border border-white/12">
       {pill}

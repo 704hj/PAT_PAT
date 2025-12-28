@@ -1,30 +1,27 @@
 "use client";
 
-import LoginButton from "@/app/components/loginBtn";
-import { signInWithEmail } from "@/app/utils/supabase/signInWithMagicLink";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import SocialLogin from "../components/socialLogin";
+import LoginButton from "@/app/components/loginBtn";
+import { useSignIn } from "@/app/hooks/useSignIn";
 
 export default function SignInPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const {
+    email,
+    password,
+    loading,
+    error,
+    canSubmit,
+    setEmail,
+    setPassword,
+    signIn,
+    clearError,
+  } = useSignIn();
 
-  const [busy, setBusy] = useState(false);
-  const canSubmit = /\S+@\S+\.\S+/.test(email);
-
-  const signin = async () => {
-    if (!canSubmit || busy) return;
-    try {
-      setBusy(true);
-      // TODO: 매직링크/이메일 로그인 연결
-      const formData = new FormData();
-      formData.set("email", email);
-      formData.set("password", password);
-      await signInWithEmail(formData);
-    } finally {
-      setBusy(false);
-    }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await signIn();
   };
 
   return (
@@ -46,54 +43,81 @@ export default function SignInPage() {
           <p className="mt-1 text-white/70 text-[13px]">기록을 다시 이어가요</p>
         </header>
 
-        <div className=" flex flex-col mt-6 rounded-[16px] border border-white/12 bg-white/6 backdrop-blur p-5 gap-4">
-          {/* 아이디 입력 */}
-          <input
-            type="text"
-            placeholder="아이디"
-            className="flex items-center gap-2 w-full text-[16px] justify-center py-4 rounded-2xl p-3 border border-white/12 text-[#ffffff]"
-            inputMode="email"
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          {/* 비밀번호 입력 */}
-          <input
-            type="password"
-            placeholder="비밀번호"
-            className="flex items-center gap-2 w-full text-[16px] justify-center py-4 rounded-2xl p-3 border border-white/12 text-[#ffffff]"
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          {/* 로그인 버튼 */}
-          <LoginButton
-            title={busy ? "처리 중…" : "로그인"}
-            onClickEvent={signin}
-            style={[
-              "mt-5 w-full h-12 rounded-[12px] text-[15px] font-semibold text-white",
-              "bg-[linear-gradient(180deg,#18326f_0%,#0b1d4a_100%)] border border-white/14",
-              "shadow-[0_6px_16px_rgba(10,18,38,0.32)]",
-              busy || !canSubmit
-                ? "opacity-50 cursor-not-allowed"
-                : "hover:brightness-[1.03] active:translate-y-[1px]",
-            ].join(" ")}
-            disable={!canSubmit || busy}
-          />
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col mt-6 rounded-[16px] border border-white/12 bg-white/6 backdrop-blur p-5 gap-4"
+        >
+          {/* 이메일 입력 */}
+          <div>
+            <input
+              type="email"
+              placeholder="이메일"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                clearError();
+              }}
+              className={`flex items-center gap-2 w-full text-[16px] py-4 rounded-2xl px-4 border ${
+                error && error.includes("이메일") ? "border-red-500" : "border-white/12"
+              } bg-white/5 text-white placeholder:text-white/50 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30`}
+            />
+            {error && error.includes("이메일") && (
+              <p className="mt-1 text-xs text-red-400">{error}</p>
+            )}
+          </div>
 
-          {/* <div className="relative my-4">
+          {/* 비밀번호 입력 */}
+          <div>
+            <input
+              type="password"
+              placeholder="비밀번호"
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                clearError();
+              }}
+              className={`flex items-center gap-2 w-full text-[16px] py-4 rounded-2xl px-4 border ${
+                error && !error.includes("이메일") ? "border-red-500" : "border-white/12"
+              } bg-white/5 text-white placeholder:text-white/50 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30`}
+            />
+            {error && !error.includes("이메일") && (
+              <p className="mt-1 text-xs text-red-400">{error}</p>
+            )}
+          </div>
+
+          {/* 로그인 버튼 */}
+          <button
+            type="submit"
+            disabled={!canSubmit}
+            className={`flex items-center gap-2 w-full text-[16px] justify-center py-4 rounded-2xl transition-colors ${
+              canSubmit
+                ? "bg-[#657FC2] text-white hover:bg-[#5570b5]"
+                : "bg-[#657FC2]/50 text-white/50 cursor-not-allowed opacity-50"
+            }`}
+          >
+            {loading ? "로그인 중..." : "로그인"}
+          </button>
+
+          <div className="relative my-4">
             <div className="h-px bg-white/10" />
-            <span className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 px-3 text-white/60 text-[12px] bg-transparent">
+            <span className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 px-3 text-white/60 text-[12px] bg-[#0d1a3d]">
               또는
             </span>
-          </div> */}
+          </div>
+
           {/* Google 및 kakao */}
-          {/* <SocialLogin /> */}
+          <SocialLogin />
+
           <div className="mt-4 text-center">
             <button
-              onClick={() => router.push("/lumi/auth/signup")}
+              type="button"
+              onClick={() => router.push("/lumi/auth/email")}
               className="text-white/85 text-[13px] underline underline-offset-4 hover:text-white transition"
             >
-              계정이 없나요? 가입하기
+              계정이 없나요? 이메일로 가입하기
             </button>
           </div>
-        </div>
+        </form>
       </section>
     </main>
   );

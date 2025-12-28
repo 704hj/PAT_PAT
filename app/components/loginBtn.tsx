@@ -14,9 +14,12 @@ export default function LoginButton({
 }: Props) {
   return (
     <button
-      onClick={onClickEvent}
+      type="button"
+      onClick={disable ? undefined : onClickEvent}
+      disabled={disable}
       className={[
         "flex items-center gap-2 w-full text-[16px] justify-center py-4 rounded-2xl",
+        disable ? "opacity-50 cursor-not-allowed" : "",
         style,
       ].join(" ")}
     >
