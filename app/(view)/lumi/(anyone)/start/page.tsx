@@ -1,10 +1,13 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { signInWithGoogle } from "@/app/utils/supabase/signInWithGoogle";
 import { signInWithKakao } from "@/app/utils/supabase/signInWithKakao";
 import { useEffect, useState } from "react";
 import LoginButton from "../../components/loginBtn";
+
 export default function Onboarding() {
+  const router = useRouter();
   const [loaded, setLoaded] = useState<boolean>(false);
   const [busy, setBusy] = useState(false);
 
@@ -93,7 +96,7 @@ export default function Onboarding() {
 
           <LoginButton
             title="이메일로 시작하기"
-            onClickEvent={() => {}}
+            onClickEvent={() => router.push("/lumi/auth/signin")}
             style="bg-[#1E2843] text-[#FBFBFB]"
           />
 
