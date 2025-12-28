@@ -76,15 +76,23 @@ export function useDiaryStats(): UseDiaryStatsReturn {
           .eq("diary_type", "star");
         
         if (starError) {
-          // diary_type 컬럼이 없는 경우 (배포 환경 스키마 문제)
-          if (starError.code === "42703" || starError.message.includes("does not exist")) {
+          // diary_type 컬럼이 없는 경우 또는 400 에러 (배포 환경 스키마 문제)
+          if (
+            starError.code === "42703" || 
+            starError.message.includes("does not exist") ||
+            starError.message === "" ||
+            (starError as any).status === 400
+          ) {
             console.warn("[useDiaryStats] diary_type column not found, using fallback");
             // diary_type 없이 전체 개수 조회
-            const { count: totalCount } = await supabase
+            const { count: totalCount, error: totalError } = await supabase
               .from("diary")
               .select("*", { count: "exact", head: true })
               .eq("user_id", userId);
-            starCount = totalCount || 0;
+            
+            if (!totalError) {
+              starCount = totalCount || 0;
+            }
           } else {
             console.error("[useDiaryStats] star 조회 에러:", starError);
           }
@@ -105,8 +113,13 @@ export function useDiaryStats(): UseDiaryStatsReturn {
           .eq("diary_type", "worry");
         
         if (worryError) {
-          // diary_type 컬럼이 없는 경우
-          if (worryError.code === "42703" || worryError.message.includes("does not exist")) {
+          // diary_type 컬럼이 없는 경우 또는 400 에러
+          if (
+            worryError.code === "42703" || 
+            worryError.message.includes("does not exist") ||
+            worryError.message === "" ||
+            (worryError as any).status === 400
+          ) {
             console.warn("[useDiaryStats] diary_type column not found, skipping worry count");
             worryCount = 0;
           } else {
@@ -138,8 +151,13 @@ export function useDiaryStats(): UseDiaryStatsReturn {
           .limit(5);
 
         if (recentError) {
-          // diary_type 컬럼이 없는 경우
-          if (recentError.code === "42703" || recentError.message.includes("does not exist")) {
+          // diary_type 컬럼이 없는 경우 또는 400 에러
+          if (
+            recentError.code === "42703" || 
+            recentError.message.includes("does not exist") ||
+            recentError.message === "" ||
+            (recentError as any).status === 400
+          ) {
             console.warn("[useDiaryStats] diary_type column not found, using fallback");
             // diary_type 없이 조회
             const { data: recentDataFallback, error: recentErrorFallback } = await supabase
