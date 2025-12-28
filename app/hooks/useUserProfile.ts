@@ -51,53 +51,58 @@ export function useUserProfile(): UseUserProfileReturn {
         user.id
       );
 
-      // JOIN을 사용해서 한 번에 조회
-      const { data, error: fetchError } = await supabase
+      // 1. users 테이블에서 user_id 가져오기
+      const { data: userData, error: userError } = await supabase
         .from("users")
-        .select(
-          `
-          user_id,
-          auth_user_id,
-          email,
-          user_profile (
-            nickname,
-            created_at,
-            updated_at
-          )
-        `
-        )
+        .select("user_id, auth_user_id, email")
         .eq("auth_user_id", user.id)
         .single();
 
-      if (fetchError) {
-        console.error("[useUserProfile] Fetch error:", fetchError);
-        throw new Error(fetchError.message);
+      if (userError || !userData) {
+        console.error("[useUserProfile] User not found:", userError);
+        setError(new Error(`사용자 조회 실패: ${userError?.message || "User not found"}`));
+        setProfile({
+          user_id: "",
+          nickname: user?.user_metadata?.nickname || "사용자",
+        });
+        setLoading(false);
+        return;
       }
 
-      if (!data) {
-        console.error("[useUserProfile] User not found");
-        throw new Error("User not found");
+      // 2. user_profile 테이블에서 프로필 정보 가져오기
+      const { data: profileData, error: profileError } = await supabase
+        .from("user_profile")
+        .select("nickname, created_at, updated_at")
+        .eq("user_id", userData.user_id)
+        .single();
+
+      // 프로필이 없어도 에러로 처리하지 않음 (신규 사용자일 수 있음)
+      if (profileError && profileError.code !== "PGRST116") {
+        // PGRST116은 "no rows returned" 에러 (프로필이 없는 경우)
+        console.warn("[useUserProfile] Profile fetch error:", profileError);
       }
 
-      console.log("[useUserProfile] Users data:", data);
-
-      // user_profile이 배열로 올 수 있으므로 처리
-      const profileData = Array.isArray(data.user_profile)
-        ? data.user_profile[0]
-        : data.user_profile;
+      console.log("[useUserProfile] Users data:", userData);
+      console.log("[useUserProfile] Profile data:", profileData);
 
       // 프로필 데이터에 user_id 포함 (프로필이 없어도 기본값 사용)
       const profile = {
         ...profileData,
-        user_id: data.user_id,
+        user_id: userData.user_id,
         nickname: profileData?.nickname || user?.user_metadata?.nickname || "사용자",
       };
 
       console.log("[useUserProfile] Profile loaded:", profile);
       setProfile(profile);
     } catch (err) {
-      console.error("[useUserProfile] Error:", err);
-      setError(err instanceof Error ? err : new Error("Unknown error"));
+      console.error("[useUserProfile] 예상치 못한 에러:", err);
+      const errorMessage = err instanceof Error ? err.message : "알 수 없는 오류가 발생했습니다.";
+      setError(new Error(errorMessage));
+      // 에러가 발생해도 기본 프로필 설정
+      setProfile({
+        user_id: "",
+        nickname: user?.user_metadata?.nickname || "사용자",
+      });
     } finally {
       setLoading(false);
     }
