@@ -17,12 +17,8 @@ export default function SignInPage() {
     setPassword,
     signIn,
     clearError,
+    handleSubmit,
   } = useSignIn();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await signIn();
-  };
 
   return (
     <main className="relative min-h-[100svh] overflow-y-auto">
