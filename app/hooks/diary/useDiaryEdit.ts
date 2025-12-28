@@ -25,7 +25,6 @@ export function useDiaryEdit() {
     revalidateOnFocus: true,
   });
 
-  console.log("diaryData ", diaryData);
   return {
     tags: tagData?.data ?? [],
     tagLoading,
