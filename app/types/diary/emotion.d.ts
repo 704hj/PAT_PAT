@@ -5,9 +5,8 @@ type TEmotion = {
 };
 
 type TTag = {
-  polarity: string;
-  name: string;
-  name_ko: string;
+  tag_id: string;
+  tag_name: string;
 };
 
 type Journal = {

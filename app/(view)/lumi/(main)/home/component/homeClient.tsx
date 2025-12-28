@@ -1,18 +1,14 @@
 "use client";
 
-import { HomeProfile } from "@/app/actions/home/homeActon";
 import GlassCard from "@/app/components/glassCard";
+import { useHomeSummary } from "@/app/hooks/home/useHomeSummary";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
+import HomeSkeleton from "./homeSkeleton";
 import Pill from "./pill";
 import PrimaryButton from "./primaryButton";
 import SecondaryButton from "./secondaryButton";
 
-type Props = {
-  starCount: number;
-  diaryCount: number;
-  profile: HomeProfile | null;
-};
 function pct(value: number, max: number) {
   const v = Math.max(0, Math.min(max, value));
   return (v / max) * 100;
@@ -24,25 +20,35 @@ function getTimeMessage(hour: number) {
   return "오늘이 조용히 마무리되고 있어요.";
 }
 
-export default function HomeClient({ starCount, diaryCount, profile }: Props) {
+export default function HomeClient() {
+  const { data: result, isLoading } = useHomeSummary();
+
   const router = useRouter();
 
-  const headerTitle = `${profile?.nickname ?? "사용자"} 님,`;
+  const headerTitle = `${result?.data?.profile?.nickname ?? "사용자"} 님,`;
   const headerSubtitle = "오늘을 한 줄로 정리해볼까요?";
 
   const todayTitle = useMemo(() => {
-    return starCount ? "오늘은 조용히 남겨졌어요" : "오늘은 아직 기록이 없어요";
-  }, [starCount]);
+    return result?.data?.starCount
+      ? "오늘은 조용히 남겨졌어요"
+      : "오늘은 아직 기록이 없어요";
+  }, [result?.data?.starCount]);
 
   const todayDesc = useMemo(() => {
-    return starCount
+    return result?.data?.starCount
       ? `별이 생성됐어요.`
       : "하루가 지나가기 전, 한 줄을 남길 수 있어요.";
-  }, [starCount]);
+  }, [result?.data?.starCount]);
 
   const todaySkyLabel = useMemo(() => {
-    return starCount ? "오늘의 하늘 · 빛남" : "오늘의 하늘 · 고요함";
-  }, [starCount]);
+    return result?.data?.starCount
+      ? "오늘의 하늘 · 빛남"
+      : "오늘의 하늘 · 고요함";
+  }, [result?.data?.starCount]);
+
+  if (isLoading) {
+    return <HomeSkeleton />;
+  }
 
   return (
     <div className="relative min-h-[100svh] overflow-y-auto">
@@ -100,8 +106,16 @@ export default function HomeClient({ starCount, diaryCount, profile }: Props) {
 
         {/* (2) 메인 CTA */}
         <div className="mt-4">
-          <PrimaryButton onClick={() => router.push("/lumi/write")}>
-            한 줄이면 충분해요
+          <PrimaryButton
+            onClick={() =>
+              result?.data?.isDIary
+                ? router.push("/lumi/write")
+                : router.push("/lumi/edit")
+            }
+          >
+            {result?.data?.isDIary
+              ? "한 줄이면 충분해요"
+              : "오늘 기록 수정하기"}
           </PrimaryButton>
         </div>
 
@@ -121,20 +135,20 @@ export default function HomeClient({ starCount, diaryCount, profile }: Props) {
             </div>
 
             <div className="mt-3 text-white/70 text-[13px] leading-snug">
-              {starCount
-                ? `이번 주에 별 ${starCount}개가 남겨졌어요`
+              {result?.data?.starCount
+                ? `이번 주에 별 ${result?.data?.starCount}개가 남겨졌어요`
                 : "이번 주는 아직 기록이 없어요"}
             </div>
 
             <div className="mt-4">
               <div className="flex items-center justify-between text-[12px] text-white/55">
                 <span>기록한 날</span>
-                <span>{diaryCount}/7</span>
+                <span>{result?.data?.diaryCount}/7</span>
               </div>
               <div className="mt-2 h-2 rounded-full bg-white/8 overflow-hidden">
                 <div
                   className="h-full rounded-full bg-white/40"
-                  style={{ width: `${pct(diaryCount, 7)}%` }}
+                  style={{ width: `${pct(result?.data?.diaryCount, 7)}%` }}
                 />
               </div>
             </div>

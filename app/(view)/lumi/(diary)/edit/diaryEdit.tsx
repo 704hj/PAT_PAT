@@ -1,9 +1,11 @@
 "use client";
 
-import { createDiaryAction } from "@/app/actions/diary";
+import { createDiaryAction } from "@/app/actions/diary/diary";
 import GlassCard from "@/app/components/glassCard";
+import { useDiaryEdit } from "@/app/hooks/diary/useDiaryEdit";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import DiarySkeleton from "../components/skeleton";
 
 type Polarity = "POSITIVE" | "NEGATIVE" | "UNSET";
 
@@ -28,14 +30,8 @@ function clampTags(next: string[]) {
   return Array.from(new Set(next)).slice(0, MAX_TAGS);
 }
 
-type Props = {
-  tags: {
-    tag_id: string;
-    tag_name: string;
-  }[];
-};
-
-export default function StarWrite({ tags }: Props) {
+export default function DiaryWrite() {
+  const { tags, tagLoading, diaryData, diaryLoading } = useDiaryEdit();
   const router = useRouter();
 
   const [polarity, setPolarity] = useState<Polarity>("UNSET");
@@ -75,6 +71,7 @@ export default function StarWrite({ tags }: Props) {
     }
   };
 
+  if (diaryLoading) return <DiarySkeleton />;
   return (
     <div className="relative min-h-[100svh] overflow-y-auto">
       {/* 배경 */}
@@ -225,7 +222,7 @@ export default function StarWrite({ tags }: Props) {
 
               {tagOpen && (
                 <div className="mt-2 flex flex-wrap gap-2">
-                  {tags.map((tag) => {
+                  {tags.map((tag: TTag) => {
                     const selected = selectedTags.includes(tag.tag_id);
                     return (
                       <button
