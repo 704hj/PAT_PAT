@@ -1,5 +1,5 @@
+import { createServerSupabaseClientReadOnly } from "@/app/utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
-import { createServerSupabaseClient } from "@/app/utils/supabase/server";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  const supabase = await createServerSupabaseClient();
+  const supabase = await createServerSupabaseClientReadOnly();
 
   const { data, error } = await supabase
     .from("constellation_period")

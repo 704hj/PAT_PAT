@@ -7,64 +7,28 @@ import { ViewToggle } from "./components/viewToggle";
 import { MonthPicker } from "./components/monthPicker";
 import { CalendarView } from "./components/calendarView";
 import { DateHeader } from "./components/dateHeader";
+import { useDiaryList } from "@/app/hooks/diary/useDiaryList";
 
 type ViewMode = "list" | "calendar";
 
 export default function JournalArchivePage() {
+  const {
+    // state
+    selectedDate,
+    setSelectedDate,
+    selectedMonth,
+    setSelectedMonth,
+
+    // month
+    diaryMonthData,
+    diaryMonthLoading,
+  } = useDiaryList();
   /* ---------------- 상태 ---------------- */
   const [view, setView] = useState<ViewMode>("list");
-  const [month, setMonth] = useState(getCurrentMonth());
   const [q, setQ] = useState("");
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
-
-  /* ---------------- 데이터 (더미) ---------------- */
-  const journals: Journal[] = useMemo(
-    () => [
-      {
-        id: "1",
-        date: "2025-09-12",
-        time: "21:40",
-        text: "오늘은 생각보다 조용한 하루였다.",
-        tags: ["하루"],
-      },
-      {
-        id: "2",
-        date: "2025-09-10",
-        time: "22:10",
-        text: "회의가 길었지만 정리는 잘 끝났다.",
-        tags: ["일"],
-      },
-    ],
-    []
-  );
-
-  /* ---------------- 필터링 ---------------- */
-  const filtered = useMemo(() => {
-    const byMonth = journals.filter((j) => j.date.startsWith(month));
-    const byQ = q.trim()
-      ? byMonth.filter((j) =>
-          `${j.text} ${(j.tags ?? []).join(" ")}`
-            .toLowerCase()
-            .includes(q.toLowerCase())
-        )
-      : byMonth;
-
-    return byQ.sort((a, b) =>
-      b.date === a.date
-        ? b.time.localeCompare(a.time)
-        : b.date.localeCompare(a.date)
-    );
-  }, [journals, month, q]);
-
-  /* ---------------- 날짜 그룹 ---------------- */
-  const grouped = useMemo(() => {
-    const map: Record<string, Journal[]> = {};
-    for (const j of filtered) (map[j.date] ||= []).push(j);
-    return Object.entries(map).sort((a, b) => b[0].localeCompare(a[0]));
-  }, [filtered]);
 
   return (
-    <main className="min-h-[100svh] bg-[#050b1c] text-white">
+    <main className="min-h-[100svh]  text-white">
       <section className="mx-auto max-w-[480px] px-5 pb-24">
         {/* 헤더 */}
         <header className="pt-6 pb-4 flex items-center justify-between">
@@ -82,7 +46,7 @@ export default function JournalArchivePage() {
 
         {/* 컨트롤 */}
         <div className="mt-3 space-y-2">
-          <MonthPicker value={month} onChange={setMonth} />
+          <MonthPicker value={selectedMonth} onChange={setSelectedMonth} />
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
@@ -95,14 +59,14 @@ export default function JournalArchivePage() {
         <div className="mt-5">
           {view === "list" && (
             <>
-              {grouped.length === 0 && <EmptyState />}
-              {grouped.map(([date, items]) => (
-                <section key={date} className="mb-6">
-                  <DateHeader date={date} />
+              {(diaryMonthData?.data?.items ?? [])?.length === 0 && (
+                <EmptyState />
+              )}
+              {(diaryMonthData?.data?.items ?? [])?.map((diary: TDiaryItem) => (
+                <section key={diary.diary_id} className="mb-6">
+                  <DateHeader date={diary.entry_date} />
                   <ul className="mt-2 space-y-2">
-                    {items.map((j) => (
-                      <JournalCard key={j.id} journal={j} />
-                    ))}
+                    <JournalCard key={diary.diary_id} diary={diary} />
                   </ul>
                 </section>
               ))}
@@ -111,8 +75,8 @@ export default function JournalArchivePage() {
 
           {view === "calendar" && (
             <CalendarView
-              month={month}
-              journals={journals}
+              month={selectedMonth}
+              diaryList={diaryMonthData?.data?.items ?? []}
               selectedDate={selectedDate}
               onSelectDate={setSelectedDate}
             />
@@ -121,12 +85,6 @@ export default function JournalArchivePage() {
       </section>
     </main>
   );
-}
-
-/* utils */
-function getCurrentMonth() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 }
 
 function EmptyState() {

@@ -7,6 +7,7 @@ import { cookies } from "next/headers";
  * 서버 전용
  * 서버에서 세션 검사할 때 필요
  */
+// 쿠키 수정 가능한 “write”  로그인 / 로그아웃 / callback / OTP / 비번 변경
 export async function createServerSupabaseClient() {
   const cookieStore = await cookies();
 
@@ -25,6 +26,27 @@ export async function createServerSupabaseClient() {
             cookieStore.set({ name, value, ...options });
           });
         },
+      },
+    }
+  );
+}
+
+// 쿠키 수정 안 하는 “read-only” 조회(다이어리 가져오기, 프로필 읽기 ..)
+export async function createServerSupabaseClientReadOnly() {
+  const cookieStore = await cookies();
+
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore
+            .getAll()
+            .map((c) => ({ name: c.name, value: c.value }));
+        },
+        //  Server Component에서 쿠키 수정 금지 -> no-op
+        setAll() {},
       },
     }
   );
