@@ -1,15 +1,28 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import SocialLogin from "../components/socialLogin";
 import LoginButton from "../../../components/loginBtn";
+import { useSignIn } from "@/app/hooks/useSignIn";
 
 export default function SignInPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [busy, setBusy] = useState(false);
-  const canSubmit = /\S+@\S+\.\S+/.test(email);
+  const {
+    email,
+    password,
+    loading,
+    error,
+    canSubmit,
+    setEmail,
+    setPassword,
+    signIn,
+    clearError,
+  } = useSignIn();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await signIn();
+  };
 
   return (
     <main className="relative min-h-[100svh] overflow-y-auto">
@@ -30,42 +43,81 @@ export default function SignInPage() {
           <p className="mt-1 text-white/70 text-[13px]">기록을 다시 이어가요</p>
         </header>
 
-        <div className=" flex flex-col mt-6 rounded-[16px] border border-white/12 bg-white/6 backdrop-blur p-5 gap-4">
-          {/* 아이디 입력 */}
-          <input
-            type="text"
-            placeholder="아이디"
-            className="flex items-center gap-2 w-full text-[16px] justify-center py-4 rounded-2xl p-3 border border-white/12 text-[#ffffff]"
-          />
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col mt-6 rounded-[16px] border border-white/12 bg-white/6 backdrop-blur p-5 gap-4"
+        >
+          {/* 이메일 입력 */}
+          <div>
+            <input
+              type="email"
+              placeholder="이메일"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                clearError();
+              }}
+              className={`flex items-center gap-2 w-full text-[16px] py-4 rounded-2xl px-4 border ${
+                error && error.includes("이메일") ? "border-red-500" : "border-white/12"
+              } bg-white/5 text-white placeholder:text-white/50 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30`}
+            />
+            {error && error.includes("이메일") && (
+              <p className="mt-1 text-xs text-red-400">{error}</p>
+            )}
+          </div>
+
           {/* 비밀번호 입력 */}
-          <input
-            type="text"
-            placeholder="비밀번호"
-            className="flex items-center gap-2 w-full text-[16px] justify-center py-4 rounded-2xl p-3 border border-white/12 text-[#ffffff]"
-          />
+          <div>
+            <input
+              type="password"
+              placeholder="비밀번호"
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                clearError();
+              }}
+              className={`flex items-center gap-2 w-full text-[16px] py-4 rounded-2xl px-4 border ${
+                error && !error.includes("이메일") ? "border-red-500" : "border-white/12"
+              } bg-white/5 text-white placeholder:text-white/50 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30`}
+            />
+            {error && !error.includes("이메일") && (
+              <p className="mt-1 text-xs text-red-400">{error}</p>
+            )}
+          </div>
+
           {/* 로그인 버튼 */}
-          <LoginButton
-            title={"로그인"}
-            onClickEvent={() => {}}
-            style="bg-[#1E2843] text-[#FBFBFB]"
-          />
+          <button
+            type="submit"
+            disabled={!canSubmit}
+            className={`flex items-center gap-2 w-full text-[16px] justify-center py-4 rounded-2xl transition-colors ${
+              canSubmit
+                ? "bg-[#657FC2] text-white hover:bg-[#5570b5]"
+                : "bg-[#657FC2]/50 text-white/50 cursor-not-allowed opacity-50"
+            }`}
+          >
+            {loading ? "로그인 중..." : "로그인"}
+          </button>
+
           <div className="relative my-4">
             <div className="h-px bg-white/10" />
-            <span className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 px-3 text-white/60 text-[12px] bg-transparent">
+            <span className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 px-3 text-white/60 text-[12px] bg-[#0d1a3d]">
               또는
             </span>
           </div>
+
           {/* Google 및 kakao */}
           <SocialLogin />
+
           <div className="mt-4 text-center">
             <button
-              onClick={() => router.push("/lumi/auth/signup")}
+              type="button"
+              onClick={() => router.push("/lumi/auth/email")}
               className="text-white/85 text-[13px] underline underline-offset-4 hover:text-white transition"
             >
-              계정이 없나요? 가입하기
+              계정이 없나요? 이메일로 가입하기
             </button>
           </div>
-        </div>
+        </form>
       </section>
     </main>
   );
