@@ -181,7 +181,7 @@ export default function HomeReLayoutSingleCTA() {
       )}
 
       {/* 일주일 기록 카드 */}
-      <Link href="/lumi/journal" className="flex flex-col w-full">
+      <Link href="/lumi/diary" className="flex flex-col w-full">
         <div className="flex w-full bg-[#C1CEF1] rounded-t-2xl items-center justify-center py-4">
           <Image
             src="/images/icon/lumi/lumi_book.svg"
