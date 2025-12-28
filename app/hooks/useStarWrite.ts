@@ -160,7 +160,16 @@ export function useStarWrite({ editDate }: UseStarWriteProps = {}): UseStarWrite
       });
 
       console.log("res ", res);
-      if (res.ok) router.replace("/lumi/starLoad");
+      if (res.ok) {
+        router.replace("/lumi/starLoad");
+      } else {
+        // 에러 발생 시 사용자에게 알림
+        console.error("[useStarWrite] Failed to create/update diary:", res.error);
+        alert(`일기 저장에 실패했습니다: ${res.error || "알 수 없는 오류"}`);
+      }
+    } catch (err) {
+      console.error("[useStarWrite] Unexpected error:", err);
+      alert("일기 저장 중 오류가 발생했습니다.");
     } finally {
       setIsSubmitting(false);
     }
