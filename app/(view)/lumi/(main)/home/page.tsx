@@ -1,9 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import ActionButton from "./component/actionBtn";
 import GlassCard from "../../components/glassCard";
+import MoodSelector from "../../components/moodSelector";
 import { useUserProfile } from "@/app/hooks/useUserProfile";
+import { useDiaryStats } from "@/app/hooks/useDiaryStats";
 
 function IconStar() {
   return (
@@ -15,6 +18,7 @@ function IconStar() {
     </svg>
   );
 }
+
 function IconRelease() {
   return (
     <svg
@@ -35,12 +39,30 @@ function IconRelease() {
     </svg>
   );
 }
-import Image from "next/image";
-import MoodSelector from "../../components/moodSelector";
+
+// 날짜 포맷 함수
+function formatDate(dateStr: string): string {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+
+  if (diffHours < 1) return "방금 전";
+  if (diffHours < 24) return `${diffHours}시간 전`;
+
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays === 1) return "어제";
+  if (diffDays < 7) return `${diffDays}일 전`;
+
+  return `${date.getMonth() + 1}.${date.getDate()}`;
+}
 
 export default function HomePage() {
   // 공통 훅으로 세션 + 프로필 정보 한 번에 가져오기
-  const { profile, loading } = useUserProfile();
+  const { profile, loading: profileLoading } = useUserProfile();
+  const { stats, loading: statsLoading } = useDiaryStats();
+
+  const loading = profileLoading || statsLoading;
 
 
   // 로딩 중이면 로딩 UI 표시
@@ -56,7 +78,7 @@ export default function HomePage() {
     <div className="flex flex-col w-full min-h-screen overflow-auto px-4 pt-14 pb-24 gap-5">
       {/* 스타 뱃지 */}
       <div
-        className="inline-flex items-center gap-1 px-3 py-1.5 
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 
                   bg-[#676D82] rounded-2xl border border-white/50 w-fit"
       >
         <img
@@ -65,8 +87,10 @@ export default function HomePage() {
           alt="star"
           className="w-4 h-4"
         />
-        <span className="text-white text-sm">Star</span>
-        <span className="text-white text-sm">0</span>
+        <span className="text-white text-sm font-medium">Star</span>
+        <span className="text-yellow-300 text-sm font-bold">
+          {stats?.totalStars ?? 0}
+        </span>
       </div>
 
       {/* 히어로 섹션: 캐릭터 + 인사 */}
@@ -109,13 +133,56 @@ export default function HomePage() {
         <span className="whitespace-pre-line text-[15px] leading-relaxed">
           {"기억하고 싶은 순간이 있었나요?\n별빛 아래에 편히 적어보아요."}
         </span>
-        <button className="bg-[#657FC2] py-2 px-5 rounded-xl text-[15px] flex-shrink-0 ml-4">
+        <Link
+          href="/lumi/write"
+          className="bg-[#657FC2] py-2 px-5 rounded-xl text-[15px] flex-shrink-0 ml-4 hover:bg-[#5570b5] transition-colors"
+        >
           기록하기
-        </button>
+        </Link>
       </div>
 
+      {/* 최근 기록 */}
+      {stats?.recentDiaries && stats.recentDiaries.length > 0 && (
+        <div className="flex flex-col gap-3">
+          <h3 className="text-white/80 text-sm font-medium">최근 기록</h3>
+          <div className="flex flex-col gap-2">
+            {stats.recentDiaries.slice(0, 3).map((diary) => (
+              <div
+                key={diary.diary_id}
+                className="flex items-center gap-3 bg-white/5 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/10"
+              >
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                    diary.diary_type === "star"
+                      ? "bg-yellow-500/20"
+                      : "bg-blue-500/20"
+                  }`}
+                >
+                  {diary.diary_type === "star" ? (
+                    <span className="text-yellow-400">⭐</span>
+                  ) : (
+                    <span className="text-blue-400">💭</span>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-white/90 text-sm truncate">
+                    {diary.content}
+                  </p>
+                  <p className="text-white/50 text-xs mt-0.5">
+                    {diary.emotion_name && (
+                      <span className="mr-2">{diary.emotion_name}</span>
+                    )}
+                    {formatDate(diary.created_at)}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* 일주일 기록 카드 */}
-      <div className="flex flex-col w-full">
+      <Link href="/lumi/journal" className="flex flex-col w-full">
         <div className="flex w-full bg-[#C1CEF1] rounded-t-2xl items-center justify-center py-4">
           <Image
             src="/images/icon/lumi/lumi_book.svg"
@@ -131,7 +198,11 @@ export default function HomePage() {
             </span>
             <br />
             <span className="text-[12px] text-[#A6A6A6]">
-              평균적으로 기쁨의 날이 많아요.
+              {stats?.weeklyMood
+                ? `이번 주는 "${stats.weeklyMood}" 감정이 많아요.`
+                : stats?.totalStars === 0
+                ? "아직 기록이 없어요. 첫 별을 만들어보세요!"
+                : "기록을 분석하고 있어요."}
             </span>
           </div>
           <div className="flex items-center justify-center rounded-full bg-[#657FC2] w-[42px] h-[42px] flex-shrink-0 ml-3">
@@ -143,7 +214,7 @@ export default function HomePage() {
             />
           </div>
         </div>
-      </div>
+      </Link>
 
       {/* 감정 선택 */}
       <MoodSelector />
