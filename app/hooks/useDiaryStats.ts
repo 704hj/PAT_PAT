@@ -66,61 +66,112 @@ export function useDiaryStats(): UseDiaryStatsReturn {
 
       const userId = userData.user_id;
 
-      // 2. 별(star) 개수 조회
+      // 2. 별(star) 개수 조회 - diary_type 컬럼이 없는 경우 대비
       let starCount = 0;
-      const { count: starCountResult, error: starError } = await supabase
-        .from("diary")
-        .select("*", { count: "exact", head: true })
-        .eq("user_id", userId)
-        .eq("diary_type", "star");
-      
-      if (starError) {
-        console.error("[useDiaryStats] star 조회 에러:", starError);
-        setError(new Error(`별 개수 조회 실패: ${starError.message}`));
-      } else {
-        starCount = starCountResult || 0;
+      try {
+        const { count: starCountResult, error: starError } = await supabase
+          .from("diary")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", userId)
+          .eq("diary_type", "star");
+        
+        if (starError) {
+          // diary_type 컬럼이 없는 경우 (배포 환경 스키마 문제)
+          if (starError.code === "42703" || starError.message.includes("does not exist")) {
+            console.warn("[useDiaryStats] diary_type column not found, using fallback");
+            // diary_type 없이 전체 개수 조회
+            const { count: totalCount } = await supabase
+              .from("diary")
+              .select("*", { count: "exact", head: true })
+              .eq("user_id", userId);
+            starCount = totalCount || 0;
+          } else {
+            console.error("[useDiaryStats] star 조회 에러:", starError);
+          }
+        } else {
+          starCount = starCountResult || 0;
+        }
+      } catch (err) {
+        console.error("[useDiaryStats] star 조회 예외:", err);
       }
 
-      // 3. 걱정(worry) 개수 조회
+      // 3. 걱정(worry) 개수 조회 - diary_type 컬럼이 없는 경우 대비
       let worryCount = 0;
-      const { count: worryCountResult, error: worryError } = await supabase
-        .from("diary")
-        .select("*", { count: "exact", head: true })
-        .eq("user_id", userId)
-        .eq("diary_type", "worry");
-      
-      if (worryError) {
-        console.error("[useDiaryStats] worry 조회 에러:", worryError);
-        setError(new Error(`걱정 개수 조회 실패: ${worryError.message}`));
-      } else {
-        worryCount = worryCountResult || 0;
+      try {
+        const { count: worryCountResult, error: worryError } = await supabase
+          .from("diary")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", userId)
+          .eq("diary_type", "worry");
+        
+        if (worryError) {
+          // diary_type 컬럼이 없는 경우
+          if (worryError.code === "42703" || worryError.message.includes("does not exist")) {
+            console.warn("[useDiaryStats] diary_type column not found, skipping worry count");
+            worryCount = 0;
+          } else {
+            console.error("[useDiaryStats] worry 조회 에러:", worryError);
+          }
+        } else {
+          worryCount = worryCountResult || 0;
+        }
+      } catch (err) {
+        console.error("[useDiaryStats] worry 조회 예외:", err);
       }
 
-      // 4. 최근 일기 5개 조회
+      // 4. 최근 일기 5개 조회 - diary_type 컬럼이 없는 경우 대비
       let recentDiaries: RecentDiary[] = [];
-      const { data: recentData, error: recentError } = await supabase
-        .from("diary")
-        .select(`
+      try {
+        // 먼저 diary_type 포함해서 시도
+        let selectFields = `
           diary_id,
           diary_type,
           content,
           created_at
-        `)
-        .eq("user_id", userId)
-        .order("created_at", { ascending: false })
-        .limit(5);
+        `;
+        
+        const { data: recentData, error: recentError } = await supabase
+          .from("diary")
+          .select(selectFields)
+          .eq("user_id", userId)
+          .order("created_at", { ascending: false })
+          .limit(5);
 
-      if (recentError) {
-        console.error("[useDiaryStats] 최근 일기 조회 에러:", recentError);
-        setError(new Error(`최근 일기 조회 실패: ${recentError.message}`));
-      } else if (recentData) {
-        recentDiaries = recentData.map((d: any) => ({
-          diary_id: d.diary_id,
-          diary_type: d.diary_type,
-          content: d.content || "",
-          created_at: d.created_at,
-          emotion_name: undefined,
-        }));
+        if (recentError) {
+          // diary_type 컬럼이 없는 경우
+          if (recentError.code === "42703" || recentError.message.includes("does not exist")) {
+            console.warn("[useDiaryStats] diary_type column not found, using fallback");
+            // diary_type 없이 조회
+            const { data: recentDataFallback, error: recentErrorFallback } = await supabase
+              .from("diary")
+              .select("diary_id, content, created_at")
+              .eq("user_id", userId)
+              .order("created_at", { ascending: false })
+              .limit(5);
+            
+            if (!recentErrorFallback && recentDataFallback) {
+              recentDiaries = recentDataFallback.map((d: any) => ({
+                diary_id: d.diary_id,
+                diary_type: "star" as const, // 기본값
+                content: d.content || "",
+                created_at: d.created_at,
+                emotion_name: undefined,
+              }));
+            }
+          } else {
+            console.error("[useDiaryStats] 최근 일기 조회 에러:", recentError);
+          }
+        } else if (recentData) {
+          recentDiaries = recentData.map((d: any) => ({
+            diary_id: d.diary_id,
+            diary_type: d.diary_type || "star", // 기본값
+            content: d.content || "",
+            created_at: d.created_at,
+            emotion_name: undefined,
+          }));
+        }
+      } catch (err) {
+        console.error("[useDiaryStats] 최근 일기 조회 예외:", err);
       }
 
       // 감정 분석은 일단 스킵 (테이블 구조 확인 후 추가)
