@@ -86,18 +86,11 @@ export function useUserProfile(): UseUserProfileReturn {
         ? data.user_profile[0]
         : data.user_profile;
 
-      if (!profileData) {
-        console.error(
-          "[useUserProfile] Profile not found for user_id:",
-          data.user_id
-        );
-        throw new Error("Profile not found");
-      }
-
-      // 프로필 데이터에 user_id 포함
+      // 프로필 데이터에 user_id 포함 (프로필이 없어도 기본값 사용)
       const profile = {
-        user_id: data.user_id,
         ...profileData,
+        user_id: data.user_id,
+        nickname: profileData?.nickname || user?.user_metadata?.nickname || "사용자",
       };
 
       console.log("[useUserProfile] Profile loaded:", profile);
