@@ -1,8 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import LoginButton from "../../../components/loginBtn";
 import SocialLogin from "../components/socialLogin";
+import LoginButton from "@/app/components/loginBtn";
 
 export default function SignUpPage() {
   const router = useRouter();

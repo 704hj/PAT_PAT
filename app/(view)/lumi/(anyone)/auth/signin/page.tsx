@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import SocialLogin from "../components/socialLogin";
-import LoginButton from "../../../components/loginBtn";
+import LoginButton from "@/app/components/loginBtn";
 import { useSignIn } from "@/app/hooks/useSignIn";
 
 export default function SignInPage() {

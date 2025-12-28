@@ -61,6 +61,7 @@ export function useUserProfile(): UseUserProfileReturn {
       if (userError || !userData) {
         console.error("[useUserProfile] User not found:", userError);
         setError(new Error(`사용자 조회 실패: ${userError?.message || "User not found"}`));
+        // 에러가 발생해도 기본 프로필 설정 (UI가 깨지지 않도록)
         setProfile({
           user_id: "",
           nickname: user?.user_metadata?.nickname || "사용자",

@@ -3,8 +3,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import ActionButton from "./component/actionBtn";
-import GlassCard from "../../components/glassCard";
-import MoodSelector from "../../components/moodSelector";
+import GlassCard from "@/app/components/glassCard";
+import MoodSelector from "@/app/components/moodSelector";
 import { useUserProfile } from "@/app/hooks/useUserProfile";
 import { useDiaryStats } from "@/app/hooks/useDiaryStats";
 
@@ -57,13 +57,12 @@ function formatDate(dateStr: string): string {
   return `${date.getMonth() + 1}.${date.getDate()}`;
 }
 
-export default function HomePage() {
+export default function HomeReLayoutSingleCTA() {
   // 공통 훅으로 세션 + 프로필 정보 한 번에 가져오기
   const { profile, loading: profileLoading } = useUserProfile();
   const { stats, loading: statsLoading } = useDiaryStats();
 
   const loading = profileLoading || statsLoading;
-
 
   // 로딩 중이면 로딩 UI 표시
   if (loading) {

@@ -1,10 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import LoginButton from "@/app/components/loginBtn";
 import { signInWithGoogle } from "@/app/utils/supabase/signInWithGoogle";
 import { signInWithKakao } from "@/app/utils/supabase/signInWithKakao";
-import { useEffect, useState } from "react";
-import LoginButton from "../../components/loginBtn";
 
 export default function Onboarding() {
   const router = useRouter();

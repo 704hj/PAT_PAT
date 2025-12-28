@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
         email: user.email ?? null,
         signup_method: provider, // 'kakao' 등
         // profile_image: avatar, // 테이블에 있으면 추가
-        // nickname,              // 테이블에 있으면 추가
+        nickname, // 테이블에 있으면 추가
         updated_at: new Date().toISOString(),
       },
       { onConflict: "auth_user_id" }
