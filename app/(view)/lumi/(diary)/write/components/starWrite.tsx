@@ -1,112 +1,44 @@
 "use client";
 
-import { createDiaryAction } from "@/app/actions/diary";
 import GlassCard from "@/app/components/glassCard";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
 import StepPill from "./StepPill";
-
-type MoodKey = "calm" | "okay" | "good" | "tough";
-type Polarity = "POSITIVE" | "NEGATIVE" | "UNSET";
-
-const MOODS: Array<{
-  key: MoodKey;
-  label: string; // 화면에 노출되는 텍스트
-  helper?: string; // 필요하면 작은 설명
-  polarity: Polarity;
-  img: string; // 아이콘 경로
-}> = [
-  {
-    key: "calm",
-    label: "편안",
-    polarity: "POSITIVE",
-    img: "/images/icon/emotion/pos/happy.png",
-  },
-  {
-    key: "okay",
-    label: "무난",
-    polarity: "UNSET",
-    img: "/images/icon/emotion/pos/joy.png",
-  },
-  {
-    key: "good",
-    label: "만족",
-    polarity: "POSITIVE",
-    img: "/images/icon/emotion/pos/love.png",
-  },
-  {
-    key: "tough",
-    label: "버거움",
-    polarity: "NEGATIVE",
-    img: "/images/icon/emotion/neg/anger.png",
-  },
-];
-
-const LIMIT = 200;
-const MAX_TAGS = 3;
-
-function intensityLabel(v: number) {
-  if (v <= 2) return "잔잔해요";
-  if (v === 3) return "조금 느껴져요";
-  return "꽤 컸어요";
-}
-
-function clampTags(next: string[]) {
-  // 중복 제거 + 최대 3개
-  const uniq = Array.from(new Set(next));
-  return uniq.slice(0, MAX_TAGS);
-}
+import {
+  useStarWrite,
+  MOODS,
+  LIMIT,
+  MAX_TAGS,
+  intensityLabel,
+  type MoodKey,
+} from "@/app/hooks/useStarWrite";
 
 type Props = {
   tags: {
     tag_id: string;
     tag_name: string;
   }[];
+  editDate?: string; // 수정 모드일 때 날짜 (YYYY-MM-DD)
 };
-export default function StarWrite({ tags }: Props) {
+
+export default function StarWrite({ tags, editDate }: Props) {
   const router = useRouter();
-
-  const [mood, setMood] = useState<MoodKey | null>(null);
-  const [intensity, setIntensity] = useState<number>(3);
-  const [text, setText] = useState("");
-  const [tagOpen, setTagOpen] = useState(false);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const selectedMood = useMemo(() => MOODS.find((m) => m.key === mood), [mood]);
-
-  const canSubmit = useMemo(() => {
-    // MVP 기준: 텍스트만 필수로 두고(200자), 감정은 선택 가능
-    return text.trim().length > 0 && !isSubmitting;
-  }, [text, isSubmitting]);
-
-  const toggleTag = (tagId: string) => {
-    setSelectedTags((prev) => {
-      const exists = prev.includes(tagId);
-      const next = exists
-        ? prev.filter((t) => t !== tagId)
-        : clampTags([...prev, tagId]);
-      return next;
-    });
-  };
-
-  const submit = async () => {
-    if (!canSubmit || !selectedMood) return;
-    setIsSubmitting(true);
-    try {
-      const res = await createDiaryAction({
-        entry_date: new Date().toDateString(),
-        polarity: selectedMood?.polarity,
-        content: text,
-        tag_ids: selectedTags,
-      });
-
-      console.log("res ", res);
-      if (res.ok) router.replace("/lumi/starLoad");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const {
+    mood,
+    intensity,
+    text,
+    tagOpen,
+    selectedTags,
+    isSubmitting,
+    loading,
+    selectedMood,
+    canSubmit,
+    setMood,
+    setIntensity,
+    setText,
+    setTagOpen,
+    toggleTag,
+    submit,
+  } = useStarWrite({ editDate });
 
   return (
     <div className="relative min-h-[100svh] overflow-y-auto">
@@ -114,6 +46,13 @@ export default function StarWrite({ tags }: Props) {
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(1200px_800px_at_50%_-10%,rgba(70,120,255,0.22),transparent_60%),radial-gradient(900px_600px_at_80%_40%,rgba(130,70,255,0.14),transparent_60%),linear-gradient(180deg,#07102a_0%,#050b1c_100%)]" />
 
       <section className="relative mx-auto w-full max-w-[480px] px-5 pb-[120px]">
+        {/* 로딩 오버레이 */}
+        {loading && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+            <div className="text-white text-sm">기존 글을 불러오는 중...</div>
+          </div>
+        )}
+
         {/* 헤더 */}
         <header className="pt-6 flex items-center justify-between">
           <button
@@ -124,7 +63,7 @@ export default function StarWrite({ tags }: Props) {
             ←
           </button>
           <h1 className="text-white text-[18px] font-semibold tracking-[-0.01em]">
-            오늘의 별 만들기
+            {editDate ? "별 수정하기" : "오늘의 별 만들기"}
           </h1>
           <span className="w-9" />
         </header>
@@ -168,9 +107,7 @@ export default function StarWrite({ tags }: Props) {
                   <button
                     key={m.key}
                     type="button"
-                    onClick={() =>
-                      setMood((prev) => (prev === m.key ? null : m.key))
-                    }
+                    onClick={() => setMood(mood === m.key ? null : m.key)}
                     aria-pressed={selected}
                     aria-label={m.label}
                     className={[
@@ -283,7 +220,7 @@ export default function StarWrite({ tags }: Props) {
             <div className="mt-4">
               <button
                 type="button"
-                onClick={() => setTagOpen((v) => !v)}
+                onClick={() => setTagOpen(!tagOpen)}
                 className="w-full flex items-center justify-between rounded-xl border border-white/10 bg-white/4 px-3 py-2 hover:bg-white/6 transition"
                 aria-expanded={tagOpen}
               >
@@ -339,21 +276,21 @@ export default function StarWrite({ tags }: Props) {
             </button>
 
             <button
-              disabled={!canSubmit}
+              disabled={!canSubmit || loading}
               onClick={submit}
               className={[
                 "group relative h-12 rounded-[12px] text-[15px] font-semibold text-white",
                 "bg-[linear-gradient(180deg,#18326f_0%,#0b1d4a_100%)] border border-white/14",
                 "shadow-[0_6px_16px_rgba(10,18,38,0.32)] overflow-hidden",
                 "focus:outline-none focus-visible:ring-2 focus-visible:ring-white/28",
-                canSubmit
+                canSubmit && !loading
                   ? "hover:brightness-[1.03] active:translate-y-[1px]"
                   : "opacity-50 cursor-not-allowed",
               ].join(" ")}
-              aria-disabled={!canSubmit}
+              aria-disabled={!canSubmit || loading}
             >
               <span className="relative z-10 inline-flex items-center justify-center gap-2">
-                오늘 정리하기
+                {loading ? "로딩 중..." : editDate ? "수정하기" : "오늘 정리하기"}
                 <svg
                   width="14"
                   height="14"

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/app/utils/supabase/client";
 import { validateEmail } from "@/app/utils/validation";
+import { checkEmailProviders } from "@/app/utils/auth/providerCheck";
 
 interface UseSignInReturn {
   // 상태
@@ -18,6 +19,7 @@ interface UseSignInReturn {
   setPassword: (password: string) => void;
   signIn: () => Promise<boolean>;
   clearError: () => void;
+  handleSubmit: (e: React.FormEvent) => Promise<void>;
 }
 
 /**
@@ -46,6 +48,15 @@ export function useSignIn(): UseSignInReturn {
     setError(null);
 
     try {
+      // Provider 확인: Email 로그인 시도 전에 다른 provider로 가입되어 있는지 확인
+      const providerCheck = await checkEmailProviders(email);
+      if (!providerCheck.canUseEmail) {
+        setError(providerCheck.errorMessage || "이미 다른 방법으로 가입된 이메일입니다.");
+        setLoading(false);
+        return false;
+      }
+
+      // Provider 확인 통과 후 로그인 진행
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -121,6 +132,11 @@ export function useSignIn(): UseSignInReturn {
 
   const clearError = () => setError(null);
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await signIn();
+  };
+
   // 버튼 활성화 조건: 이메일과 비밀번호가 모두 입력되어야 함
   const canSubmit = Boolean(
     email.trim() && 
@@ -140,6 +156,7 @@ export function useSignIn(): UseSignInReturn {
     setPassword,
     signIn,
     clearError,
+    handleSubmit,
   };
 }
 

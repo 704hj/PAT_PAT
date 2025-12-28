@@ -1,15 +1,11 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import SocialLogin from "../components/socialLogin";
 import LoginButton from "@/app/components/loginBtn";
+import { useSignUpPage } from "@/app/hooks/useSignUpPage";
 
 export default function SignUpPage() {
-  const router = useRouter();
-
-  const emailLogin = async () => {
-    router.push("/lumi/auth/email");
-  };
+  const { handleEmailSignup, handleGoToSignIn } = useSignUpPage();
 
   return (
     <main className="relative min-h-[100svh] overflow-y-auto">
@@ -38,7 +34,7 @@ export default function SignUpPage() {
         >
           <LoginButton
             title={"이메일로 시작하기"}
-            onClickEvent={emailLogin}
+            onClickEvent={handleEmailSignup}
             style="bg-[#1E2843] text-[#FBFBFB]"
           />
 
@@ -61,7 +57,7 @@ export default function SignUpPage() {
           {/* 로그인 안내 */}
           <div className="mt-5">
             <button
-              onClick={() => router.push("/lumi/auth/signin")}
+              onClick={handleGoToSignIn}
               className="text-white/85 text-[13px] underline underline-offset-4 
                  hover:text-white transition py-6"
             >
