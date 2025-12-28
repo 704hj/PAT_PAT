@@ -234,7 +234,7 @@ export default function StarWritePage({ emotions, tags, limit }: Props) {
         >
           <div className="grid grid-cols-2 gap-8">
             <button
-              onClick={() => router.replace("/lumi/write/starLoad")}
+              onClick={() => router.replace("/lumi/home")}
               className="h-12 rounded-[12px] text-[14px] font-medium text-white/85
                          bg-white/6 border border-white/12 hover:bg-white/10 transition"
             >
