@@ -1,9 +1,12 @@
 import { getTagsAction } from "@/app/actions/tag";
 import StarWrite from "./components/starWrite";
 
-export default async function Page() {
-  // const { emotions, posTage } = await getEmotionsAndTags();
-  // return <StarClient emotions={emotions} tags={posTage || []} limit={200} />;
+type Props = {
+  searchParams: Promise<{ date?: string }>;
+};
+
+export default async function Page({ searchParams }: Props) {
+  const params = await searchParams;
   const tagData = await getTagsAction();
-  return <StarWrite tags={tagData} />;
+  return <StarWrite tags={tagData} editDate={params.date} />;
 }
