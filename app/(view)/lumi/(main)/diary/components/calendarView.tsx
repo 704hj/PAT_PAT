@@ -1,18 +1,17 @@
 "use client";
 
-import { useMemo } from "react";
 import { JournalCard } from "./journalCard";
 
 type Props = {
   month: string; // YYYY-MM
-  journals: Journal[];
+  diaryList: TDiaryItem[];
   selectedDate: string | null;
   onSelectDate: (date: string) => void;
 };
 
 export function CalendarView({
   month,
-  journals,
+  diaryList,
   selectedDate,
   onSelectDate,
 }: Props) {
@@ -20,16 +19,6 @@ export function CalendarView({
 
   const daysInMonth = new Date(year, m, 0).getDate();
   const startDay = new Date(year, m - 1, 1).getDay(); // 0~6
-
-  const journalMap = useMemo(() => {
-    const map: Record<string, Journal[]> = {};
-    journals.forEach((j) => {
-      if (j.date.startsWith(month)) {
-        (map[j.date] ||= []).push(j);
-      }
-    });
-    return map;
-  }, [journals, month]);
 
   const days: (string | null)[] = [];
   for (let i = 0; i < startDay; i++) days.push(null);
@@ -40,6 +29,10 @@ export function CalendarView({
     )}`;
     days.push(day);
   }
+
+  const selectedDiaries = (diaryList ?? []).filter(
+    (diary) => diary.entry_date === selectedDate
+  );
 
   return (
     <div className="space-y-6">
@@ -54,7 +47,9 @@ export function CalendarView({
         {days.map((day, idx) => {
           if (!day) return <div key={idx} className="h-10" />;
 
-          const hasEntry = !!journalMap[day];
+          const hasEntry = !!diaryList?.find(
+            (diary) => diary.entry_date === day
+          );
           const selected = selectedDate === day;
 
           return (
@@ -86,11 +81,11 @@ export function CalendarView({
           </h3>
 
           <div className="space-y-2">
-            {(journalMap[selectedDate] ?? []).map((j) => (
-              <JournalCard key={j.id} journal={j} />
+            {selectedDiaries.map((d) => (
+              <JournalCard key={d.diary_id} diary={d} />
             ))}
 
-            {(journalMap[selectedDate]?.length ?? 0) === 0 && (
+            {selectedDiaries.length === 0 && (
               <p className="text-[12px] text-white/50">
                 이 날에는 기록이 없어요.
               </p>
