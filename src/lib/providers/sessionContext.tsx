@@ -1,11 +1,11 @@
-import { supabase } from "../utils/supabase/client";
-
 /**
  * > session 값 가져오기
  *  > session 없으면 로그인으로 이동
  *  > session 있으면 user.nickName 추출
  *  > user.nickName상태에 저장
  */
+
+import { supabase } from "@/utils/supabase/client";
 
 // 현재 로그인된 유저의 session값 가져오기 (로그인 후 사용자 정보 확인할 때 필요)
 const {
