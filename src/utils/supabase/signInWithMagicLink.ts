@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { createServerSupabaseClient } from "@/app/utils/supabase/server";
+import { createServerSupabaseClient } from "@/utils/supabase/server";
 
 export async function signInWithEmail(
   formData: FormData,

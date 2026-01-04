@@ -1,5 +1,5 @@
 "use client";
-import BottomNav from "@/app/components/navigation";
+import BottomNav from "@/shared/components/navigation";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (

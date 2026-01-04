@@ -1,6 +1,6 @@
 "use client";
 
-import { Pt, samplePolyline } from "@/app/lib/zodiac";
+import { Pt, samplePolyline } from "@/lib/zodiac";
 import { useMemo } from "react";
 
 type ConstellationSvgProps = {
@@ -173,4 +173,3 @@ export default function ConstellationSvg({
     </svg>
   );
 }
-

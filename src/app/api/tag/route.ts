@@ -1,5 +1,5 @@
-import { jsonError, jsonOk, makeRequestId, mapSupabaseError } from "@/app/lib";
-import { createServerSupabaseClientReadOnly } from "@/app/utils/supabase/server";
+import { jsonError, jsonOk, makeRequestId, mapSupabaseError } from "@/lib";
+import { createServerSupabaseClientReadOnly } from "@/utils/supabase/server";
 
 export async function GET() {
   const requestId = makeRequestId();

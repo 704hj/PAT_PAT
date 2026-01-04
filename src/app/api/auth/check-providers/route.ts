@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createSupabaseAdminClient } from "@/app/utils/supabase/server";
+import { createSupabaseAdminClient } from "@/utils/supabase/server";
 
 /**
  * 이메일로 가입된 provider 목록을 반환
@@ -10,21 +10,18 @@ export async function POST(req: NextRequest) {
     const { email } = await req.json();
 
     if (!email || typeof email !== "string") {
-      return NextResponse.json(
-        { providers: [] },
-        { status: 400 }
-      );
+      return NextResponse.json({ providers: [] }, { status: 400 });
     }
 
     // Admin API를 사용하여 이메일의 provider 확인
     const adminClient = await createSupabaseAdminClient();
-    
+
     // 이메일로 사용자 조회
     const { data, error } = await adminClient.auth.admin.listUsers({
       page: 1,
       perPage: 1000,
     });
-    
+
     if (error) {
       console.error("[check-providers] Admin API error:", error);
       return NextResponse.json({ providers: [] });
@@ -37,7 +34,7 @@ export async function POST(req: NextRequest) {
 
     // 각 사용자의 provider 수집 (중복 제거)
     const providers = new Set<string>();
-    
+
     users.forEach((user) => {
       // Supabase에서 provider는 app_metadata.provider 또는 identities에서 확인 가능
       // identities 배열에서 provider 추출
@@ -54,7 +51,7 @@ export async function POST(req: NextRequest) {
           }
         });
       }
-      
+
       // app_metadata에서도 확인 (fallback)
       if (user.app_metadata?.provider) {
         const provider = user.app_metadata.provider;
@@ -66,12 +63,11 @@ export async function POST(req: NextRequest) {
       }
     });
 
-    return NextResponse.json({ 
-      providers: Array.from(providers) 
+    return NextResponse.json({
+      providers: Array.from(providers),
     });
   } catch (err: any) {
     console.error("[check-providers] Error:", err);
     return NextResponse.json({ providers: [] });
   }
 }
-

@@ -1,12 +1,12 @@
 "use client";
-import { TStar } from "@/app/types/memory/star";
+import { TStar } from "@/types/memory/star";
 import { useEffect, useMemo, useState } from "react";
 import {
   daysInMonth,
   loadTemplates,
   resolveZodiacByDate,
   type ZodiacTemplate,
-} from "../lib/zodiac";
+} from "../../lib/zodiac";
 
 export default function ConstellationCanvas({
   userId = "demoUser",

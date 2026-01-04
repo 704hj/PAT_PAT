@@ -1,8 +1,8 @@
 "use client";
 
 import { createDiaryAction } from "@/features/diary/actions/diary";
-import GlassCard from "@/app/components/glassCard";
-import { useDiaryWrite } from "@/app/hooks/diary/useDiaryWrite";
+import GlassCard from "@/shared/components/glassCard";
+import { useDiaryWrite } from "@/features/diary/hooks/useDiaryWrite";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import DiarySkeleton from "./skeleton";

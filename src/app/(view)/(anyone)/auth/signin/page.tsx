@@ -1,6 +1,6 @@
 "use client";
 
-import { useSignIn } from "@/app/hooks/useSignIn";
+import { useSignIn } from "@/features/auth/hooks/useSignIn";
 import SocialLogin from "@/features/auth/components/socialLogin";
 import { useRouter } from "next/navigation";
 

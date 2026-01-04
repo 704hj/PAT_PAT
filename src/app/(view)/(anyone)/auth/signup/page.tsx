@@ -1,8 +1,8 @@
 "use client";
 
 import SocialLogin from "@/features/auth/components/socialLogin";
-import LoginButton from "@/app/components/loginBtn";
-import { useSignUpPage } from "@/app/hooks/useSignUpPage";
+import LoginButton from "@/shared/components/loginBtn";
+import { useSignUpPage } from "@/features/auth/hooks/useSignUpPage";
 
 export default function SignUpPage() {
   const { handleEmailSignup, handleGoToSignIn } = useSignUpPage();

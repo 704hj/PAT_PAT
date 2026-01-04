@@ -1,4 +1,4 @@
-import { createServerSupabaseClientReadOnly } from "../../../app/utils/supabase/server";
+import { createServerSupabaseClientReadOnly } from "../../../utils/supabase/server";
 
 export async function getUserProfileAction() {
   const supabase = await createServerSupabaseClientReadOnly();

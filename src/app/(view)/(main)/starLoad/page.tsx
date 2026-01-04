@@ -1,7 +1,7 @@
 "use client";
 
-import ConstellationSvg from "@/app/components/ConstellationSvg";
-import EntryModal from "@/app/components/EntryModal";
+import ConstellationSvg from "@/shared/components/ConstellationSvg";
+import EntryModal from "@/shared/components/EntryModal";
 import {
   displayDate,
   getZodiacNameKo,
@@ -10,8 +10,8 @@ import {
   loadTemplates,
   toDateString,
   type Pt,
-} from "@/app/lib/zodiac";
-import { Entry, getEntryByDate, loadEntriesByRange } from "@/app/utils/entries";
+} from "@/lib/zodiac";
+import { Entry, getEntryByDate, loadEntriesByRange } from "@/utils/entries";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 

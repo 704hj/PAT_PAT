@@ -1,7 +1,7 @@
 "use client";
 
-import { displayDate } from "@/app/lib/zodiac";
-import { Entry } from "@/app/utils/entries";
+import { displayDate } from "@/lib/zodiac";
+import { Entry } from "@/utils/entries";
 import { useEffect, useState } from "react";
 
 type EntryModalProps = {
@@ -122,4 +122,3 @@ export default function EntryModal({
     </div>
   );
 }
-

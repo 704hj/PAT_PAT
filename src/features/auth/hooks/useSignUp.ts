@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/app/utils/supabase/client";
-import { validatePassword, validateEmail } from "@/app/utils/validation";
-import { checkEmailProviders } from "@/app/utils/auth/providerCheck";
+import { supabase } from "@/utils/supabase/client";
+import { validatePassword, validateEmail } from "@/utils/validation";
+import { checkEmailProviders } from "@/utils/auth/providerCheck";
 
 interface UseSignUpReturn {
   // 폼 상태

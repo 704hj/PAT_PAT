@@ -3,9 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import SocialLogout from "@/features/auth/components/socialLogout";
-import { useUserProfile } from "@/app/hooks/useUserProfile";
-import { useDiaryStats } from "@/app/hooks/useDiaryStats";
-import { useAuth } from "@/app/hooks/useAuth";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useUserProfile } from "@/features/profile/hooks/useUserProfile";
+import { useDiaryStats } from "@/features/home/hooks/useDiaryStats";
 
 export default function AccountPage() {
   const { user } = useAuth({ required: true });

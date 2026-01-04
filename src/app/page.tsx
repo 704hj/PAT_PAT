@@ -1,7 +1,7 @@
 "use client";
 
-import ProgressBar from "./components/splash/progressBar";
-import SplashStar from "./components/splash/splashStar";
+import ProgressBar from "../shared/components/splash/progressBar";
+import SplashStar from "../shared/components/splash/splashStar";
 
 export default function Splash() {
   return (

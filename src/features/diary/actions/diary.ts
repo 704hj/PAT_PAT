@@ -1,6 +1,6 @@
 "use server";
-import { makeRequestId } from "@/app/lib";
-import { createServerSupabaseClientReadOnly } from "@/app/utils/supabase/server";
+import { makeRequestId } from "@/lib";
+import { createServerSupabaseClientReadOnly } from "@/utils/supabase/server";
 
 type CreateDiaryInput = {
   entry_date: string;

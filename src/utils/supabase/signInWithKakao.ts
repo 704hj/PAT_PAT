@@ -1,6 +1,6 @@
 "use client";
 
-import { supabase } from "@/app/utils/supabase/client";
+import { supabase } from "@/utils/supabase/client";
 
 export async function signInWithKakao(nextPath: string = "/home") {
   const origin = window.location.origin;

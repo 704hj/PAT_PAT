@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useSignUp } from "@/app/hooks/useSignUp";
+import { useSignUp } from "@/features/auth/hooks/useSignUp";
 
 export default function EmailSignupPage() {
   const {

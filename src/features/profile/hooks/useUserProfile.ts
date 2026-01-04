@@ -1,8 +1,8 @@
 "use client";
 
+import { supabase } from "@/utils/supabase/client";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useEffect, useState } from "react";
-import { supabase } from "@/app/utils/supabase/client";
-import { useAuth } from "./useAuth";
 
 interface UserProfile {
   user_id: string;
@@ -60,7 +60,11 @@ export function useUserProfile(): UseUserProfileReturn {
 
       if (userError || !userData) {
         console.error("[useUserProfile] User not found:", userError);
-        setError(new Error(`사용자 조회 실패: ${userError?.message || "User not found"}`));
+        setError(
+          new Error(
+            `사용자 조회 실패: ${userError?.message || "User not found"}`
+          )
+        );
         // 에러가 발생해도 기본 프로필 설정 (UI가 깨지지 않도록)
         setProfile({
           user_id: "",
@@ -87,7 +91,10 @@ export function useUserProfile(): UseUserProfileReturn {
           console.log("[useUserProfile] Profile not found (new user)");
         } else if (profileError.code === "PGRST205") {
           // 테이블이 없는 경우 - 배포 환경 스키마 문제
-          console.warn("[useUserProfile] user_profile table not found:", profileError);
+          console.warn(
+            "[useUserProfile] user_profile table not found:",
+            profileError
+          );
         } else {
           console.warn("[useUserProfile] Profile fetch error:", profileError);
         }
@@ -102,14 +109,16 @@ export function useUserProfile(): UseUserProfileReturn {
       const profile = {
         ...profileData,
         user_id: userData.user_id,
-        nickname: profileData?.nickname || user?.user_metadata?.nickname || "사용자",
+        nickname:
+          profileData?.nickname || user?.user_metadata?.nickname || "사용자",
       };
 
       console.log("[useUserProfile] Profile loaded:", profile);
       setProfile(profile);
     } catch (err) {
       console.error("[useUserProfile] 예상치 못한 에러:", err);
-      const errorMessage = err instanceof Error ? err.message : "알 수 없는 오류가 발생했습니다.";
+      const errorMessage =
+        err instanceof Error ? err.message : "알 수 없는 오류가 발생했습니다.";
       setError(new Error(errorMessage));
       // 에러가 발생해도 기본 프로필 설정
       setProfile({

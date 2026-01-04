@@ -1,4 +1,4 @@
-import { createServerSupabaseClient } from "@/app/utils/supabase/server";
+import { createServerSupabaseClient } from "@/utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
 const AFTER_LOGIN = "/home";

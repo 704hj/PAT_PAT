@@ -1,7 +1,7 @@
 "use client";
 
-import GlassCard from "@/app/components/glassCard";
-import { useHomeSummary } from "@/app/hooks/home/useHomeSummary";
+import GlassCard from "@/shared/components/glassCard";
+import { useHomeSummary } from "@/features/home/hooks/useHomeSummary";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import HomeSkeleton from "./homeSkeleton";

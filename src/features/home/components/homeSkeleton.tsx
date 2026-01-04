@@ -1,5 +1,5 @@
-import GlassCard from "@/app/components/glassCard";
-import { Skeleton } from "@/app/components/skeleton/skeletons";
+import GlassCard from "@/shared/components/glassCard";
+import { Skeleton } from "@/shared/components/skeleton/skeletons";
 
 export default function HomeSkeleton() {
   return (

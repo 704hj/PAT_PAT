@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "@/app/utils/supabase/client";
-import { useAuth } from "./useAuth";
+import { supabase } from "@/utils/supabase/client";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 interface DiaryStats {
   totalStars: number;
@@ -74,22 +74,24 @@ export function useDiaryStats(): UseDiaryStatsReturn {
           .select("*", { count: "exact", head: true })
           .eq("user_id", userId)
           .eq("diary_type", "star");
-        
+
         if (starError) {
           // diary_type 컬럼이 없는 경우 또는 400 에러 (배포 환경 스키마 문제)
           if (
-            starError.code === "42703" || 
+            starError.code === "42703" ||
             starError.message.includes("does not exist") ||
             starError.message === "" ||
             (starError as any).status === 400
           ) {
-            console.warn("[useDiaryStats] diary_type column not found, using fallback");
+            console.warn(
+              "[useDiaryStats] diary_type column not found, using fallback"
+            );
             // diary_type 없이 전체 개수 조회
             const { count: totalCount, error: totalError } = await supabase
               .from("diary")
               .select("*", { count: "exact", head: true })
               .eq("user_id", userId);
-            
+
             if (!totalError) {
               starCount = totalCount || 0;
             }
@@ -111,16 +113,18 @@ export function useDiaryStats(): UseDiaryStatsReturn {
           .select("*", { count: "exact", head: true })
           .eq("user_id", userId)
           .eq("diary_type", "worry");
-        
+
         if (worryError) {
           // diary_type 컬럼이 없는 경우 또는 400 에러
           if (
-            worryError.code === "42703" || 
+            worryError.code === "42703" ||
             worryError.message.includes("does not exist") ||
             worryError.message === "" ||
             (worryError as any).status === 400
           ) {
-            console.warn("[useDiaryStats] diary_type column not found, skipping worry count");
+            console.warn(
+              "[useDiaryStats] diary_type column not found, skipping worry count"
+            );
             worryCount = 0;
           } else {
             console.error("[useDiaryStats] worry 조회 에러:", worryError);
@@ -142,7 +146,7 @@ export function useDiaryStats(): UseDiaryStatsReturn {
           content,
           created_at
         `;
-        
+
         const { data: recentData, error: recentError } = await supabase
           .from("diary")
           .select(selectFields)
@@ -153,20 +157,23 @@ export function useDiaryStats(): UseDiaryStatsReturn {
         if (recentError) {
           // diary_type 컬럼이 없는 경우 또는 400 에러
           if (
-            recentError.code === "42703" || 
+            recentError.code === "42703" ||
             recentError.message.includes("does not exist") ||
             recentError.message === "" ||
             (recentError as any).status === 400
           ) {
-            console.warn("[useDiaryStats] diary_type column not found, using fallback");
+            console.warn(
+              "[useDiaryStats] diary_type column not found, using fallback"
+            );
             // diary_type 없이 조회
-            const { data: recentDataFallback, error: recentErrorFallback } = await supabase
-              .from("diary")
-              .select("diary_id, content, created_at")
-              .eq("user_id", userId)
-              .order("created_at", { ascending: false })
-              .limit(5);
-            
+            const { data: recentDataFallback, error: recentErrorFallback } =
+              await supabase
+                .from("diary")
+                .select("diary_id, content, created_at")
+                .eq("user_id", userId)
+                .order("created_at", { ascending: false })
+                .limit(5);
+
             if (!recentErrorFallback && recentDataFallback) {
               recentDiaries = recentDataFallback.map((d: any) => ({
                 diary_id: d.diary_id,
@@ -204,7 +211,8 @@ export function useDiaryStats(): UseDiaryStatsReturn {
       });
     } catch (err) {
       console.error("[useDiaryStats] 예상치 못한 에러:", err);
-      const errorMessage = err instanceof Error ? err.message : "알 수 없는 오류가 발생했습니다.";
+      const errorMessage =
+        err instanceof Error ? err.message : "알 수 없는 오류가 발생했습니다.";
       setError(new Error(errorMessage));
       // 에러가 발생해도 기본값으로 설정 (UI가 깨지지 않도록)
       setStats({
@@ -231,4 +239,3 @@ export function useDiaryStats(): UseDiaryStatsReturn {
     refetch: fetchStats,
   };
 }
-

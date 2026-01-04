@@ -1,6 +1,6 @@
 "use client";
 
-import { fetcher } from "@/app/lib/fetcher";
+import { fetcher } from "@/lib/fetcher";
 import { useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 

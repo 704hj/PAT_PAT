@@ -1,4 +1,4 @@
-import { createServerSupabaseClient } from "@/app/utils/supabase/server"; // 너 프로젝트 경로에 맞게
+import { createServerSupabaseClient } from "@/utils/supabase/server"; // 너 프로젝트 경로에 맞게
 import { NextResponse } from "next/server";
 
 type Polarity = "POSITIVE" | "NEGATIVE" | "UNSET";

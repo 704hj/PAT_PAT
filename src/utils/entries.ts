@@ -1,7 +1,7 @@
 "use client";
 
-import { supabase } from "@/app/utils/supabase/client";
-import { toDateString } from "@/app/lib/zodiac";
+import { supabase } from "@/utils/supabase/client";
+import { toDateString } from "@/lib/zodiac";
 
 export type Entry = {
   date: string; // "YYYY-MM-DD"
@@ -125,11 +125,18 @@ export async function getEntryByDate(
       .order("created_at", { ascending: false })
       .limit(1);
 
-    let diaries: DiaryRow[] | null = (diariesData as unknown) as DiaryRow[] | null;
+    let diaries: DiaryRow[] | null = diariesData as unknown as
+      | DiaryRow[]
+      | null;
 
     // diary_type 컬럼이 없는 경우 fallback
-    if (error && (error.code === "42703" || error.message.includes("does not exist"))) {
-      console.warn("[getEntryByDate] diary_type column not found, using fallback");
+    if (
+      error &&
+      (error.code === "42703" || error.message.includes("does not exist"))
+    ) {
+      console.warn(
+        "[getEntryByDate] diary_type column not found, using fallback"
+      );
       const { data: diariesFallback, error: errorFallback } = await supabase
         .from("diary")
         .select("diary_id, content, created_at, updated_at")
@@ -138,7 +145,7 @@ export async function getEntryByDate(
         .lte("created_at", endDate.toISOString())
         .order("created_at", { ascending: false })
         .limit(1);
-      
+
       if (!errorFallback && diariesFallback) {
         // diary_type이 없는 경우 기본값 추가
         diaries = (diariesFallback as unknown as DiaryRow[]).map((d) => ({
@@ -177,4 +184,3 @@ export async function getEntryByDate(
     return null;
   }
 }
-

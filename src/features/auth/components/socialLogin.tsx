@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { signInWithKakao } from "@/app/utils/supabase/signInWithKakao";
-import { signInWithGoogle } from "@/app/utils/supabase/signInWithGoogle";
-import LoginButton from "@/app/components/loginBtn";
+import { signInWithKakao } from "@/utils/supabase/signInWithKakao";
+import { signInWithGoogle } from "@/utils/supabase/signInWithGoogle";
+import LoginButton from "@/shared/components/loginBtn";
 
 export default function SocialLogin() {
   const [busy, setBusy] = useState(false);

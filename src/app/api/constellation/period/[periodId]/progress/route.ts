@@ -1,4 +1,4 @@
-import { createServerSupabaseClientReadOnly } from "@/app/utils/supabase/server";
+import { createServerSupabaseClientReadOnly } from "@/utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic"; // (선택) 캐시/정적화 간섭 방지

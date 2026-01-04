@@ -1,6 +1,6 @@
 "use client";
 
-import GlassCard from "@/app/components/glassCard";
+import GlassCard from "@/shared/components/glassCard";
 
 function SkeletonLine({ w = "w-full", h = "h-4" }: { w?: string; h?: string }) {
   return <div className={`${w} ${h} rounded-md bg-white/10 animate-pulse`} />;

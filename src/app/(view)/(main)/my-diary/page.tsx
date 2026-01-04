@@ -7,7 +7,7 @@ import { ViewToggle } from "@/features/my-diary/components/viewToggle";
 import { MonthPicker } from "@/features/my-diary/components/monthPicker";
 import { CalendarView } from "@/features/my-diary/components/calendarView";
 import { DateHeader } from "@/features/my-diary/components/dateHeader";
-import { useDiaryList } from "@/app/hooks/diary/useDiaryList";
+import { useDiaryList } from "@/features/diary/hooks/useDiaryList";
 
 type ViewMode = "list" | "calendar";
 
