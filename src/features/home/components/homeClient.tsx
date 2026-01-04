@@ -1,7 +1,8 @@
 "use client";
 
-import GlassCard from "@/shared/components/glassCard";
 import { useHomeSummary } from "@/features/home/hooks/useHomeSummary";
+import GlassCard from "@/shared/components/glassCard";
+import { data } from "framer-motion/client";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import HomeSkeleton from "./homeSkeleton";
@@ -108,14 +109,14 @@ export default function HomeClient() {
         <div className="mt-4">
           <PrimaryButton
             onClick={() =>
-              result?.data?.isDIary
-                ? router.push("/diary/write")
-                : router.push("/diary/edit")
+              result?.data?.isDiary
+                ? router.push("/diary/edit")
+                : router.push("/diary/write")
             }
           >
-            {result?.data?.isDIary
-              ? "한 줄이면 충분해요"
-              : "오늘 기록 수정하기"}
+            {result?.data?.isDiary
+              ? "오늘 기록 수정하기"
+              : "한 줄이면 충분해요"}
           </PrimaryButton>
         </div>
 
@@ -157,7 +158,7 @@ export default function HomeClient() {
 
         {/* (4) 보조 바로가기 */}
         <div className="mt-4 grid grid-cols-2 gap-3">
-          <SecondaryButton onClick={() => router.push("/diary")}>
+          <SecondaryButton onClick={() => router.push("/diary-archive")}>
             기록 모아보기
           </SecondaryButton>
           <SecondaryButton onClick={() => router.push("/starLoad")}>
