@@ -39,6 +39,7 @@ export default async function Page() {
       }
       return res.data;
     },
+    staleTime: 1000 * 60, // useDiaryList staleTime과 동일하게 맞춤
   });
 
   return (
