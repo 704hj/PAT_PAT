@@ -2,24 +2,38 @@
 
 import SocialLogout from '@/features/auth/components/socialLogout';
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import { useDiaryStats } from '@/features/home/hooks/useDiaryStats';
+import ErrorModal from '@/features/common/ErrorModal';
 import { useUserProfile } from '@/features/profile/hooks/useUserProfile';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function AccountPage() {
+  const router = useRouter();
   const { user } = useAuth({ required: true });
-  const { profile, loading: profileLoading } = useUserProfile();
-  const { stats, loading: statsLoading } = useDiaryStats();
+  const { data, isLoading, isError, error } = useUserProfile();
 
-  const [notifOn, setNotifOn] = useState(true);
-  const [soundOn, setSoundOn] = useState(false);
-  const [privateMode, setPrivateMode] = useState(false);
-
-  const loading = profileLoading || statsLoading;
-
-  if (loading) {
+  if (isLoading) {
     return <ProfileSkeleton />;
+  }
+
+  if (isError) {
+    const code = (error as any)?.code;
+    if (code === 'AUTH_UNAUTHORIZED') {
+      router.push('/start');
+      return null;
+    }
+    return (
+      <main className="relative min-h-[100svh] overflow-hidden">
+        <div
+          aria-hidden
+          className="absolute inset-0 -z-20 bg-[radial-gradient(100%_70%_at_50%_100%,#0b1d4a_0%,#091430_48%,#070f24_100%)]"
+        />
+        <ErrorModal
+          message={error?.message ?? '프로필을 불러오지 못했어요.'}
+          onClose={() => router.push('/home')}
+        />
+      </main>
+    );
   }
 
   return (
@@ -67,16 +81,10 @@ export default function AccountPage() {
               </div>
               <div className="min-w-0">
                 <p className="text-white/90 text-[15px] leading-snug truncate">
-                  안녕하세요, {profile?.nickname || '별빛 기록가'}님 ✨
+                  안녕하세요, {data?.profile.nickname || '별빛 기록가'}님 ✨
                 </p>
                 <div className="mt-2 flex flex-wrap gap-1.5">
-                  {stats?.weeklyMood && (
-                    <Badge>이번 주 감정: {stats.weeklyMood}</Badge>
-                  )}
-                  <Badge>
-                    총 {(stats?.totalStars ?? 0) + (stats?.totalWorries ?? 0)}개
-                    기록
-                  </Badge>
+                  <Badge>총 {data?.totalDiaries ?? 0}개 기록</Badge>
                 </div>
               </div>
             </div>
@@ -84,16 +92,16 @@ export default function AccountPage() {
             <div className="mt-4 grid grid-cols-3 divide-x divide-white/10 rounded-[12px] overflow-hidden border border-white/10">
               <StatCell
                 label="오늘의 별"
-                value={String(stats?.totalStars ?? 0)}
+                value={String(data?.totalStars ?? 0)}
               />
               <StatCell
                 label="걱정 비움"
-                value={String(stats?.totalWorries ?? 0)}
+                value={String(data?.totalWorries ?? 0)}
               />
               <StatCell
                 label="전체 기록"
                 value={String(
-                  (stats?.totalStars ?? 0) + (stats?.totalWorries ?? 0)
+                  (data?.totalStars ?? 0) + (data?.totalWorries ?? 0)
                 )}
               />
             </div>
