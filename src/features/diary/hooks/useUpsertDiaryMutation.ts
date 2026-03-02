@@ -4,7 +4,8 @@ import {
   createDiaryAction,
   updateDiaryAction,
 } from '@/features/diary/actions/diary.actions';
-import { homeKeys } from '@/features/home/queries/summary,';
+import { homeKeys } from '@/features/home/queries/summary';
+import { profileKeys } from '@/features/profile/queries/profile';
 import { ActionError, unwrap } from '@/lib/result/result';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
@@ -32,6 +33,7 @@ export function useUpsertDiaryMutation({ diary_id }: { diary_id?: string }) {
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: homeKeys.all });
       await qc.invalidateQueries({ queryKey: diaryKeys.all });
+      await qc.invalidateQueries({ queryKey: profileKeys.all });
 
       router.replace('/starLoad');
     },

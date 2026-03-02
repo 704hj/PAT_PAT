@@ -163,7 +163,12 @@ export default function HomeClient() {
             별자리 보기
           </SecondaryButton>
         </div>
-        <ErrorModal open={isError} title={error?.message} onClose={() => {}} />
+        <ErrorModal
+          open={isError}
+          title="데이터를 불러오지 못했어요"
+          description={error?.message ?? '잠시 후 다시 시도해 주세요.'}
+          onClose={() => router.push('/home')}
+        />
       </section>
     </div>
   );

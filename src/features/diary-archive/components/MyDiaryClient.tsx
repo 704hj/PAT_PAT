@@ -5,10 +5,13 @@ import { DateHeader } from '@/features/diary-archive/components/dateHeader';
 import { JournalCard } from '@/features/diary-archive/components/journalCard';
 import { MonthPicker } from '@/features/diary-archive/components/monthPicker';
 import { ViewToggle } from '@/features/diary-archive/components/viewToggle';
+import { ErrorModal } from '@/features/common/BaseModal';
 import { useDiaryList } from '@/features/diary/hooks/useDiaryList';
+import { useRouter } from 'next/navigation';
 import { DiaryCollectionPageSkeleton } from './skeleton/skeleton';
 
 export default function MyDiaryClient() {
+  const router = useRouter();
   const {
     // state
     selectedDate,
@@ -24,6 +27,8 @@ export default function MyDiaryClient() {
     setQ,
     view,
     setView,
+    isError,
+    error,
   } = useDiaryList();
 
   const items = diaryMonthData?.items ?? [];
@@ -50,44 +55,43 @@ export default function MyDiaryClient() {
             className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px]"
           />
         </div>
-        {!diaryMonthLoading ? (
-          <>
-            {/* 콘텐츠 */}
-            <div className="mt-5">
-              {diaryMonthLoading ? (
-                <DiaryCollectionPageSkeleton view={view} />
-              ) : (
+        <div className="mt-5">
+          {diaryMonthLoading ? (
+            <DiaryCollectionPageSkeleton view={view} />
+          ) : (
+            <>
+              {view === 'list' && (
                 <>
-                  {view === 'list' && (
-                    <>
-                      {isEmpty && <EmptyState />}
-                      {items.map((diary) => (
-                        <section key={diary.diary_id} className="mb-6">
-                          <DateHeader date={diary.entry_date} />
-                          <ul className="mt-2">
-                            <JournalCard diary={diary} />
-                          </ul>
-                        </section>
-                      ))}
-                    </>
-                  )}
-
-                  {view === 'calendar' && (
-                    <CalendarView
-                      month={selectedMonth}
-                      diaryList={items}
-                      selectedDate={selectedDate}
-                      onSelectDate={setSelectedDate}
-                    />
-                  )}
+                  {isEmpty && <EmptyState />}
+                  {items.map((diary) => (
+                    <section key={diary.diary_id} className="mb-6">
+                      <DateHeader date={diary.entry_date} />
+                      <ul className="mt-2">
+                        <JournalCard diary={diary} />
+                      </ul>
+                    </section>
+                  ))}
                 </>
               )}
-            </div>
-          </>
-        ) : (
-          <DiaryCollectionPageSkeleton view={view} />
-        )}
+
+              {view === 'calendar' && (
+                <CalendarView
+                  month={selectedMonth}
+                  diaryList={items}
+                  selectedDate={selectedDate}
+                  onSelectDate={setSelectedDate}
+                />
+              )}
+            </>
+          )}
+        </div>
       </section>
+      <ErrorModal
+        open={isError}
+        title="기록을 불러오지 못했어요"
+        description={error?.message ?? '잠시 후 다시 시도해 주세요.'}
+        onClose={() => router.push('/diary-archive')}
+      />
     </main>
   );
 }

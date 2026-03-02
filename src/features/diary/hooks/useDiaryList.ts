@@ -1,6 +1,7 @@
 'use client';
 
 import { getDiariesAction } from '@/features/diary/actions/diary.actions';
+import { diaryKeys } from '@/features/diary/queries/diaries';
 import { useDebouncedValue } from '@/shared/hooks/useDebounce';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
@@ -19,6 +20,7 @@ export function useDiaryList() {
     data: diaryMonthData,
     isLoading: diaryMonthLoading,
     isError,
+    error,
   } = useQuery({
     /**
      * 1. queryKey: 이 쿼리의 "주소"이자 "의존성 배열"
@@ -26,7 +28,7 @@ export function useDiaryList() {
      * - selectedMonth나 debouncedQ가 변경되면 TanStack Query가 이를 감지하고
      * 새로운 데이터를 자동으로 fetch한다. (useEffect를 직접 쓸 필요가 없는 이유다.)
      */
-    queryKey: ['diary', 'list', { month: selectedMonth, q: debouncedQ }],
+    queryKey: diaryKeys.list({ month: selectedMonth, q: debouncedQ }),
 
     /**
      * 2. queryFn: 실제 데이터를 가져오는 비동기 로직
@@ -68,6 +70,7 @@ export function useDiaryList() {
     diaryMonthData,
     diaryMonthLoading,
     isError,
+    error,
     q,
     setQ,
     view,
