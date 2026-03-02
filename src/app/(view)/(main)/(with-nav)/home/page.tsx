@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import HomeClient from '@/features/home/components/homeClient';
 import { homeKeys } from '@/features/home/queries/summary';
 import { getHomeSummaryServer } from '@/features/home/services/home.server';
