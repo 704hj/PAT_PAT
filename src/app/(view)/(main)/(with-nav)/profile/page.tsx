@@ -3,14 +3,51 @@
 import SocialLogout from '@/features/auth/components/socialLogout';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import ErrorModal from '@/features/common/ErrorModal';
+import { deleteAccountAction, updateNicknameAction } from '@/features/profile/actions/profile.actions';
 import { useUserProfile } from '@/features/profile/hooks/useUserProfile';
+import { profileKeys } from '@/features/profile/queries/profile';
+import { useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 export default function AccountPage() {
   const router = useRouter();
   const { user } = useAuth({ required: true });
   const { data, isLoading, isError, error } = useUserProfile();
+  const qc = useQueryClient();
+
+  const [nickInput, setNickInput] = useState('');
+  const [editingNick, setEditingNick] = useState(false);
+  const [nickPending, setNickPending] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [deletePending, setDeletePending] = useState(false);
+
+  const handleDeleteAccount = async () => {
+    if (deletePending) return;
+    setDeletePending(true);
+    const res = await deleteAccountAction();
+    setDeletePending(false);
+    if (res.ok) {
+      router.replace('/start');
+    }
+  };
+
+  const openNickEdit = () => {
+    setNickInput(data?.profile.nickname ?? '');
+    setEditingNick(true);
+  };
+
+  const saveNickname = async () => {
+    if (!nickInput.trim() || nickPending) return;
+    setNickPending(true);
+    const res = await updateNicknameAction(nickInput.trim());
+    setNickPending(false);
+    if (res.ok) {
+      setEditingNick(false);
+      await qc.invalidateQueries({ queryKey: profileKeys.all });
+    }
+  };
 
   if (isLoading) {
     return <ProfileSkeleton />;
@@ -55,12 +92,6 @@ export default function AccountPage() {
           <h1 className="text-white text-[20px] font-semibold tracking-tight">
             내 정보
           </h1>
-          <Link
-            href="/home"
-            className="text-white/80 text-[13px] underline underline-offset-4 hover:text-white transition"
-          >
-            홈으로
-          </Link>
         </header>
 
         {/* 콘텐츠 */}
@@ -91,18 +122,16 @@ export default function AccountPage() {
 
             <div className="mt-4 grid grid-cols-3 divide-x divide-white/10 rounded-[12px] overflow-hidden border border-white/10">
               <StatCell
-                label="오늘의 별"
+                label="긍정 기록"
                 value={String(data?.totalStars ?? 0)}
               />
               <StatCell
-                label="걱정 비움"
+                label="버거운 기록"
                 value={String(data?.totalWorries ?? 0)}
               />
               <StatCell
                 label="전체 기록"
-                value={String(
-                  (data?.totalStars ?? 0) + (data?.totalWorries ?? 0)
-                )}
+                value={String(data?.totalDiaries ?? 0)}
               />
             </div>
           </GlassCard>
@@ -110,6 +139,47 @@ export default function AccountPage() {
           {/* 계정 */}
           <GlassCard className="p-1.5">
             <SectionTitle>계정</SectionTitle>
+            {editingNick ? (
+              <div className="px-4 py-3 flex items-center gap-2 border-t border-white/8">
+                <span className="text-white/90 text-[14px] shrink-0">
+                  닉네임
+                </span>
+                <input
+                  className="flex-1 min-w-0 bg-white/6 border border-white/20 rounded-lg px-2 py-1 text-[14px] text-white placeholder:text-white/30 focus:outline-none focus:border-white/40"
+                  value={nickInput}
+                  onChange={(e) => setNickInput(e.target.value)}
+                  maxLength={20}
+                  autoFocus
+                  onKeyDown={(e) => e.key === 'Enter' && saveNickname()}
+                />
+                <button
+                  onClick={saveNickname}
+                  disabled={nickPending || !nickInput.trim()}
+                  className="shrink-0 text-[12px] text-white/85 px-2.5 py-1.5 rounded-lg bg-white/10 border border-white/15 disabled:opacity-40"
+                >
+                  {nickPending ? '저장 중' : '저장'}
+                </button>
+                <button
+                  onClick={() => setEditingNick(false)}
+                  className="shrink-0 text-[12px] text-white/55"
+                >
+                  취소
+                </button>
+              </div>
+            ) : (
+              <SettingRow
+                label="닉네임"
+                desc={data?.profile.nickname}
+                right={
+                  <button
+                    onClick={openNickEdit}
+                    className="text-[12px] text-white/60 px-2.5 py-1.5 rounded-lg bg-white/6 border border-white/10 hover:bg-white/10 transition"
+                  >
+                    수정
+                  </button>
+                }
+              />
+            )}
             <SettingRow label="이메일" desc={user?.email || '이메일 없음'} />
             <SettingRow
               label="로그인 방식"
@@ -195,18 +265,44 @@ export default function AccountPage() {
           </GlassCard>
 
           {/* 세션/위험영역 */}
-          <div className="grid grid-cols-2 gap-3">
-            <SocialLogout
-              next="/start"
-              className="h-11 rounded-[12px] text-[13px] font-medium text-white/85 bg-white/6 border border-white/12 hover:bg-white/10 transition"
-            />
-            <button
-              type="button"
-              className="h-11 rounded-[12px] text-[13px] font-medium text-white/80 bg-white/6 border border-white/12 hover:border-red-400/40 hover:text-red-300 hover:bg-red-500/10 transition"
-            >
-              계정 삭제
-            </button>
-          </div>
+          {deleteConfirm ? (
+            <div className="rounded-[12px] border border-red-400/20 bg-red-500/8 p-4 space-y-3">
+              <p className="text-[13.5px] text-red-300/90 leading-snug">
+                정말로 계정을 삭제할까요?
+                <br />
+                모든 기록과 별이 영구적으로 사라져요.
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => setDeleteConfirm(false)}
+                  className="h-10 rounded-[10px] text-[13px] text-white/80 bg-white/8 border border-white/12"
+                >
+                  취소
+                </button>
+                <button
+                  onClick={handleDeleteAccount}
+                  disabled={deletePending}
+                  className="h-10 rounded-[10px] text-[13px] font-medium text-red-300 bg-red-500/15 border border-red-400/30 disabled:opacity-40"
+                >
+                  {deletePending ? '삭제 중...' : '삭제하기'}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-3">
+              <SocialLogout
+                next="/start"
+                className="h-11 rounded-[12px] text-[13px] font-medium text-white/85 bg-white/6 border border-white/12 hover:bg-white/10 transition"
+              />
+              <button
+                type="button"
+                onClick={() => setDeleteConfirm(true)}
+                className="h-11 rounded-[12px] text-[13px] font-medium text-white/80 bg-white/6 border border-white/12 hover:border-red-400/40 hover:text-red-300 hover:bg-red-500/10 transition"
+              >
+                계정 삭제
+              </button>
+            </div>
+          )}
 
           {/* 하단 여백(Safe area) */}
           <div style={{ height: 'max(16px, env(safe-area-inset-bottom))' }} />
