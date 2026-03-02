@@ -13,7 +13,7 @@ export async function getHomeSummaryClient(): Promise<HomeSummary> {
   }
 
   const json = await res.json();
-  const parsed = HomeSummarySchema.safeParse(json);
+  const parsed = HomeSummarySchema.safeParse(json.data);
 
   if (!parsed.success) {
     throw new Error('Home summary payload schema mismatch');

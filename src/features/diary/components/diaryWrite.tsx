@@ -3,7 +3,7 @@
 import { ErrorModal } from '@/features/common/BaseModal';
 import GlassCard from '@/shared/components/glassCard';
 import { useRouter } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useDiaryDetail } from '../hooks/useDiaryDetail';
 import { useTags } from '../hooks/useTags';
 import { useUpsertDiaryMutation } from '../hooks/useUpsertDiaryMutation';
@@ -54,17 +54,20 @@ export default function DiaryWrite({ diaryId }: { diaryId?: string }) {
 
   const router = useRouter();
 
-  const [polarity, setPolarity] = useState<Polarity>(
-    diary?.emotion_polarity ?? 'UNSET'
-  );
-  const [intensity, setIntensity] = useState<number>(
-    diary?.emotion_intensity ?? 3
-  );
-  const [text, setText] = useState(diary?.content ?? '');
+  const [polarity, setPolarity] = useState<Polarity>('UNSET');
+  const [intensity, setIntensity] = useState<number>(3);
+  const [text, setText] = useState('');
   const [tagOpen, setTagOpen] = useState(false);
-  const [selectedTags, setSelectedTags] = useState<string[]>(
-    diary?.tags?.map((t) => t.tag_id) ?? []
-  );
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
+  // diary 데이터가 로드된 후 폼 상태 동기화
+  useEffect(() => {
+    if (!diary) return;
+    setPolarity(diary.emotion_polarity ?? 'UNSET');
+    setIntensity(diary.emotion_intensity ?? 3);
+    setText(diary.content ?? '');
+    setSelectedTags(diary.tags?.map((t) => t.tag_id) ?? []);
+  }, [diary?.diary_id]);
   const hasError = !!error || isTagsError || isDiaryDetailError;
   const errorMessage =
     error?.message ??
