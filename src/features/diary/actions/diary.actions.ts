@@ -7,6 +7,8 @@ import {
 
 import { AppError, Errors, makeRequestId, mapSupabaseError } from '@/lib';
 import { withAuthAction } from '@/lib/actions/withAuthAction';
+import { getDiaryDetailServer } from '../services/diary.server';
+import { getTagsServer } from '../services/tags.server';
 
 export async function updateDiaryAction(input: UpsertDiaryInput) {
   return withAuthAction(async ({ supabase, authUser }) => {
@@ -38,6 +40,28 @@ export async function createDiaryAction(input: UpsertDiaryInput) {
     if (error) throw mapSupabaseError(error);
     return data;
   });
+}
+
+export async function getTagsAction() {
+  const requestId = makeRequestId();
+  try {
+    const data = await getTagsServer();
+    return { ok: true, data, requestId } as const;
+  } catch (e) {
+    const error = e instanceof AppError ? e : Errors.internal();
+    return { ok: false, code: error.code, message: error.message, requestId } as const;
+  }
+}
+
+export async function getDiaryDetailAction(diaryId: string) {
+  const requestId = makeRequestId();
+  try {
+    const data = await getDiaryDetailServer(diaryId);
+    return { ok: true, data, requestId } as const;
+  } catch (e) {
+    const error = e instanceof AppError ? e : Errors.internal();
+    return { ok: false, code: error.code, message: error.message, requestId } as const;
+  }
 }
 
 export async function getDiariesAction(params: QueryDiariesParams) {

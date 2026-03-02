@@ -54,23 +54,26 @@ export default function DiaryWrite({ diaryId }: { diaryId?: string }) {
 
   const router = useRouter();
 
-  const [polarity, setPolarity] = useState<Polarity>(
-    diary?.emotion_polarity ?? 'UNSET'
-  );
-  const [intensity, setIntensity] = useState<number>(
-    diary?.emotion_intensity ?? 3
-  );
-  const [text, setText] = useState(diary?.content ?? '');
+  const [polarity, setPolarity] = useState<Polarity>('UNSET');
+  const [intensity, setIntensity] = useState<number>(3);
+  const [text, setText] = useState('');
   const [tagOpen, setTagOpen] = useState(false);
-  const [selectedTags, setSelectedTags] = useState<string[]>(
-    diary?.tags?.map((t) => t.tag_id) ?? []
-  );
-  const [isError, setIsError] = useState(false);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
+  // diary 데이터가 로드된 후 폼 상태 동기화
+  useEffect(() => {
+    if (!diary) return;
+    setPolarity(diary.emotion_polarity ?? 'UNSET');
+    setIntensity(diary.emotion_intensity ?? 3);
+    setText(diary.content ?? '');
+    setSelectedTags(diary.tags?.map((t) => t.tag_id) ?? []);
+  }, [diary?.diary_id]);
+  const hasError = !!error || isTagsError || isDiaryDetailError;
   const errorMessage =
-    error?.message ||
-    tagsError?.message ||
-    diaryDetailError?.message ||
-    '에러가 발생했습니다.';
+    error?.message ??
+    tagsError?.message ??
+    diaryDetailError?.message ??
+    '잠시 후 다시 시도해 주세요.';
 
   const canSubmit = useMemo(() => {
     return text.trim().length > 0 && polarity && !diaryPending;
@@ -97,9 +100,6 @@ export default function DiaryWrite({ diaryId }: { diaryId?: string }) {
     });
   };
 
-  useEffect(() => {
-    setIsError(!!error || isTagsError || isDiaryDetailError);
-  }, [error, isTagsError, isDiaryDetailError]);
 
   return (
     <div className="relative min-h-[100svh] overflow-y-auto">
@@ -312,10 +312,10 @@ export default function DiaryWrite({ diaryId }: { diaryId?: string }) {
         </section>
       }
       <ErrorModal
-        open={isError}
-        onClose={() => setIsError(false)}
-        title={'Error'}
+        open={hasError}
+        title="데이터를 불러오지 못했어요"
         description={errorMessage}
+        onClose={() => router.back()}
       />
     </div>
   );

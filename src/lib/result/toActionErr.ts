@@ -1,3 +1,4 @@
+import { ZodError } from 'zod';
 import { AppError } from '../errors/AppError';
 import { Errors } from '../errors/Errors';
 
@@ -18,8 +19,17 @@ export function toActionErr(e: unknown, requestId: string): ActionErr {
     };
   }
 
+  if (e instanceof ZodError) {
+    return {
+      code: 'VALIDATION_ERROR',
+      message: '데이터를 불러오는 중 문제가 발생했어요.',
+      details: e.issues,
+      requestId,
+    };
+  }
+
   const msg = e instanceof Error ? e.message : 'Unknown error';
-  const wrapped = Errors.internal(msg); // 내부적으로 AppError 생성
+  const wrapped = Errors.internal(msg);
   return {
     code: wrapped.code,
     message: wrapped.message,

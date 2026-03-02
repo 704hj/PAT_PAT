@@ -58,3 +58,5 @@ supabase/.pnpm-debug.log*
 # OS metadata
 .DS_Store
 Thumbs.db
+
+CLAUDE.md

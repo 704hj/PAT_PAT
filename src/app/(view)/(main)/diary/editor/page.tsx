@@ -14,23 +14,19 @@ export default async function DiaryWritePage({
   const { diaryId } = await searchParams;
   const queryClient = getQueryClient();
 
-  const prefetchPromises = [
+  await Promise.all([
     queryClient.prefetchQuery({
       queryKey: tagsKeys.list(),
       queryFn: getTagsServer,
       staleTime: 1000 * 60 * 30,
     }),
-  ];
-
-  if (diaryId) {
-    prefetchPromises.push(
+    diaryId &&
       queryClient.prefetchQuery({
         queryKey: diaryKeys.detail(diaryId),
         queryFn: () => getDiaryDetailServer(diaryId),
         staleTime: 1000 * 60 * 30,
-      })
-    );
-  }
+      }),
+  ]);
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
