@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { getProfileAction } from '@/features/profile/actions/profile.actions';
 import ProfileClientPage from '@/features/profile/components/profileClient';
 import { profileKeys } from '@/features/profile/queries/profile';
