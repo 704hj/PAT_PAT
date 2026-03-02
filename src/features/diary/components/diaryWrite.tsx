@@ -3,7 +3,7 @@
 import { ErrorModal } from '@/features/common/BaseModal';
 import GlassCard from '@/shared/components/glassCard';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useDiaryDetail } from '../hooks/useDiaryDetail';
 import { useTags } from '../hooks/useTags';
 import { useUpsertDiaryMutation } from '../hooks/useUpsertDiaryMutation';
@@ -65,12 +65,12 @@ export default function DiaryWrite({ diaryId }: { diaryId?: string }) {
   const [selectedTags, setSelectedTags] = useState<string[]>(
     diary?.tags?.map((t) => t.tag_id) ?? []
   );
-  const [isError, setIsError] = useState(false);
+  const hasError = !!error || isTagsError || isDiaryDetailError;
   const errorMessage =
-    error?.message ||
-    tagsError?.message ||
-    diaryDetailError?.message ||
-    '에러가 발생했습니다.';
+    error?.message ??
+    tagsError?.message ??
+    diaryDetailError?.message ??
+    '잠시 후 다시 시도해 주세요.';
 
   const canSubmit = useMemo(() => {
     return text.trim().length > 0 && polarity && !diaryPending;
@@ -97,9 +97,6 @@ export default function DiaryWrite({ diaryId }: { diaryId?: string }) {
     });
   };
 
-  useEffect(() => {
-    setIsError(!!error || isTagsError || isDiaryDetailError);
-  }, [error, isTagsError, isDiaryDetailError]);
 
   return (
     <div className="relative min-h-[100svh] overflow-y-auto">
@@ -312,10 +309,10 @@ export default function DiaryWrite({ diaryId }: { diaryId?: string }) {
         </section>
       }
       <ErrorModal
-        open={isError}
-        onClose={() => setIsError(false)}
-        title={'Error'}
+        open={hasError}
+        title="데이터를 불러오지 못했어요"
         description={errorMessage}
+        onClose={() => router.back()}
       />
     </div>
   );

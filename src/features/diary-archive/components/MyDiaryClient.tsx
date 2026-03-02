@@ -5,10 +5,13 @@ import { DateHeader } from '@/features/diary-archive/components/dateHeader';
 import { JournalCard } from '@/features/diary-archive/components/journalCard';
 import { MonthPicker } from '@/features/diary-archive/components/monthPicker';
 import { ViewToggle } from '@/features/diary-archive/components/viewToggle';
+import { ErrorModal } from '@/features/common/BaseModal';
 import { useDiaryList } from '@/features/diary/hooks/useDiaryList';
+import { useRouter } from 'next/navigation';
 import { DiaryCollectionPageSkeleton } from './skeleton/skeleton';
 
 export default function MyDiaryClient() {
+  const router = useRouter();
   const {
     // state
     selectedDate,
@@ -24,6 +27,8 @@ export default function MyDiaryClient() {
     setQ,
     view,
     setView,
+    isError,
+    error,
   } = useDiaryList();
 
   const items = diaryMonthData?.items ?? [];
@@ -88,6 +93,12 @@ export default function MyDiaryClient() {
           <DiaryCollectionPageSkeleton view={view} />
         )}
       </section>
+      <ErrorModal
+        open={isError}
+        title="기록을 불러오지 못했어요"
+        description={error?.message ?? '잠시 후 다시 시도해 주세요.'}
+        onClose={() => router.push('/diary-archive')}
+      />
     </main>
   );
 }

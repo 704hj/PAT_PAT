@@ -19,6 +19,7 @@ export function useDiaryList() {
     data: diaryMonthData,
     isLoading: diaryMonthLoading,
     isError,
+    error,
   } = useQuery({
     /**
      * 1. queryKey: 이 쿼리의 "주소"이자 "의존성 배열"
@@ -68,6 +69,7 @@ export function useDiaryList() {
     diaryMonthData,
     diaryMonthLoading,
     isError,
+    error,
     q,
     setQ,
     view,
