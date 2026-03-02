@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { homeKeys } from '../queries/summary,';
+import { homeKeys } from '../queries/summary';
 import { getHomeSummaryClient } from '../services/home.client';
 
 export function useHomeSummary() {

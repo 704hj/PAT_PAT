@@ -9,7 +9,7 @@ export async function getHomeSummaryClient(): Promise<HomeSummary> {
 
   if (!res.ok) {
     const text = await res.text().catch(() => '');
-    throw new Error(`Failed to fetch tags: ${res.status} ${text}`);
+    throw new Error(`Failed to fetch home summary: ${res.status} ${text}`);
   }
 
   const json = await res.json();

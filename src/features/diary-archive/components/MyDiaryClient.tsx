@@ -55,43 +55,36 @@ export default function MyDiaryClient() {
             className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px]"
           />
         </div>
-        {!diaryMonthLoading ? (
-          <>
-            {/* 콘텐츠 */}
-            <div className="mt-5">
-              {diaryMonthLoading ? (
-                <DiaryCollectionPageSkeleton view={view} />
-              ) : (
+        <div className="mt-5">
+          {diaryMonthLoading ? (
+            <DiaryCollectionPageSkeleton view={view} />
+          ) : (
+            <>
+              {view === 'list' && (
                 <>
-                  {view === 'list' && (
-                    <>
-                      {isEmpty && <EmptyState />}
-                      {items.map((diary) => (
-                        <section key={diary.diary_id} className="mb-6">
-                          <DateHeader date={diary.entry_date} />
-                          <ul className="mt-2">
-                            <JournalCard diary={diary} />
-                          </ul>
-                        </section>
-                      ))}
-                    </>
-                  )}
-
-                  {view === 'calendar' && (
-                    <CalendarView
-                      month={selectedMonth}
-                      diaryList={items}
-                      selectedDate={selectedDate}
-                      onSelectDate={setSelectedDate}
-                    />
-                  )}
+                  {isEmpty && <EmptyState />}
+                  {items.map((diary) => (
+                    <section key={diary.diary_id} className="mb-6">
+                      <DateHeader date={diary.entry_date} />
+                      <ul className="mt-2">
+                        <JournalCard diary={diary} />
+                      </ul>
+                    </section>
+                  ))}
                 </>
               )}
-            </div>
-          </>
-        ) : (
-          <DiaryCollectionPageSkeleton view={view} />
-        )}
+
+              {view === 'calendar' && (
+                <CalendarView
+                  month={selectedMonth}
+                  diaryList={items}
+                  selectedDate={selectedDate}
+                  onSelectDate={setSelectedDate}
+                />
+              )}
+            </>
+          )}
+        </div>
       </section>
       <ErrorModal
         open={isError}

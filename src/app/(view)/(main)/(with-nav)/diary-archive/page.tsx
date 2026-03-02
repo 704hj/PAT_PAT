@@ -50,9 +50,7 @@ export default async function Page() {
      * 로딩(`isLoading`) 없이 즉시 서버에서 받아온 데이터를 보여줄 수 있다. (사용자 경험 극대화)
      */
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <main className="min-h-[100svh] text-white">
-        <MyDiaryClient />
-      </main>
+      <MyDiaryClient />
     </HydrationBoundary>
   );
 }

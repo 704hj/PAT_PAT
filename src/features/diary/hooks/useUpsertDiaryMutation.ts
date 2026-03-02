@@ -4,7 +4,7 @@ import {
   createDiaryAction,
   updateDiaryAction,
 } from '@/features/diary/actions/diary.actions';
-import { homeKeys } from '@/features/home/queries/summary,';
+import { homeKeys } from '@/features/home/queries/summary';
 import { profileKeys } from '@/features/profile/queries/profile';
 import { ActionError, unwrap } from '@/lib/result/result';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
