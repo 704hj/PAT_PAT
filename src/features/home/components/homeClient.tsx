@@ -6,14 +6,13 @@ import GlassCard from '@/shared/components/glassCard';
 import { useRouter } from 'next/navigation';
 import { useMemo } from 'react';
 import HomeSkeleton from './homeSkeleton';
-import Pill from './pill';
 import PrimaryButton from './primaryButton';
-import SecondaryButton from './secondaryButton';
 
 function pct(value: number, max: number) {
   const v = Math.max(0, Math.min(max, value));
   return (v / max) * 100;
 }
+
 function getTimeMessage(hour: number) {
   if (hour >= 5 && hour < 11) return '오늘이 천천히 시작되고 있어요.';
   if (hour >= 11 && hour < 17) return '오늘이 차분히 흘러가고 있어요.';
@@ -21,29 +20,30 @@ function getTimeMessage(hour: number) {
   return '오늘이 조용히 마무리되고 있어요.';
 }
 
+
 export default function HomeClient() {
   const { data: result, isPending, isError, error } = useHomeSummary();
-
   const router = useRouter();
+  const hour = new Date().getHours();
 
-  const headerTitle = `${result?.profile?.nickname ?? '사용자'} 님,`;
-  const headerSubtitle = '오늘을 한 줄로 정리해볼까요?';
+  const headerSubtitle = result?.isDiary
+    ? '오늘도 기록했네요 ✦'
+    : '오늘 어떤 하루였나요?';
+
 
   const todayTitle = useMemo(() => {
-    return result?.starCount
-      ? '오늘은 조용히 남겨졌어요'
+    return result?.isDiary
+      ? '오늘의 감정이 담겼어요'
       : '오늘은 아직 기록이 없어요';
-  }, [result?.starCount]);
+  }, [result?.isDiary]);
 
   const todayDesc = useMemo(() => {
-    return result?.starCount
-      ? `별이 생성됐어요.`
+    return result?.isDiary
+      ? '기록은 언제든 다시 수정할 수 있어요.'
       : '하루가 지나가기 전, 한 줄을 남길 수 있어요.';
-  }, [result?.starCount]);
+  }, [result?.isDiary]);
 
-  const todaySkyLabel = useMemo(() => {
-    return result?.starCount ? '오늘의 하늘 · 빛남' : '오늘의 하늘 · 고요함';
-  }, [result?.starCount]);
+  const filledDays = result?.diaryCount ?? 0;
 
   if (isPending) {
     return <HomeSkeleton />;
@@ -51,133 +51,119 @@ export default function HomeClient() {
 
   return (
     <div className="relative min-h-[100svh] overflow-y-auto">
-      {/* 배경 */}
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(1200px_800px_at_50%_-10%,rgba(70,120,255,0.22),transparent_60%),radial-gradient(900px_600px_at_80%_40%,rgba(130,70,255,0.14),transparent_60%),linear-gradient(180deg,#07102a_0%,#050b1c_100%)]" />
 
       <section className="relative mx-auto w-full max-w-[480px] px-5 pb-[120px]">
         {/* 헤더 */}
-        <header className="pt-10">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <div className="text-white text-[28px] font-semibold tracking-[-0.02em]">
-                {headerTitle}
-              </div>
-              <div className="mt-2 text-white/85 text-[18px] leading-snug">
-                {headerSubtitle}
-              </div>
+        <header className="pt-12 flex items-center justify-between gap-4">
+          <div>
+            <p className="text-white/45 text-[13px]">
+              {getTimeMessage(new Date().getHours())}
+            </p>
+            <h1 className="mt-1 text-white text-[26px] font-semibold tracking-[-0.02em]">
+              {result?.profile?.nickname ?? '사용자'} 님,
+            </h1>
 
-              <div className="mt-4 flex items-center gap-2">
-                {/* <Pill>⭐ Star {starCount}</Pill> */}
-                <Pill>{todaySkyLabel}</Pill>
-              </div>
-            </div>
-
-            <img
-              src="/images/icon/lumi/lumi_main.svg"
-              alt="루미"
-              className="w-16 h-16 object-contain"
-            />
+            <p className="mt-1 text-white/70 text-[16px]">{headerSubtitle}</p>
           </div>
+          <img
+            src="/images/icon/lumi/lumi_main.svg"
+            alt="루미"
+            className="w-14 h-14 object-contain flex-shrink-0"
+          />
         </header>
 
-        {/* (1) 오늘 상태 */}
-        <div className="mt-6">
-          <GlassCard className="p-4">
+        {/* 오늘 카드 + CTA 통합 */}
+        <div className="mt-8">
+          <GlassCard className="p-5">
             <div className="flex items-start justify-between gap-3">
-              <div>
-                <div className="text-white text-[16px] font-semibold">
+              <div className="flex-1">
+                <p className="text-white/40 text-[11px] uppercase tracking-widest">
+                  Today
+                </p>
+                <p className="mt-2 text-white text-[17px] font-semibold leading-snug">
                   {todayTitle}
-                </div>
-                <div className="mt-1 text-white/70 text-[13px] leading-snug">
+                </p>
+                <p className="mt-1 text-white/55 text-[13px] leading-relaxed">
                   {todayDesc}
-                </div>
-                <div className="mt-3 text-white/55 text-[12px]">
-                  {getTimeMessage(new Date().getHours())}
-                </div>
+                </p>
               </div>
 
-              <div className="w-10 h-10 rounded-2xl border border-white/10 bg-white/4 flex items-center justify-center text-white/60 text-[12px]">
-                ✦
-              </div>
-            </div>
-          </GlassCard>
-        </div>
-
-        {/* (2) 메인 CTA */}
-        <div className="mt-4">
-          <PrimaryButton
-            onClick={() =>
-              router.push(
-                result?.diaryId
-                  ? `/diary/editor?diaryId=${result?.diaryId}`
-                  : `/diary/editor`
-              )
-            }
-          >
-            {result?.isDiary ? '오늘 기록 수정하기' : '한 줄이면 충분해요'}
-          </PrimaryButton>
-        </div>
-
-        {/* (3) 주간 요약 */}
-        <div className="mt-6">
-          <GlassCard className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="text-white/90 text-[15px] font-semibold">
-                이번 주 돌아보기
-              </div>
-              {/* <button
-                onClick={() => router.push('/stats')}
-                className="h-9 rounded-xl px-3 text-[13px] text-white/80 bg-white/6 border border-white/12 hover:bg-white/10 transition"
+              <div
+                className={[
+                  'w-9 h-9 rounded-2xl flex items-center justify-center text-[15px] flex-shrink-0',
+                  result?.isDiary
+                    ? 'bg-indigo-400/20 border border-indigo-400/30 text-indigo-300'
+                    : 'bg-white/6 border border-white/10 text-white/30',
+                ].join(' ')}
               >
-                자세히
-              </button> */}
+                {result?.isDiary ? '✦' : '○'}
+              </div>
             </div>
 
-            <div className="mt-3 text-white/70 text-[13px] leading-snug">
-              {result?.starCount
-                ? `이번 주에 별 ${result?.starCount}개가 남겨졌어요`
-                : '이번 주는 아직 기록이 없어요'}
-            </div>
-
-            <div className="mt-4">
-              <div className="flex items-center justify-between text-[12px] text-white/55">
-                <span>기록한 날</span>
-                <span>{result?.diaryCount ?? 0}/7</span>
-              </div>
-              <div className="mt-2 h-2 rounded-full bg-white/8 overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-white/40"
-                  style={{ width: `${pct(result?.diaryCount ?? 0, 7)}%` }}
-                />
-              </div>
+            <div className="mt-5">
+              <PrimaryButton
+                onClick={() =>
+                  router.push(
+                    result?.diaryId
+                      ? `/diary/editor?diaryId=${result?.diaryId}`
+                      : `/diary/editor`
+                  )
+                }
+              >
+                {result?.isDiary ? '오늘 기록 수정하기' : '오늘 기록 남기기'}
+              </PrimaryButton>
             </div>
           </GlassCard>
         </div>
 
-        {/* (4) 보조 바로가기 */}
-        <div className="mt-4 grid grid-cols-2 gap-3">
-          <SecondaryButton onClick={() => router.push('/diary-archive')}>
-            기록 모아보기
-          </SecondaryButton>
-          <SecondaryButton onClick={() => router.push('/starLoad')}>
-            별자리 보기
-          </SecondaryButton>
+        {/* 주간 요약 */}
+        <div className="mt-3">
+          <GlassCard className="p-5">
+            <div className="flex items-center justify-between">
+              <p className="text-white/85 text-[15px] font-semibold">
+                이번 주 기록
+              </p>
+              <p className="text-white/85 text-[15px] font-semibold">
+                {filledDays}
+                <span className="text-white/35 text-[13px] font-normal">
+                  {' '}
+                  / 7일
+                </span>
+              </p>
+            </div>
+
+            <div className="mt-4 h-1.5 rounded-full bg-white/8 overflow-hidden">
+              <div
+                className="h-full rounded-full bg-white/35 transition-all duration-500"
+                style={{ width: `${pct(filledDays, 7)}%` }}
+              />
+            </div>
+
+            <p className="mt-3 text-white/40 text-[12px]">
+              {filledDays > 0
+                ? `이번 주에 ${filledDays}일을 기록했어요`
+                : '이번 주는 아직 기록이 없어요'}
+            </p>
+          </GlassCard>
         </div>
-        <ErrorModal
-          open={isError}
-          title="데이터를 불러오지 못했어요"
-          description={
-            error?.message === 'signup_incomplete'
-              ? '회원가입이 완료되지 않았어요. 약관 동의 후 이용해 주세요.'
-              : (error?.message ?? '잠시 후 다시 시도해 주세요.')
-          }
-          onClose={() =>
-            error?.message === 'signup_incomplete'
-              ? router.replace('/auth/terms')
-              : router.push('/home')
-          }
-        />
+
       </section>
+
+      <ErrorModal
+        open={isError}
+        title="데이터를 불러오지 못했어요"
+        description={
+          error?.message === 'signup_incomplete'
+            ? '회원가입이 완료되지 않았어요. 약관 동의 후 이용해 주세요.'
+            : error?.message ?? '잠시 후 다시 시도해 주세요.'
+        }
+        onClose={() =>
+          error?.message === 'signup_incomplete'
+            ? router.replace('/auth/terms')
+            : router.push('/home')
+        }
+      />
     </div>
   );
 }
