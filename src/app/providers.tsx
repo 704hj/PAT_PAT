@@ -4,6 +4,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import * as React from 'react';
 
+import { useOAuthDeepLink } from '@/shared/hooks/useOAuthDeepLink';
+
+function OAuthDeepLinkHandler() {
+  useOAuthDeepLink();
+  return null;
+}
+
 function makeQueryClient() {
   return new QueryClient({
     defaultOptions: {
@@ -32,6 +39,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <OAuthDeepLinkHandler />
       {children}
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>

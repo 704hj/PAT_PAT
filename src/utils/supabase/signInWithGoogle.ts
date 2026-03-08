@@ -1,37 +1,49 @@
-"use client";
+'use client';
 
-import { supabase } from "@/utils/supabase/client";
+import { Browser } from '@capacitor/browser';
+import { Capacitor } from '@capacitor/core';
 
-export async function signInWithGoogle(nextPath: string = "/") {
-  const origin = window.location.origin;
-  const callbackUrl = `${origin}/api/auth/callback?next=${encodeURIComponent(
-    nextPath
-  )}`;
+import { supabase } from '@/utils/supabase/client';
 
-  console.log("[signInWithGoogle] Origin:", origin);
-  console.log("[signInWithGoogle] Callback URL:", callbackUrl);
+const DEEP_LINK_CALLBACK = 'com.patpat.app://auth/callback';
 
-  /**
-   * 구글로 회원가입 클릭
-   *  > signInWithOAuth -> 구글 로그인 페이지로 이동
-   *      > 구글 로그인 성공
-   *      > redirectTo(콜백 라우트)에서 code 파라미터 받아서 supabase.auth.exchangeCodeForSession(code) 실행
-   *      > 세션 생성
-   *      > 시작 페이지로 리다이렉트
-   */
-  const { error } = await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: {
-      redirectTo: callbackUrl,
-      queryParams: {
-        access_type: "offline",
-        prompt: "consent",
+export async function signInWithGoogle(nextPath: string = '/') {
+  if (Capacitor.isNativePlatform()) {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: DEEP_LINK_CALLBACK,
+        skipBrowserRedirect: true,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        },
       },
-    },
-  });
+    });
 
-  if (error) {
-    console.error("Google login error:", error.message);
-    console.error("Google login error details:", error);
+    if (error || !data.url) {
+      console.error('Google login error:', error?.message);
+      return;
+    }
+
+    await Browser.open({ url: data.url, windowName: '_self' });
+  } else {
+    const origin = window.location.origin;
+    const callbackUrl = `${origin}/api/auth/callback?next=${encodeURIComponent(nextPath)}`;
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: callbackUrl,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        },
+      },
+    });
+
+    if (error) {
+      console.error('Google login error:', error.message);
+    }
   }
 }
