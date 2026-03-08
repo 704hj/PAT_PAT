@@ -5,7 +5,7 @@ import { DateHeader } from '@/features/diary-archive/components/dateHeader';
 import { JournalCard } from '@/features/diary-archive/components/journalCard';
 import { MonthPicker } from '@/features/diary-archive/components/monthPicker';
 import { ViewToggle } from '@/features/diary-archive/components/viewToggle';
-import { ErrorModal } from '@/features/common/BaseModal';
+import ErrorModal from '@/features/common/ErrorModal';
 import { useDiaryList } from '@/features/diary/hooks/useDiaryList';
 import { useRouter } from 'next/navigation';
 import { DiaryCollectionPageSkeleton } from './skeleton/skeleton';

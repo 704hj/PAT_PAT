@@ -1,6 +1,6 @@
 'use client';
 
-import { ErrorModal } from '@/features/common/BaseModal';
+import ErrorModal from '@/features/common/ErrorModal';
 import GlassCard from '@/shared/components/glassCard';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';

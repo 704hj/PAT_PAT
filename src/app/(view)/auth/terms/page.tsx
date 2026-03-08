@@ -354,7 +354,7 @@ export default function TermsPage() {
         </div>
       </div>
       {errorMsg && (
-        <ErrorModal message={[errorMsg]} onClose={() => setErrorMsg(null)} />
+        <ErrorModal description={errorMsg} onClose={() => setErrorMsg(null)} />
       )}
     </div>
   );

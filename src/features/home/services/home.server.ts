@@ -18,8 +18,12 @@ export async function getHomeSummaryServer(): Promise<HomeSummary> {
     .is('deleted_at', null)
     .single();
 
-  if (profileErr) throw mapSupabaseError(profileErr);
-  if (!profile) throw Errors.notFound('User profile not found');
+  if (profileErr) {
+    // PGRST116: users 테이블에 레코드 없음 → 회원가입 미완료 상태
+    if (profileErr.code === 'PGRST116') throw Errors.unauthorized('signup_incomplete');
+    throw mapSupabaseError(profileErr);
+  }
+  if (!profile) throw Errors.unauthorized('signup_incomplete');
 
   // 1. 기준 날짜 설정
   const now = new Date();

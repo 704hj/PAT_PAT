@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'PAT PAT',
   webDir: 'out',
   server: {
-    url: 'https://pat-pat.vercel.app',
+    url: 'http://localhost:3000',
     cleartext: false,
   },
 };

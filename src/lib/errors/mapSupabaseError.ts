@@ -61,6 +61,12 @@ export function mapSupabaseError(e: PGError): AppError {
       return Errors.invalid('Invalid or unsupported character encoding', e);
 
     // ───────────────────────────────
+    // PGRST — PostgREST / Supabase
+    // ───────────────────────────────
+    case 'PGRST116': // .single() returned 0 or multiple rows
+      return Errors.notFound('No matching record found', e);
+
+    // ───────────────────────────────
     // 42 — Syntax or Access Rule Violation
     // ───────────────────────────────
     case '42P01': // undefined_table

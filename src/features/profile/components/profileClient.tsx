@@ -71,7 +71,7 @@ export default function ProfileClientPage() {
           className="absolute inset-0 -z-20 bg-[radial-gradient(100%_70%_at_50%_100%,#0b1d4a_0%,#091430_48%,#070f24_100%)]"
         />
         <ErrorModal
-          message={error?.message ?? '프로필을 불러오지 못했어요.'}
+          description={error?.message ?? '프로필을 불러오지 못했어요.'}
           onClose={() => router.push('/home')}
         />
       </main>
