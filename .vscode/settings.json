@@ -81,5 +81,6 @@
     "source.fixAll.eslint": "explicit",
     "source.organizeImports": "explicit"
     // "source.fixAll.prettier": "explicit" // 만아가 tailwind-prettier 플러그인을 쓰신다면 유용합니다.
-  }
+  },
+  "java.configuration.updateBuildConfiguration": "interactive"
 }

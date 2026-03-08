@@ -26,7 +26,7 @@ export async function signInWithGoogle(nextPath: string = '/') {
       return;
     }
 
-    await Browser.open({ url: data.url, windowName: '_self' });
+    await Browser.open({ url: data.url });
   } else {
     const origin = window.location.origin;
     const callbackUrl = `${origin}/api/auth/callback?next=${encodeURIComponent(nextPath)}`;

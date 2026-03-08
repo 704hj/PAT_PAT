@@ -11,12 +11,11 @@ export default function AuthLayout({
   const router = useRouter();
   const pathname = usePathname();
 
-  const hideBack = pathname === '/';
+  const hideBack = ['/', '/auth/terms'].includes(pathname);
 
   const getTitle = () => {
     if (pathname === '/auth/terms') return '서비스 약관';
     if (pathname === '/auth/signup') return '회원가입';
-    if (pathname === '/auth/signin') return '로그인';
     return '';
   };
 
