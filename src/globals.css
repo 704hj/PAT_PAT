@@ -130,8 +130,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  overflow-x: auto;
-  min-width: var(--min-app-width);
+  overflow-x: hidden;
 }
 
 /* Scroll hide helper (global로 남겨도 OK) */
