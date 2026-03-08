@@ -10,6 +10,7 @@ import {
   toDateString,
   type Pt,
 } from '@/lib/zodiac';
+import BackButton from '@/shared/components/BackButton';
 import ConstellationSvg from '@/shared/components/ConstellationSvg';
 import EntryModal from '@/shared/components/EntryModal';
 import { Entry, getEntryByDate, loadEntriesByRange } from '@/utils/entries';
@@ -166,13 +167,7 @@ export default function Page() {
       <section className="mx-auto w-full max-w-[480px] px-5 pt-5 pb-28">
         {/* Top bar */}
         <header className="flex items-center justify-between">
-          <button
-            className="h-10 w-10 rounded-xl bg-white/5 border border-white/10 hover:bg-white/8 transition"
-            aria-label="뒤로"
-            onClick={() => router.back()}
-          >
-            ←
-          </button>
+          <BackButton />
 
           <div className="text-center">
             <div className="text-[16px] font-semibold tracking-[-0.01em]">

@@ -2,6 +2,7 @@ import {
   PRIVACY_SECTIONS,
   TERMS_SECTIONS,
 } from '@/features/auth/constants/termsContent';
+import BackButton from '@/shared/components/BackButton';
 import type { Metadata, NextPage } from 'next';
 
 export const metadata: Metadata = {
@@ -43,6 +44,11 @@ const PrivacyPage: NextPage = () => {
       }}
     >
       <div className="mx-auto w-full max-w-[640px] px-5 py-12 pb-20">
+        {/* 뒤로가기 */}
+        <div className="mb-6">
+          <BackButton />
+        </div>
+
         {/* 헤더 */}
         <div className="mb-10 text-center">
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-white/8 border border-white/12 text-2xl mb-4">

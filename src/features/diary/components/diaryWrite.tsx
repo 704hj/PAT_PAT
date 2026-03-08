@@ -1,6 +1,7 @@
 'use client';
 
 import ErrorModal from '@/features/common/ErrorModal';
+import BackButton from '@/shared/components/BackButton';
 import GlassCard from '@/shared/components/glassCard';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
@@ -113,17 +114,11 @@ export default function DiaryWrite({ diaryId }: { diaryId?: string }) {
         <section className="mx-auto max-w-[480px] px-5 pb-[120px]">
           {/* 헤더 */}
           <header className="pt-6 flex items-center justify-between">
-            <button
-              onClick={() => router.back()}
-              className="rounded-lg px-3 h-9 text-white/80
-                       bg-white/6 border border-white/10"
-            >
-              ←
-            </button>
+            <BackButton />
             <h1 className="text-white text-[18px] font-semibold">
               오늘 정리하기
             </h1>
-            <span className="w-9" />
+            <span className="w-10" />
           </header>
 
           {/* 안내 */}

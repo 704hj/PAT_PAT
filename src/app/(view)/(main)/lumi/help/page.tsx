@@ -1,5 +1,6 @@
 'use client';
 
+import BackButton from '@/shared/components/BackButton';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -46,12 +47,7 @@ export default function HelpPage() {
 
       <section className="mx-auto max-w-[480px] px-5 pb-24">
         <header className="pt-6 flex items-center gap-3">
-          <button
-            onClick={() => router.back()}
-            className="h-9 w-9 rounded-lg bg-white/6 border border-white/10 text-white/80 flex items-center justify-center"
-          >
-            ←
-          </button>
+          <BackButton />
           <h1 className="text-white text-[18px] font-semibold">도움말</h1>
         </header>
 

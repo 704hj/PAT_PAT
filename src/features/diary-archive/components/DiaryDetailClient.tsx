@@ -1,6 +1,7 @@
 'use client';
 
 import { useDiaryDetail } from '@/features/diary/hooks/useDiaryDetail';
+import BackButton from '@/shared/components/BackButton';
 import { useRouter } from 'next/navigation';
 
 const POLARITY_STYLE: Record<string, { dot: string; label: string }> = {
@@ -30,12 +31,7 @@ export default function DiaryDetailClient({ diaryId }: { diaryId: string }) {
       <section className="mx-auto max-w-[480px] px-5 pb-16">
         {/* 헤더 */}
         <header className="pt-6 pb-4 flex items-center gap-3">
-          <button
-            onClick={() => router.back()}
-            className="h-9 w-9 rounded-lg bg-white/6 border border-white/10 text-white/80 flex items-center justify-center shrink-0"
-          >
-            ←
-          </button>
+          <BackButton />
           <h1 className="text-[17px] font-semibold text-white/90">일기</h1>
         </header>
 
