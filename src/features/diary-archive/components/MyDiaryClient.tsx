@@ -1,11 +1,10 @@
 'use client';
 
+import ErrorModal from '@/features/common/ErrorModal';
 import { CalendarView } from '@/features/diary-archive/components/calendarView';
-import { DateHeader } from '@/features/diary-archive/components/dateHeader';
-import { JournalCard } from '@/features/diary-archive/components/journalCard';
+import { ConstellationView } from '@/features/diary-archive/components/ConstellationView';
 import { MonthPicker } from '@/features/diary-archive/components/monthPicker';
 import { ViewToggle } from '@/features/diary-archive/components/viewToggle';
-import ErrorModal from '@/features/common/ErrorModal';
 import { useDiaryList } from '@/features/diary/hooks/useDiaryList';
 import { useRouter } from 'next/navigation';
 import { DiaryCollectionPageSkeleton } from './skeleton/skeleton';
@@ -62,15 +61,14 @@ export default function MyDiaryClient() {
             <>
               {view === 'list' && (
                 <>
-                  {isEmpty && <EmptyState />}
-                  {items.map((diary) => (
-                    <section key={diary.diary_id} className="mb-6">
-                      <DateHeader date={diary.entry_date} />
-                      <ul className="mt-2">
-                        <JournalCard diary={diary} />
-                      </ul>
-                    </section>
-                  ))}
+                  {isEmpty ? (
+                    <EmptyState />
+                  ) : (
+                    <ConstellationView
+                      month={selectedMonth}
+                      diaryList={items}
+                    />
+                  )}
                 </>
               )}
 
