@@ -3,9 +3,39 @@ export function DiaryCollectionPageSkeleton({ view }: { view: string }) {
     <section>
       {/* 콘텐츠 */}
       <div className="mt-5 space-y-6">
-        {view === "list" ? <DiaryListSkeleton /> : <CalendarViewSkeleton />}
+        {view === 'list' ? (
+          <ConstellationViewSkeleton />
+        ) : (
+          <CalendarViewSkeleton />
+        )}
       </div>
     </section>
+  );
+}
+
+export function ConstellationViewSkeleton() {
+  return (
+    <div className="space-y-4 animate-pulse">
+      {/* 별자리 정보 헤더 스켈레톤 */}
+      <div className="flex items-center justify-between px-1">
+        <div className="space-y-2">
+          <div className="h-4 w-24 rounded bg-white/10" />
+          <div className="h-3 w-32 rounded bg-white/10" />
+        </div>
+        <div className="h-5 w-16 rounded-full bg-white/10" />
+      </div>
+
+      {/* 별자리 카드 영역 스켈레톤 */}
+      <div className="hero-card overflow-hidden">
+        <div className="hero-inner p-4 min-h-[320px] bg-white/5 flex items-center justify-center">
+          <div className="h-4 w-32 rounded bg-white/10" />
+        </div>
+      </div>
+
+      <div className="flex justify-center pt-2">
+        <div className="h-3 w-48 rounded bg-white/10" />
+      </div>
+    </div>
   );
 }
 
