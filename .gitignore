@@ -49,6 +49,7 @@ next-env.d.ts
 storybook-static
 
 # Capacitor - Android
+android/.idea/
 android/.gradle/
 android/app/build/
 android/build/
@@ -75,5 +76,5 @@ supabase/.pnpm-debug.log*
 Thumbs.db
 
 CLAUDE.md
-mcp.json
+.mcp.json
 settings.Local.json
