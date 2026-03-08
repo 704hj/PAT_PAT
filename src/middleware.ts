@@ -53,14 +53,16 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith('/start') ||
     request.nextUrl.pathname === '/';
 
+  const termPage = '/privacy';
+
   // 4. 로직 처리: 로그인 안 된 유저가 보호된 페이지 접근 시
-  if (!user && !isAuthPage) {
+  if (!termPage && !user && !isAuthPage) {
     // 로그인이 안 되어 있고, 허용된 페이지(/start, /auth)가 아니면 로그인으로 보냄
     return NextResponse.redirect(new URL('/start', request.url));
   }
 
   // 5. 로직 처리: 이미 로그인된 유저가 로그인/시작 페이지 접근 시
-  if (user && isAuthPage) {
+  if (!termPage && user && isAuthPage) {
     // [예외] 약관 동의 페이지(/auth/terms)는 신규 가입자가 세션을 가진 채로 머물러야 하므로 제외
     if (request.nextUrl.pathname === '/auth/terms') {
       return response;

@@ -10,8 +10,8 @@ import {
 import ProfileSkeleton from '@/features/profile/components/skeleton';
 import { useUserProfile } from '@/features/profile/hooks/useUserProfile';
 import { profileKeys } from '@/features/profile/queries/profile';
-import { useQueryClient } from '@tanstack/react-query';
 import GlassCard from '@/shared/components/glassCard';
+import { useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -266,7 +266,7 @@ export default function ProfileClientPage() {
               label="문의하기"
               desc="피드백 보내기"
             />
-            <SettingLink href="/lumi/terms" label="이용약관 · 개인정보" />
+            <SettingLink href="/privacy" label="이용약관 · 개인정보" />
           </GlassCard>
 
           {/* 세션/위험영역 */}
