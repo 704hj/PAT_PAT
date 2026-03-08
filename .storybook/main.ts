@@ -18,23 +18,23 @@ const config: StorybookConfig = {
   //스토리 파일 위치 정의
   stories: [
     "../stories/**/*.stories.@(ts|tsx|mdx)",
-    "../app/**/*.stories.@(ts|tsx|mdx)",
+    "../src/**/*.stories.@(ts|tsx|mdx)",
   ],
   addons: [
     "@storybook/addon-essentials",
     "@storybook/addon-docs",
-    "@storybook/addon-vitest",
   ],
   features: {
     // @ts-ignore
     autodocs: true,
   },
   webpackFinal: async (config) => {
-    config.resolve = config.resolve || {};
-    config.resolve.alias = {
-      ...(config.resolve.alias || {}),
-      "@": path.resolve(__dirnameGlobal, ".."),
-    };
+    if (config.resolve) {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        "@": path.resolve(__dirnameGlobal, "../src"),
+      };
+    }
     return config;
   },
 };
