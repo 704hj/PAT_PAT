@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import MyDiaryClient from '@/features/diary-archive/components/MyDiaryClient';
 import { getDiariesAction } from '@/features/diary/actions/diary.actions';
 import { diaryKeys } from '@/features/diary/queries/diaries';
