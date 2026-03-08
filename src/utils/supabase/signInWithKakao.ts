@@ -22,7 +22,7 @@ export async function signInWithKakao(nextPath: string = '/home') {
       return;
     }
 
-    await Browser.open({ url: data.url, windowName: '_self' });
+    await Browser.open({ url: data.url });
   } else {
     const origin = window.location.origin;
     const redirectTo = `${origin}/api/auth/callback?next=${encodeURIComponent(nextPath)}`;

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { supabase } from "@/utils/supabase/client";
 import { validatePassword, validateEmail } from "@/utils/validation";
 import { checkEmailProviders } from "@/utils/auth/providerCheck";
@@ -26,6 +25,7 @@ interface UseSignUpReturn {
   passwordError: string;
   password2Error: string;
   busy: boolean;
+  signupDone: boolean;
 
   // 액션
   setNickname: (value: string) => void;
@@ -45,8 +45,6 @@ interface UseSignUpReturn {
  * 회원가입 훅
  */
 export function useSignUp(): UseSignUpReturn {
-  const router = useRouter();
-
   // 폼 상태
   const [nickname, setNickname] = useState("");
   const [email, setEmail] = useState("");
@@ -68,6 +66,7 @@ export function useSignUp(): UseSignUpReturn {
   const [passwordError, setPasswordError] = useState("");
   const [password2Error, setPassword2Error] = useState("");
   const [busy, setBusy] = useState(false);
+  const [signupDone, setSignupDone] = useState(false);
 
   // 닉네임 변경 핸들러
   const handleNicknameChange = (value: string) => {
@@ -280,8 +279,8 @@ export function useSignUp(): UseSignUpReturn {
         throw new Error(result.message || "회원가입에 실패했습니다.");
       }
 
-      // 완료 - 홈으로 이동
-      router.push("/home");
+      // 완료 - 성공 모달 표시 (네비게이션은 호출 측에서 처리)
+      setSignupDone(true);
     } catch (error: any) {
       console.error("회원가입 오류:", error);
       setPasswordError(error.message || "회원가입에 실패했습니다.");
@@ -310,6 +309,7 @@ export function useSignUp(): UseSignUpReturn {
     passwordError,
     password2Error,
     busy,
+    signupDone,
 
     // 액션
     setNickname: handleNicknameChange,

@@ -88,10 +88,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // 약관 동의 시각 기록 (이메일 플로우는 terms 페이지에서 동의 후 여기 도달)
+    const nowIso = new Date().toISOString();
+    const { error: termsErr } = await adminClient
+      .from("users")
+      .update({ terms_accepted_at: nowIso })
+      .eq("auth_user_id", user.id);
+    if (termsErr) {
+      console.error("terms_accepted_at 업데이트 오류:", termsErr);
+    }
+
     return NextResponse.json({
       ok: true,
       message: "회원가입이 완료되었습니다.",
-      debug: rpcData, // 디버그 정보 포함
     });
   } catch (error: any) {
     console.error("비밀번호 설정 예외:", error);

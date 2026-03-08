@@ -1,6 +1,6 @@
 'use client';
 
-import SocialLogout from '@/features/auth/components/socialLogout';
+import { supabase } from '@/utils/supabase/client';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import ErrorModal from '@/features/common/ErrorModal';
 import {
@@ -27,6 +27,14 @@ export default function ProfileClientPage() {
   const [nickPending, setNickPending] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deletePending, setDeletePending] = useState(false);
+  const [logoutPending, setLogoutPending] = useState(false);
+
+  const handleLogout = async () => {
+    if (logoutPending) return;
+    setLogoutPending(true);
+    await supabase.auth.signOut();
+    router.replace('/start');
+  };
 
   const handleDeleteAccount = async () => {
     if (deletePending) return;
@@ -295,10 +303,14 @@ export default function ProfileClientPage() {
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-3">
-              <SocialLogout
-                next="/start"
-                className="h-11 rounded-[12px] text-[13px] font-medium text-white/85 bg-white/6 border border-white/12 hover:bg-white/10 transition"
-              />
+              <button
+                type="button"
+                onClick={handleLogout}
+                disabled={logoutPending}
+                className="h-11 rounded-[12px] text-[13px] font-medium text-white/85 bg-white/6 border border-white/12 hover:bg-white/10 transition disabled:opacity-40"
+              >
+                {logoutPending ? '로그아웃 중...' : '로그아웃'}
+              </button>
               <button
                 type="button"
                 onClick={() => setDeleteConfirm(true)}

@@ -9,17 +9,17 @@ import {
   TERMS_SECTIONS,
 } from '@/features/auth/constants/termsContent';
 import ErrorModal from '@/features/common/ErrorModal';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useRef, useState } from 'react';
 
 type Tab = 'terms' | 'privacy';
 
-function CheckIcon() {
+function CheckIcon({ size = 10 }: { size?: number }) {
   return (
-    <svg viewBox="0 0 12 10" fill="none" className="w-3 h-3">
+    <svg viewBox="0 0 12 10" fill="none" style={{ width: size, height: size }}>
       <path
         d="M1 5l3.5 3.5L11 1"
-        stroke="#050b1c"
+        stroke="currentColor"
         strokeWidth="2.2"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -31,10 +31,13 @@ function CheckIcon() {
 function Checkbox({
   checked,
   onChange,
+  size = 'md',
 }: {
   checked: boolean;
   onChange: (v: boolean) => void;
+  size?: 'sm' | 'md';
 }) {
+  const dim = size === 'sm' ? 'h-[18px] w-[18px]' : 'h-5 w-5';
   return (
     <button
       type="button"
@@ -42,28 +45,32 @@ function Checkbox({
       aria-checked={checked}
       onClick={() => onChange(!checked)}
       className={[
-        'flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-all duration-200',
+        'shrink-0 flex items-center justify-center rounded-md border transition-all duration-200',
+        dim,
         checked
-          ? 'bg-sky-400/90 border-sky-400 shadow-[0_0_8px_rgba(56,189,248,0.35)]'
-          : 'border-white/22 bg-white/5 hover:border-white/40',
+          ? 'bg-sky-400 border-sky-400 text-[#050b1c]'
+          : 'border-white/20 bg-white/5 text-transparent hover:border-white/35',
       ].join(' ')}
     >
-      {checked && <CheckIcon />}
+      <CheckIcon size={size === 'sm' ? 9 : 10} />
     </button>
   );
 }
 
 export default function TermsPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isEmailFlow = searchParams.get('from') === 'email';
   const [activeTab, setActiveTab] = useState<Tab>('terms');
   const [agreedTerms, setAgreedTerms] = useState(false);
   const [agreedPrivacy, setAgreedPrivacy] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const canProceed = agreedTerms && agreedPrivacy && !isSubmitting;
-  const allAgreed = agreedTerms && agreedPrivacy;
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const allAgreed = agreedTerms && agreedPrivacy;
+  const canProceed = allAgreed && !isSubmitting;
 
   const switchTab = (tab: Tab) => {
     setActiveTab(tab);
@@ -71,6 +78,10 @@ export default function TermsPage() {
   };
 
   const handleCancel = async () => {
+    if (isEmailFlow) {
+      router.back();
+      return;
+    }
     setIsCancelling(true);
     try {
       await cancelSignupAction();
@@ -83,22 +94,20 @@ export default function TermsPage() {
 
   const handleCompleteSignup = async () => {
     if (!canProceed) return;
+    if (isEmailFlow) {
+      router.push('/auth/email');
+      return;
+    }
     setIsSubmitting(true);
-
     try {
-      const fd = new FormData();
-      const res = await completeSignupAction(fd);
+      const res = await completeSignupAction(new FormData());
       if (!res.ok) {
         setErrorMsg(res.message);
-        console.log(res.message);
         setIsSubmitting(false);
         return;
       }
-
-      // 성공 시 홈으로 이동
       router.push('/home');
     } catch (err: any) {
-      console.error('completeSignupAction error:', err);
       setErrorMsg(err.message || '가입 처리 중 오류가 발생했습니다.');
       setIsSubmitting(false);
     }
@@ -107,21 +116,10 @@ export default function TermsPage() {
   const sections = activeTab === 'terms' ? TERMS_SECTIONS : PRIVACY_SECTIONS;
 
   return (
-    /* Fills the flex-1 space in AuthLayout, ensuring internal scroll works */
     <div className="flex-1 flex flex-col min-h-0 text-white relative">
-      {/* 페이지 전용 배경 글로우 */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10"
-        style={{
-          background:
-            'radial-gradient(700px_400px_at_50%_0%,rgba(56,189,248,0.07),transparent_60%),' +
-            'radial-gradient(500px_350px_at_90%_100%,rgba(130,70,255,0.07),transparent_55%)',
-        }}
-      />
-      {/* 탭 바: 상단 고정 (Sticky within this container) */}
-      <div className="shrink-0 z-20 border-b border-white/8 bg-[rgba(5,11,28,0.85)] backdrop-blur-md">
-        <div className="flex w-full">
+      {/* 탭 바 */}
+      <div className="shrink-0 z-20 px-5 pt-4 pb-0">
+        <div className="flex gap-1 rounded-[12px] bg-white/[0.04] border border-white/8 p-1">
           {(['terms', 'privacy'] as Tab[]).map((tab) => {
             const label = tab === 'terms' ? '이용약관' : '개인정보 처리방침';
             const agreed = tab === 'terms' ? agreedTerms : agreedPrivacy;
@@ -131,175 +129,163 @@ export default function TermsPage() {
                 key={tab}
                 onClick={() => switchTab(tab)}
                 className={[
-                  'relative flex flex-1 items-center justify-center gap-1.5 py-4 text-[13px] font-medium transition-colors',
+                  'relative flex flex-1 items-center justify-center gap-1.5 py-2.5 rounded-[9px] text-[13px] font-medium transition-all duration-200',
                   isActive
-                    ? 'text-sky-300'
-                    : 'text-white/40 hover:text-white/65',
+                    ? 'bg-white/10 text-white shadow-sm'
+                    : 'text-white/40 hover:text-white/60',
                 ].join(' ')}
               >
                 {agreed && (
-                  <span className="flex h-4 w-4 items-center justify-center rounded-full bg-sky-400/20 border border-sky-400/40">
-                    <CheckIcon />
+                  <span className="flex h-[16px] w-[16px] items-center justify-center rounded-full bg-sky-400 text-[#050b1c]">
+                    <CheckIcon size={9} />
                   </span>
                 )}
                 {label}
-                {isActive && (
-                  <span className="absolute bottom-0 left-1/2 h-[2px] w-14 -translate-x-1/2 rounded-full bg-sky-400" />
-                )}
               </button>
             );
           })}
         </div>
       </div>
 
-      {/* ── 내부 스크롤 콘텐츠 ── */}
+      {/* 콘텐츠 */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto scroll-hide">
-        <div className="w-full px-5 pt-5 pb-5 space-y-3">
+        <div className="px-5 pt-4 pb-4 space-y-2">
           {sections.map((s, idx) => (
-            <section
-              key={s.id}
-              id={s.id}
-              className="rounded-[16px] border border-white/8 bg-white/[0.04] px-5 py-5 shadow-[0_4px_16px_rgba(0,0,0,0.2)]"
-            >
-              <div className="mb-3 flex items-center gap-2.5">
-                <span className="text-[11px] font-mono text-white/25 tabular-nums shrink-0">
-                  {String(idx + 1).padStart(2, '0')}
-                </span>
-                <h2 className="text-[14px] font-semibold text-white/85">
-                  {s.title}
-                </h2>
+            <section key={s.id} id={s.id}>
+              <div className="px-4 py-4 rounded-[12px] border border-white/6 bg-white/[0.03]">
+                <div className="flex items-baseline gap-2 mb-2">
+                  <span className="text-[10px] font-mono text-white/20 tabular-nums">
+                    {String(idx + 1).padStart(2, '0')}
+                  </span>
+                  <h2 className="text-[13px] font-semibold text-white/80">
+                    {s.title}
+                  </h2>
+                </div>
+                <p className="whitespace-pre-line text-[12px] leading-[1.85] text-white/45 pl-5">
+                  {s.content}
+                </p>
               </div>
-              <div className="mb-3 h-px bg-white/8" />
-              <p className="whitespace-pre-line text-[13px] leading-[1.8] text-white/55">
-                {s.content}
-              </p>
             </section>
           ))}
-          <div className="h-4" />
+          <div className="h-2" />
         </div>
       </div>
 
-      {/* ── Fixed 하단 동의 바 ── */}
-      <div className="shrink-0 border-t border-white/10 bg-[rgba(5,11,28,0.92)] backdrop-blur-2xl px-5 pt-4 pb-[max(20px,env(safe-area-inset-bottom))]">
-        <div className="space-y-3">
+      {/* 하단 동의 바 */}
+      <div className="shrink-0 border-t border-white/8 bg-[rgba(5,11,28,0.95)] backdrop-blur-2xl px-5 pt-4 pb-[max(20px,env(safe-area-inset-bottom))]">
+        <div className="space-y-2.5">
           {/* 전체 동의 */}
           <div
-            className={[
-              'flex items-center gap-4 rounded-2xl px-5 py-4 transition-all duration-300 cursor-pointer',
-              allAgreed
-                ? 'bg-sky-400/[0.12] border border-sky-400/30 shadow-[0_0_24px_rgba(56,189,248,0.12)]'
-                : 'bg-white/5 border border-white/10',
-            ].join(' ')}
+            role="checkbox"
+            aria-checked={allAgreed}
+            tabIndex={0}
             onClick={() => {
               setAgreedTerms(!allAgreed);
               setAgreedPrivacy(!allAgreed);
             }}
+            onKeyDown={(e) => {
+              if (e.key === ' ' || e.key === 'Enter') {
+                e.preventDefault();
+                setAgreedTerms(!allAgreed);
+                setAgreedPrivacy(!allAgreed);
+              }
+            }}
+            className={[
+              'flex items-center gap-3 rounded-[12px] px-4 py-3.5 cursor-pointer transition-all duration-200 select-none',
+              allAgreed
+                ? 'bg-sky-400/10 border border-sky-400/25'
+                : 'bg-white/[0.04] border border-white/10',
+            ].join(' ')}
           >
-            <Checkbox
-              checked={allAgreed}
-              onChange={(v) => {
-                setAgreedTerms(v);
-                setAgreedPrivacy(v);
-              }}
-            />
-            <div className="flex flex-col">
-              <span
-                className={[
-                  'text-[14px] font-bold transition-colors duration-300',
-                  allAgreed ? 'text-white' : 'text-white/90',
-                ].join(' ')}
-              >
-                약관 전체 동의하기
-              </span>
-              <span
-                className={[
-                  'text-[11px] transition-colors duration-300',
-                  allAgreed ? 'text-sky-300/60' : 'text-white/40',
-                ].join(' ')}
-              >
-                필수 이용약관 및 개인정보 처리방침
-              </span>
+            <span
+              className={[
+                'shrink-0 flex h-5 w-5 items-center justify-center rounded-md border transition-all duration-200',
+                allAgreed
+                  ? 'bg-sky-400 border-sky-400 text-[#050b1c]'
+                  : 'border-white/20 bg-white/5 text-transparent',
+              ].join(' ')}
+            >
+              <CheckIcon size={10} />
+            </span>
+            <div>
+              <p className="text-[13.5px] font-semibold text-white/90 leading-tight">
+                약관 전체 동의
+              </p>
+              <p className="text-[11.5px] text-white/40 mt-0.5">
+                이용약관 · 개인정보 처리방침 (필수)
+              </p>
             </div>
           </div>
 
-          {/* 개별 동의 2개 */}
-          <div className="flex gap-3 px-1">
-            {/* 이용약관 */}
-            <div
-              className="flex flex-1 items-center gap-2.5 cursor-pointer"
-              onClick={() => setAgreedTerms(!agreedTerms)}
-            >
-              <div className="scale-90">
-                <Checkbox checked={agreedTerms} onChange={setAgreedTerms} />
-              </div>
-              <span className="text-[12px] text-white/60 font-medium">
-                이용약관 <span className="text-sky-300/60 ml-0.5">(필수)</span>
-              </span>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setActiveTab('terms');
-                }}
-                className="ml-auto text-[11px] text-white/30 underline underline-offset-2 hover:text-white/55 transition"
+          {/* 개별 동의 */}
+          <div className="space-y-1 px-1">
+            {(
+              [
+                {
+                  key: 'terms' as Tab,
+                  label: '이용약관',
+                  checked: agreedTerms,
+                  set: setAgreedTerms,
+                },
+                {
+                  key: 'privacy' as Tab,
+                  label: '개인정보 처리방침',
+                  checked: agreedPrivacy,
+                  set: setAgreedPrivacy,
+                },
+              ] as const
+            ).map(({ key, label, checked, set }) => (
+              <div
+                key={key}
+                className="flex items-center gap-2.5 py-1.5 cursor-pointer"
+                onClick={() => set(!checked)}
               >
-                보기
-              </button>
-            </div>
-
-            {/* 개인정보 처리방침 */}
-            <div
-              className="flex flex-1 items-center gap-2.5 cursor-pointer"
-              onClick={() => setAgreedPrivacy(!agreedPrivacy)}
-            >
-              <div className="scale-90">
-                <Checkbox checked={agreedPrivacy} onChange={setAgreedPrivacy} />
+                <Checkbox size="sm" checked={checked} onChange={set} />
+                <span className="text-[12px] text-white/55 flex-1">
+                  {label}{' '}
+                  <span className="text-sky-400/60 text-[11px]">(필수)</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    switchTab(key);
+                  }}
+                  className="text-[11px] text-white/30 hover:text-white/55 transition underline underline-offset-2"
+                >
+                  보기
+                </button>
               </div>
-              <span className="text-[12px] text-white/60 font-medium">
-                개인정보처리방침{' '}
-                <span className="text-sky-300/60 ml-0.5">(필수)</span>
-              </span>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setActiveTab('privacy');
-                }}
-                className="ml-auto text-[11px] text-white/30 underline underline-offset-2 hover:text-white/55 transition"
-              >
-                보기
-              </button>
-            </div>
+            ))}
           </div>
 
-          {/* CTA 버튼 */}
+          {/* CTA */}
           <button
             type="button"
             onClick={handleCompleteSignup}
             disabled={!canProceed}
             className={[
-              'w-full h-[54px] rounded-2xl text-[16px] font-bold tracking-tight',
-              'flex items-center justify-center transition-all duration-300',
-              'active:scale-[0.98]',
+              'w-full h-[52px] rounded-[12px] text-[15px] font-bold tracking-tight transition-all duration-300 active:scale-[0.98]',
               canProceed
-                ? 'bg-[linear-gradient(180deg,var(--cta-from)_0%,var(--cta-to)_100%)] border-white/14 text-white shadow-[0_12px_32px_rgba(0,0,0,0.3)] hover:brightness-110'
+                ? 'bg-[linear-gradient(180deg,var(--cta-from)_0%,var(--cta-to)_100%)] text-white shadow-[0_8px_24px_rgba(0,0,0,0.3)] hover:brightness-110'
                 : 'bg-white/5 border border-white/5 text-white/20 cursor-not-allowed',
             ].join(' ')}
           >
             {isSubmitting ? '처리 중...' : '동의하고 시작하기'}
           </button>
 
-          {/* 취소 버튼 */}
+          {/* 취소 */}
           <button
             type="button"
             onClick={handleCancel}
             disabled={isCancelling || isSubmitting}
-            className="w-full text-center text-[13px] text-white/35 hover:text-white/55 transition py-1"
+            className="w-full text-center text-[12.5px] text-white/30 hover:text-white/50 transition py-1"
           >
-            {isCancelling ? '취소 중...' : '회원가입 취소'}
+            {isCancelling ? '취소 중...' : '뒤로가기'}
           </button>
         </div>
       </div>
+
       {errorMsg && (
         <ErrorModal description={errorMsg} onClose={() => setErrorMsg(null)} />
       )}

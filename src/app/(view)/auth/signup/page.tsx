@@ -56,7 +56,7 @@ export default function SignUpPage() {
           <div className="mt-4 text-center">
             <button
               type="button"
-              onClick={() => router.push('/auth/terms')}
+              onClick={() => router.push('/auth/terms?from=email')}
               className="text-white/85 text-[13px] underline underline-offset-4 hover:text-white transition"
             >
               약관 동의 및 가입 시작하기
