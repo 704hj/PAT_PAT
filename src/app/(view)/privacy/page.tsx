@@ -5,35 +5,25 @@ import {
 import BackButton from '@/shared/components/BackButton';
 import type { Metadata, NextPage } from 'next';
 
+import { PolicyAccordion } from './PolicyAccordion';
+
 export const metadata: Metadata = {
   title: '개인정보 처리방침 · PAT PAT',
   description: 'PAT PAT 서비스의 개인정보 처리방침 및 이용약관',
 };
 
-function PolicySection({
-  section,
-  index,
-}: {
-  section: { id: string; title: string; content: string };
-  index: number;
-}) {
+function SectionDivider({ label }: { label: string }) {
   return (
-    <section className="rounded-2xl border border-white/8 bg-white/[0.04] px-5 py-5">
-      <div className="mb-3 flex items-center gap-2.5">
-        <span className="text-[11px] font-mono text-white/25 tabular-nums shrink-0">
-          {String(index + 1).padStart(2, '0')}
-        </span>
-        <h3 className="text-[14px] font-semibold text-white/85">
-          {section.title}
-        </h3>
-      </div>
-      <div className="h-px bg-white/8 mb-3" />
-      <p className="whitespace-pre-line text-[13px] leading-[1.8] text-white/55">
-        {section.content}
-      </p>
-    </section>
+    <div className="flex items-center gap-3 mb-5">
+      <div className="h-px flex-1 bg-white/10" />
+      <span className="text-[11px] font-semibold text-white/35 tracking-[0.15em] uppercase">
+        {label}
+      </span>
+      <div className="h-px flex-1 bg-white/10" />
+    </div>
   );
 }
+
 
 const PrivacyPage: NextPage = () => {
   return (
@@ -43,63 +33,60 @@ const PrivacyPage: NextPage = () => {
         background: 'linear-gradient(180deg, #07102a 0%, #050b1c 100%)',
       }}
     >
-      <div className="mx-auto w-full max-w-[640px] px-5 py-12 pb-20">
+      <div className="mx-auto w-full max-w-[640px] px-5 pt-10 pb-24">
         {/* 뒤로가기 */}
-        <div className="mb-6">
+        <div className="mb-8">
           <BackButton />
         </div>
 
         {/* 헤더 */}
-        <div className="mb-10 text-center">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-white/8 border border-white/12 text-2xl mb-4">
-            ✦
+        <div className="mb-12 flex flex-col items-center gap-3">
+          <div
+            className="w-16 h-16 rounded-full flex items-center justify-center"
+            style={{
+              background:
+                'radial-gradient(circle, rgba(120,100,255,0.15) 0%, rgba(120,100,255,0.04) 100%)',
+              boxShadow: '0 0 32px rgba(120,100,255,0.12)',
+            }}
+          >
+            <img
+              src="/images/icon/lumi/lumi_main.svg"
+              alt="Lumi"
+              className="w-10 h-10 object-contain"
+            />
           </div>
-          <h1 className="text-[24px] font-bold tracking-tight text-white">
-            PAT PAT
-          </h1>
-          <p className="mt-1 text-[14px] text-white/50">
-            이용약관 및 개인정보 처리방침
-          </p>
-          <p className="mt-1 text-[12px] text-white/30">
-            최초 시행일: 2026년 3월 8일
-          </p>
+          <div className="text-center">
+            <h1 className="font-surround text-[22px] font-bold tracking-tight text-white">
+              PAT PAT
+            </h1>
+            <p className="mt-1 text-[13px] text-white/45">
+              이용약관 및 개인정보 처리방침
+            </p>
+          </div>
+          <div className="mt-1 inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1">
+            <span className="text-[11px] text-white/30">시행일</span>
+            <span className="text-[11px] text-white/50">2026년 3월 8일</span>
+          </div>
         </div>
 
         {/* 이용약관 */}
         <div className="mb-10">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="h-px flex-1 bg-white/8" />
-            <h2 className="text-[13px] font-semibold text-white/60 tracking-widest uppercase">
-              이용약관
-            </h2>
-            <div className="h-px flex-1 bg-white/8" />
-          </div>
-          <div className="space-y-3">
-            {TERMS_SECTIONS.map((s, i) => (
-              <PolicySection key={s.id} section={s} index={i} />
-            ))}
-          </div>
+          <SectionDivider label="이용약관" />
+          <PolicyAccordion sections={TERMS_SECTIONS} />
         </div>
 
         {/* 개인정보 처리방침 */}
         <div>
-          <div className="flex items-center gap-3 mb-4">
-            <div className="h-px flex-1 bg-white/8" />
-            <h2 className="text-[13px] font-semibold text-white/60 tracking-widest uppercase">
-              개인정보 처리방침
-            </h2>
-            <div className="h-px flex-1 bg-white/8" />
-          </div>
-          <div className="space-y-3">
-            {PRIVACY_SECTIONS.map((s, i) => (
-              <PolicySection key={s.id} section={s} index={i} />
-            ))}
-          </div>
+          <SectionDivider label="개인정보 처리방침" />
+          <PolicyAccordion sections={PRIVACY_SECTIONS} />
         </div>
 
         {/* 푸터 */}
-        <div className="mt-10 text-center text-[12px] text-white/25">
-          문의: hyoung1566@gmail.com
+        <div className="mt-12 text-center">
+          <p className="text-[11px] text-white/20">
+            문의:{' '}
+            <span className="text-white/35">hyoung1566@gmail.com</span>
+          </p>
         </div>
       </div>
     </div>
