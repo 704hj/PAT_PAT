@@ -27,16 +27,25 @@ export function useOAuthDeepLink() {
 
       if (!code) return;
 
-      const { error } = await supabase.auth.exchangeCodeForSession(code);
+      const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
-      if (!error) {
-        await Browser.close();
-        router.replace('/home');
-      } else {
+      if (error) {
         console.error('[OAuthDeepLink] Session exchange failed:', error.message);
         await Browser.close();
         router.replace('/start?error=UNAUTHORIZED');
+        return;
       }
+
+      // 신규 유저 여부 확인 (users 테이블에 레코드 없으면 약관 동의 필요)
+      const authUserId = data.user?.id;
+      const { data: existingUser } = await supabase
+        .from('users')
+        .select('user_id')
+        .eq('auth_user_id', authUserId)
+        .maybeSingle();
+
+      await Browser.close();
+      router.replace(existingUser ? '/home' : '/auth/terms');
     });
 
     return () => {
