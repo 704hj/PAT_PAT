@@ -1,23 +1,39 @@
-"use client";
+'use client';
 
-import { supabase } from "@/utils/supabase/client";
+import { Browser } from '@capacitor/browser';
+import { Capacitor } from '@capacitor/core';
 
-export async function signInWithKakao(nextPath: string = "/home") {
-  const origin = window.location.origin;
-  const redirectTo = `${origin}/api/auth/callback?next=${encodeURIComponent(
-    nextPath
-  )}`;
+import { supabase } from '@/utils/supabase/client';
 
-  console.log("[signInWithKakao] Origin:", origin);
-  console.log("[signInWithKakao] Callback URL:", redirectTo);
+const DEEP_LINK_CALLBACK = 'com.patpat.app://auth/callback';
 
-  const { error } = await supabase.auth.signInWithOAuth({
-    provider: "kakao",
-    options: { redirectTo },
-  });
+export async function signInWithKakao(nextPath: string = '/home') {
+  if (Capacitor.isNativePlatform()) {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'kakao',
+      options: {
+        redirectTo: DEEP_LINK_CALLBACK,
+        skipBrowserRedirect: true,
+      },
+    });
 
-  if (error) {
-    console.error("Kakao login error:", error.message);
-    console.error("Kakao login error details:", error);
+    if (error || !data.url) {
+      console.error('Kakao login error:', error?.message);
+      return;
+    }
+
+    await Browser.open({ url: data.url, windowName: '_self' });
+  } else {
+    const origin = window.location.origin;
+    const redirectTo = `${origin}/api/auth/callback?next=${encodeURIComponent(nextPath)}`;
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'kakao',
+      options: { redirectTo },
+    });
+
+    if (error) {
+      console.error('Kakao login error:', error.message);
+    }
   }
 }
