@@ -1,6 +1,6 @@
 'use client';
 
-import { ErrorModal } from '@/features/common/BaseModal';
+import ErrorModal from '@/features/common/ErrorModal';
 import { useHomeSummary } from '@/features/home/hooks/useHomeSummary';
 import GlassCard from '@/shared/components/glassCard';
 import { useRouter } from 'next/navigation';
@@ -166,8 +166,16 @@ export default function HomeClient() {
         <ErrorModal
           open={isError}
           title="데이터를 불러오지 못했어요"
-          description={error?.message ?? '잠시 후 다시 시도해 주세요.'}
-          onClose={() => router.push('/home')}
+          description={
+            error?.message === 'signup_incomplete'
+              ? '회원가입이 완료되지 않았어요. 약관 동의 후 이용해 주세요.'
+              : (error?.message ?? '잠시 후 다시 시도해 주세요.')
+          }
+          onClose={() =>
+            error?.message === 'signup_incomplete'
+              ? router.replace('/auth/terms')
+              : router.push('/home')
+          }
         />
       </section>
     </div>

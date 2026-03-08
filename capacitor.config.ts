@@ -7,6 +7,8 @@ const config: CapacitorConfig = {
   server: {
     url: 'https://pat-pat.vercel.app',
     cleartext: false,
+    // url: 'http://10.0.2.2:3000',
+    // cleartext: true,
   },
 };
 

@@ -43,6 +43,8 @@ export function useAuth(options: UseAuthOptions = {}): UseAuthReturn {
 
         if (error) {
           console.error("[useAuth] Session check error:", error);
+          await supabase.auth.signOut();
+          router.replace("/start");
           setLoading(false);
           return;
         }

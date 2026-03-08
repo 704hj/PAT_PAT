@@ -4,6 +4,7 @@ import { mapSupabaseError } from '@/lib';
 import {
   createServerSupabaseClient,
   createServerSupabaseClientReadOnly,
+  createSupabaseAdminClient,
 } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
 
@@ -108,5 +109,35 @@ export async function completeSignupAction(formData: FormData) {
   revalidatePath('/auth/terms');
 
   // 4) 완료 후 성공 반환 (클라에서 redirect 처리)
+  return { ok: true as const };
+}
+
+/**
+ * 약관 동의 취소 (회원가입 포기)
+ * - auth.users 레코드 삭제 (admin 권한 필요)
+ * - 세션 만료 처리
+ */
+export async function cancelSignupAction() {
+  const supabase = await createServerSupabaseClient();
+
+  const { data: userRes, error: userErr } = await supabase.auth.getUser();
+  if (userErr || !userRes.user) {
+    return { ok: false as const, message: '세션이 없습니다.' };
+  }
+
+  const userId = userRes.user.id;
+
+  // auth.users에서 완전 삭제 (admin)
+  const adminClient = await createSupabaseAdminClient();
+  const { error: deleteErr } = await adminClient.auth.admin.deleteUser(userId);
+
+  if (deleteErr) {
+    console.error('[cancelSignupAction] deleteUser error:', deleteErr);
+    // 삭제 실패해도 로그아웃은 진행
+  }
+
+  // 세션 만료
+  await supabase.auth.signOut();
+
   return { ok: true as const };
 }

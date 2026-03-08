@@ -65,7 +65,7 @@ function OnboardingContent() {
 
       {errorMessage && (
         <ErrorModal
-          message={[errorMessage]}
+          description={errorMessage}
           onClose={() => {
             errorMessage = null;
           }}

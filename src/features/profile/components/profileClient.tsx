@@ -10,8 +10,8 @@ import {
 import ProfileSkeleton from '@/features/profile/components/skeleton';
 import { useUserProfile } from '@/features/profile/hooks/useUserProfile';
 import { profileKeys } from '@/features/profile/queries/profile';
-import { useQueryClient } from '@tanstack/react-query';
 import GlassCard from '@/shared/components/glassCard';
+import { useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -71,7 +71,7 @@ export default function ProfileClientPage() {
           className="absolute inset-0 -z-20 bg-[radial-gradient(100%_70%_at_50%_100%,#0b1d4a_0%,#091430_48%,#070f24_100%)]"
         />
         <ErrorModal
-          message={error?.message ?? '프로필을 불러오지 못했어요.'}
+          description={error?.message ?? '프로필을 불러오지 못했어요.'}
           onClose={() => router.push('/home')}
         />
       </main>
@@ -266,7 +266,7 @@ export default function ProfileClientPage() {
               label="문의하기"
               desc="피드백 보내기"
             />
-            <SettingLink href="/lumi/terms" label="이용약관 · 개인정보" />
+            <SettingLink href="/privacy" label="이용약관 · 개인정보" />
           </GlassCard>
 
           {/* 세션/위험영역 */}

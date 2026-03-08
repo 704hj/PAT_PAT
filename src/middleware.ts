@@ -51,6 +51,7 @@ export async function middleware(request: NextRequest) {
   const isAuthPage =
     request.nextUrl.pathname.startsWith('/auth') ||
     request.nextUrl.pathname.startsWith('/start') ||
+    request.nextUrl.pathname.startsWith('/privacy') ||
     request.nextUrl.pathname === '/';
 
   // 4. 로직 처리: 로그인 안 된 유저가 보호된 페이지 접근 시
@@ -63,6 +64,10 @@ export async function middleware(request: NextRequest) {
   if (user && isAuthPage) {
     // [예외] 약관 동의 페이지(/auth/terms)는 신규 가입자가 세션을 가진 채로 머물러야 하므로 제외
     if (request.nextUrl.pathname === '/auth/terms') {
+      return response;
+    }
+    // [예외] /privacy는 누구나 열람 가능
+    if (request.nextUrl.pathname.startsWith('/privacy')) {
       return response;
     }
     // 이미 로그인했는데 /login 이나 /start로 가려고 하면 대시보드로 보냄
