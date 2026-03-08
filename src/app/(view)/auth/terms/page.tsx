@@ -1,6 +1,9 @@
 'use client';
 
-import { completeSignupAction } from '@/features/auth/actions/auth';
+import {
+  cancelSignupAction,
+  completeSignupAction,
+} from '@/features/auth/actions/auth';
 import ErrorModal from '@/features/common/ErrorModal';
 import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
@@ -145,6 +148,7 @@ export default function TermsPage() {
   const [agreedTerms, setAgreedTerms] = useState(false);
   const [agreedPrivacy, setAgreedPrivacy] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const canProceed = agreedTerms && agreedPrivacy && !isSubmitting;
   const allAgreed = agreedTerms && agreedPrivacy;
@@ -153,6 +157,17 @@ export default function TermsPage() {
   const switchTab = (tab: Tab) => {
     setActiveTab(tab);
     scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleCancel = async () => {
+    setIsCancelling(true);
+    try {
+      await cancelSignupAction();
+    } catch (e) {
+      console.error('cancelSignupAction error:', e);
+    } finally {
+      router.replace('/start');
+    }
   };
 
   const handleCompleteSignup = async () => {
@@ -350,6 +365,16 @@ export default function TermsPage() {
             ].join(' ')}
           >
             {isSubmitting ? '처리 중...' : '동의하고 시작하기'}
+          </button>
+
+          {/* 취소 버튼 */}
+          <button
+            type="button"
+            onClick={handleCancel}
+            disabled={isCancelling || isSubmitting}
+            className="w-full text-center text-[13px] text-white/35 hover:text-white/55 transition py-1"
+          >
+            {isCancelling ? '취소 중...' : '회원가입 취소'}
           </button>
         </div>
       </div>

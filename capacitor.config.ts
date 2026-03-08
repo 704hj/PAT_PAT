@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'PAT PAT',
   webDir: 'out',
   server: {
-    url: 'http://localhost:3000',
+    url: process.env.NEXT_URL,
     cleartext: false,
   },
 };
