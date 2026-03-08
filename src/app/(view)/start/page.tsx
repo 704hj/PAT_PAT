@@ -51,7 +51,7 @@ function OnboardingContent() {
   }, []);
 
   return (
-    <main className="relative min-h-[100svh] min-w-[412px] overflow-x-auto flex justify-center">
+    <main className="relative min-h-[100svh] w-full overflow-hidden flex justify-center">
       {/* (공통 배경은 Layout/body가 담당)
           페이지 전용 연출만 얹기 */}
       <div

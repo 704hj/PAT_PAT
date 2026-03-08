@@ -48,9 +48,24 @@ next-env.d.ts
 *storybook.log
 storybook-static
 
+# Capacitor - Android
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties
+
+# Capacitor - iOS
+ios/App/Pods/
+ios/App/App.xcworkspace/xcuserdata/
+ios/App/App.xcodeproj/xcuserdata/
+ios/App/App.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcuserstate
+DerivedData/
+
 # Supabase
 supabase/.temp/
 supabase/pull/
+
 
 # Local database data (로컬 개발용 DB 데이터)
 supabase/.pnpm-debug.log*
@@ -60,3 +75,5 @@ supabase/.pnpm-debug.log*
 Thumbs.db
 
 CLAUDE.md
+mcp.json
+settings.Local.json
