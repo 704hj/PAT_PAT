@@ -10,7 +10,7 @@ import {
 } from '@/features/auth/constants/termsContent';
 import ErrorModal from '@/features/common/ErrorModal';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useRef, useState } from 'react';
+import { Suspense, useRef, useState } from 'react';
 
 type Tab = 'terms' | 'privacy';
 
@@ -57,7 +57,7 @@ function Checkbox({
   );
 }
 
-export default function TermsPage() {
+function TermsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isEmailFlow = searchParams.get('from') === 'email';
@@ -290,5 +290,13 @@ export default function TermsPage() {
         <ErrorModal description={errorMsg} onClose={() => setErrorMsg(null)} />
       )}
     </div>
+  );
+}
+
+export default function TermsPage() {
+  return (
+    <Suspense>
+      <TermsContent />
+    </Suspense>
   );
 }
