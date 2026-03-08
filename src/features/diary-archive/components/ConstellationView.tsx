@@ -167,9 +167,9 @@ export function ConstellationView({ month, diaryList }: Props) {
           {/* SVG 별자리 레이어 */}
           <div className="relative z-10">
             {loading ? (
-              <div className="flex items-center justify-center min-h-[280px]">
-                <p className="text-white/40 text-sm animate-pulse">
-                  별자리를 불러오는 중...
+              <div className="flex flex-col items-center justify-center min-h-[280px] space-y-4">
+                <p className="text-white/40 text-[13px] tracking-tight animate-pulse">
+                  별자리를 불러오고 있습니다...
                 </p>
               </div>
             ) : anchorPoints.length > 0 ? (

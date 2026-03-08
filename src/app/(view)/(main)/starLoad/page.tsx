@@ -229,8 +229,10 @@ export default function Page() {
             {/* SVG 레이어 */}
             <div className="relative z-10">
               {loading ? (
-                <div className="text-white/60 text-sm text-center py-8">
-                  별자리 로딩 중…
+                <div className="flex flex-col items-center justify-center min-h-[280px] space-y-4">
+                  <p className="text-white/40 text-[13px] tracking-tight animate-pulse">
+                    별자리를 불러오고 있습니다...
+                  </p>
                 </div>
               ) : seasonRange.daysCount === 0 ? (
                 <div className="text-white/60 text-sm text-center py-8">
@@ -252,6 +254,7 @@ export default function Page() {
                   dates={seasonRange.dates}
                   todayDate={todayStr}
                   onStarClick={handleStarClick}
+                  theme="lumi"
                 />
               )}
             </div>
@@ -259,7 +262,7 @@ export default function Page() {
         </div>
 
         {/* CTA */}
-        <div className="mt-5">
+        {/* <div className="mt-5">
           <button
             className="cta w-full"
             onClick={() => router.push('/diary/editor')}
@@ -267,7 +270,7 @@ export default function Page() {
             오늘의 별 만들기
             <span className="cta-shimmer" aria-hidden />
           </button>
-        </div>
+        </div> */}
       </section>
 
       {/* Entry Modal */}
