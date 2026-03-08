@@ -180,6 +180,7 @@ export function ConstellationView({ month, diaryList }: Props) {
                 dates={dates}
                 todayDate={todayStr}
                 onStarClick={handleStarClick}
+                theme="lumi" // 새로 추가한 'test' 테마(별 온도 기반) 적용
               />
             ) : (
               <div className="flex items-center justify-center min-h-[280px]">
