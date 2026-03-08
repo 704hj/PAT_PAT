@@ -25,33 +25,41 @@ export async function getHomeSummaryServer(): Promise<HomeSummary> {
   }
   if (!profile) throw Errors.unauthorized('signup_incomplete');
 
-  // 1. 기준 날짜 설정
+  // 1. 기준 날짜 설정 (KST 기준)
   const now = new Date();
-  const monday = new Date(now);
-  monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
-  monday.setHours(0, 0, 0, 0);
+  const nowKst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
 
-  const mondayIso = monday.toISOString();
-  // 한국 시간 기준(KST) YYYY-MM-DD 추출을 위한 보정 (필요 시)
-  const todayKst = new Date(now.getTime() + 9 * 60 * 60 * 1000)
-    .toISOString()
-    .split('T')[0];
+  // KST 기준 이번 주 월요일/일요일 날짜 (YYYY-MM-DD)
+  const kstDay = nowKst.getUTCDay(); // 0=일, 1=월 ... 6=토
+  const mondayKst = new Date(nowKst);
+  mondayKst.setUTCDate(nowKst.getUTCDate() - ((kstDay + 6) % 7));
+  const weekStartKst = mondayKst.toISOString().split('T')[0];
+
+  const sundayKst = new Date(mondayKst);
+  sundayKst.setUTCDate(mondayKst.getUTCDate() + 6);
+  const weekEndKst = sundayKst.toISOString().split('T')[0];
+
+  // KST 기준 오늘 날짜 (YYYY-MM-DD)
+  const todayKst = nowKst.toISOString().split('T')[0];
 
   // 2. 비동기 작업을 병렬로 실행 (속도 향상)
   const [starRes, diaryWeekRes, diaryTodayRes] = await Promise.all([
-    // 이번 주 별 개수
+    // 이번 주 별 개수 (created_at 기준, 월~일 00:00~23:59 KST)
     supabase
       .from('star')
       .select('star_id', { count: 'exact', head: true })
-      .gte('created_at', mondayIso)
+      .gte('created_at', `${weekStartKst}T00:00:00+09:00`)
+      .lte('created_at', `${weekEndKst}T23:59:59+09:00`)
       .eq('auth_user_id', authUser.id),
 
-    // 이번 주 일기 개수
+    // 이번 주 일기 개수 (entry_date 기준, KST 월~일)
     supabase
       .from('diary')
       .select('diary_id', { count: 'exact', head: true })
-      .gte('created_at', mondayIso)
-      .eq('auth_user_id', authUser.id),
+      .gte('entry_date', weekStartKst)
+      .lte('entry_date', weekEndKst)
+      .eq('auth_user_id', authUser.id)
+      .is('deleted_at', null),
 
     // 오늘 일기 작성 여부
     supabase
