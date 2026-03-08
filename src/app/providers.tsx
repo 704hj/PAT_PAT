@@ -2,7 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
 
@@ -18,17 +18,28 @@ function OAuthDeepLinkHandler() {
 /** 앱 사용 중 세션이 만료되면 모달 → signOut → /start */
 function SessionErrorHandler() {
   const router = useRouter();
+  const pathname = usePathname();
   const [sessionExpired, setSessionExpired] = useState(false);
   const wasLoggedIn = useRef(false);
+
+  // 이메일 가입 플로우 등 auth 페이지에서는 세션 만료 감지 불필요
+  const isAuthPage =
+    pathname.startsWith('/auth') ||
+    pathname.startsWith('/start') ||
+    pathname === '/';
 
   useEffect(() => {
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
       if (session) {
         wasLoggedIn.current = true;
-      } else if (wasLoggedIn.current) {
-        // 로그인 상태였다가 세션이 사라진 경우 (만료/오류)
+      } else if (
+        wasLoggedIn.current &&
+        !isAuthPage &&
+        event !== 'SIGNED_OUT' // 의도적 로그아웃은 제외
+      ) {
+        // 로그인 상태였다가 세션이 예기치 않게 사라진 경우 (만료/오류)
         setSessionExpired(true);
       }
     });

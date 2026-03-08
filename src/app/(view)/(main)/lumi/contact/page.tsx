@@ -21,9 +21,12 @@ export default function ContactPage() {
     if (!isValid) return;
 
     setStatus('submitting');
-    // TODO: 실제 문의 API 연결
-    await new Promise((r) => setTimeout(r, 800));
-    setStatus('success');
+    const res = await fetch('/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(form),
+    });
+    setStatus(res.ok ? 'success' : 'error');
   };
 
   if (status === 'success') {
