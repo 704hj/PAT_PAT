@@ -25,6 +25,7 @@ type Row = {
   diary_tags: Array<{
     tag: { tag_id: string; tag_name: string } | null;
   }> | null;
+  star: { star_color_hex: string | null } | null;
 };
 
 export type DiaryTag = { tag_id: string; tag_name: string };
@@ -37,6 +38,7 @@ export type DiaryListItem = {
   created_at: string;
   updated_at: string | null;
   tags: DiaryTag[];
+  star_color_hex: string | null;
 };
 
 export type QueryDiariesResult = {
@@ -95,6 +97,9 @@ export async function queryDiaries(
             tag_id,
             tag_name
           )
+        ),
+        star:star!diary_id (
+          star_color_hex
         )
       `
     )
@@ -161,6 +166,7 @@ export async function queryDiaries(
     emotion_intensity: d.emotion_intensity,
     created_at: String(d.created_at),
     updated_at: d.updated_at ? String(d.updated_at) : null,
+    star_color_hex: d.star?.star_color_hex ?? null,
     tags: (d.diary_tags ?? [])
       .map((x) => x?.tag)
       .filter((t): t is DiaryTag => !!t)

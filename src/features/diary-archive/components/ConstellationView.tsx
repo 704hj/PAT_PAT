@@ -1,151 +1,205 @@
 'use client';
 
 import {
+  displayDate,
   getZodiacBackgroundImage,
-  getZodiacNameKo,
-  getZodiacSign,
-  loadTemplates,
-  Pt,
   toDateString,
+  type Pt,
+  type ZodiacSign,
 } from '@/lib/zodiac';
 import ConstellationSvg from '@/shared/components/ConstellationSvg';
 import EntryModal from '@/shared/components/EntryModal';
-import { Entry } from '@/utils/entries';
+import { Entry, getEntryByDate, loadEntriesByRange } from '@/utils/entries';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-type Props = {
-  month: string; // YYYY-MM
-  diaryList: TDiaryItem[];
+type PeriodInfo = {
+  period_id: number;
+  start_date: string;
+  end_date: string;
+  name_ko: string;
+  code: ZodiacSign;
 };
 
-/**
- * ConstellationView: 기록 보관함의 '목록 보기'를 대체하는 별자리 뷰 컴포넌트입니다.
- * 선택된 월의 기록들을 밤하늘의 별자리처럼 시각화하여 보여줍니다.
- */
-export function ConstellationView({ month, diaryList }: Props) {
+async function fetchPeriodByDate(date: string): Promise<PeriodInfo | null> {
+  const res = await fetch(
+    `/api/constellation/period/by-date?date=${date}`,
+    { cache: 'no-store' },
+  );
+  const json = await res.json();
+  if (!json.ok) return null;
+  const { period_id, start_date, end_date, constellation_master } = json.data;
+  return {
+    period_id,
+    start_date,
+    end_date,
+    name_ko: constellation_master?.name_ko ?? '',
+    code: (constellation_master?.code ?? 'aries') as ZodiacSign,
+  };
+}
+
+function addDays(dateStr: string, days: number): string {
+  const d = new Date(dateStr);
+  d.setDate(d.getDate() + days);
+  return toDateString(d);
+}
+
+export function ConstellationView() {
   const router = useRouter();
 
-  // 연도와 월 추출
-  const [year, m] = useMemo(() => month.split('-').map(Number), [month]);
+  const todayStr = useMemo(
+    () => new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10),
+    [],
+  );
 
-  // 해당 월의 마지막 날 계산
-  const daysInMonth = useMemo(() => new Date(year, m, 0).getDate(), [year, m]);
-
-  // 해당 월의 날짜 리스트 생성 (YYYY-MM-DD)
-  const dates = useMemo(() => {
-    return Array.from({ length: daysInMonth }, (_, i) => {
-      const day = i + 1;
-      return `${year}-${String(m).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    });
-  }, [year, m, daysInMonth]);
-
-  // 해당 월의 대표 별자리 결정 (월의 중간 날짜 기준)
-  const sign = useMemo(() => {
-    const middleDate = new Date(year, m - 1, 15);
-    return getZodiacSign(middleDate);
-  }, [year, m]);
-
-  const zodiacName = getZodiacNameKo(sign);
-  const zodiacBgImage = getZodiacBackgroundImage(sign);
-
-  // 앵커 포인트 (별자리 모양을 결정하는 지점들)
-  const [anchorPoints, setAnchorPoints] = useState<Pt[]>([]);
+  const [period, setPeriod] = useState<PeriodInfo | null>(null);
+  const [starPoints, setStarPoints] = useState<Pt[]>([]);
+  const [entries, setEntries] = useState<Record<string, Entry>>({});
   const [loading, setLoading] = useState(true);
 
-  // 별자리 템플릿 로드
+  const zodiacBgImage = useMemo(
+    () => (period?.code ? getZodiacBackgroundImage(period.code) : ''),
+    [period?.code],
+  );
+
+  const dates = useMemo(() => {
+    if (!period) return [];
+    const result: string[] = [];
+    const current = new Date(period.start_date);
+    const end = new Date(period.end_date);
+    while (current <= end) {
+      result.push(toDateString(current));
+      current.setDate(current.getDate() + 1);
+    }
+    return result;
+  }, [period]);
+
+  const rangeDisplay = useMemo(() => {
+    if (!period) return '';
+    return `${displayDate(period.start_date)} ~ ${displayDate(period.end_date)}`;
+  }, [period]);
+
+  const loadPeriod = useCallback(async (date: string) => {
+    setLoading(true);
+    // 전환 중 starPoints/dates 불일치 방지: 먼저 초기화
+    setPeriod(null);
+    setStarPoints([]);
+    setEntries({});
+    try {
+      const info = await fetchPeriodByDate(date);
+      if (!info) return;
+
+      const [pointsRes, loadedEntries] = await Promise.all([
+        fetch(`/api/constellation/period/${info.period_id}/points`, {
+          cache: 'no-store',
+        }).then((r) => r.json()),
+        loadEntriesByRange(new Date(info.start_date), new Date(info.end_date)),
+      ]);
+
+      const pts = pointsRes.ok
+        ? (pointsRes.data ?? []).map(
+            (r: { day_index: number; x: number; y: number }) => ({
+              x: r.x,
+              y: r.y,
+            }),
+          )
+        : [];
+
+      // period, starPoints, entries를 한 렌더 사이클에서 가능한 한 같이 설정
+      setPeriod(info);
+      setStarPoints(pts);
+      setEntries(loadedEntries);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // 초기 로드: 오늘 날짜 기준 시즌
   useEffect(() => {
-    const fetchTemplate = async () => {
-      setLoading(true);
-      try {
-        const templates = await loadTemplates();
-        const template = templates.find(
-          (t: any) => t.zodiac_code === sign || t.star_code === sign
-        );
+    loadPeriod(todayStr);
+  }, [todayStr, loadPeriod]);
 
-        if (template && template.points && template.points.length > 0) {
-          const path = template.path_index
-            ? template.path_index.map((i: number) => template.points[i])
-            : template.points;
-          setAnchorPoints(path);
-        }
-      } catch (error) {
-        console.error('Failed to load zodiac template:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const goToPrev = useCallback(() => {
+    if (!period) return;
+    loadPeriod(addDays(period.start_date, -1));
+  }, [period, loadPeriod]);
 
-    fetchTemplate();
-  }, [sign]);
+  const goToNext = useCallback(() => {
+    if (!period) return;
+    // 다음 시즌이 아직 오지 않았으면 이동 불가
+    const nextDate = addDays(period.end_date, 1);
+    if (nextDate > todayStr) return;
+    loadPeriod(nextDate);
+  }, [period, loadPeriod, todayStr]);
 
-  // diaryList를 ConstellationSvg가 기대하는 Record 형식으로 변환
-  const entriesRecord = useMemo(() => {
-    const record: Record<string, any> = {};
-    diaryList.forEach((diary) => {
-      record[diary.entry_date] = {
-        content: diary.content,
-        emotion_polarity: diary.emotion_polarity,
-        emotion_intensity: diary.emotion_intensity,
-      };
-    });
-    return record;
-  }, [diaryList]);
+  const isNextDisabled = useMemo(() => {
+    if (!period) return true;
+    return addDays(period.end_date, 1) > todayStr;
+  }, [period, todayStr]);
 
-  // 모달 및 선택 상태
+  // 모달
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedEntry, setSelectedEntry] = useState<Entry | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // 별 클릭 핸들러
   const handleStarClick = useCallback(
-    (date: string) => {
-      const diary = diaryList.find((d) => d.entry_date === date);
+    async (date: string) => {
       setSelectedDate(date);
-      if (diary) {
-        setSelectedEntry({
-          content: diary.content,
-          emotion_polarity: diary.emotion_polarity,
-          emotion_intensity: diary.emotion_intensity,
-        } as Entry);
-      } else {
-        setSelectedEntry(null);
-      }
+      const entry = entries[date] || (await getEntryByDate(date));
+      setSelectedEntry(entry);
       setIsModalOpen(true);
     },
-    [diaryList]
+    [entries],
   );
 
-  // 수정하기 핸들러 (다이어리 에디터로 이동)
   const handleEdit = useCallback(() => {
-    if (selectedDate) {
-      router.push(`/diary/editor?date=${selectedDate}`);
-    }
+    router.push(
+      selectedDate ? `/diary/editor?date=${selectedDate}` : '/diary/editor',
+    );
   }, [selectedDate, router]);
 
-  const todayStr = useMemo(() => toDateString(new Date()), []);
+  const progressCount = useMemo(() => Object.keys(entries).length, [entries]);
 
   return (
     <div className="space-y-4">
-      {/* 별자리 정보 헤더 */}
-      <div className="flex items-center justify-between px-1">
-        <div className="space-y-0.5">
-          <h3 className="text-[15px] font-medium text-white/90">
-            {zodiacName}
-          </h3>
-          <p className="text-[12px] text-white/50">
-            {year}년 {m}월의 밤하늘
+      {/* 시즌 네비게이션 */}
+      <div className="flex items-center justify-between gap-2">
+        <button
+          onClick={goToPrev}
+          className="h-9 px-3 rounded-xl bg-white/5 border border-white/10
+                     text-white/60 text-[13px] hover:bg-white/10 transition"
+        >
+          ←
+        </button>
+
+        <div className="flex-1 text-center">
+          <p className="text-[16px] font-semibold text-white">
+            {period?.name_ko ?? ''}
           </p>
+          <p className="text-[11px] text-white/45 mt-0.5">{rangeDisplay}</p>
         </div>
-        <div className="chip chip-glow text-[11px]">
-          기록 {diaryList.length}/{daysInMonth}
-        </div>
+
+        <button
+          onClick={goToNext}
+          disabled={isNextDisabled}
+          className="h-9 px-3 rounded-xl bg-white/5 border border-white/10
+                     text-white/60 text-[13px] hover:bg-white/10 transition
+                     disabled:opacity-30 disabled:cursor-not-allowed"
+        >
+          →
+        </button>
       </div>
 
-      {/* 별자리 카드 영역 */}
+      {/* 진행도 */}
+      <div className="flex justify-end">
+        <span className="chip chip-glow text-[11px]">
+          기록 {progressCount}/{dates.length}
+        </span>
+      </div>
+
+      {/* 별자리 카드 */}
       <div className="hero-card overflow-hidden">
         <div className="hero-inner p-4 min-h-[320px] relative">
-          {/* 별자리 배경 (starLoad와 동일한 스타일 답습) */}
           <div
             className="absolute inset-0 opacity-20 pointer-events-none"
             style={{
@@ -153,57 +207,55 @@ export function ConstellationView({ month, diaryList }: Props) {
               backgroundSize: 'cover',
               backgroundPosition: 'center',
             }}
+            aria-hidden="true"
           />
-          <div
-            className="absolute inset-0 opacity-30 pointer-events-none"
-            style={{
-              backgroundImage: `url(${zodiacBgImage})`,
-              backgroundSize: 'contain',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat',
-            }}
-          />
+          {zodiacBgImage && (
+            <div
+              className="absolute inset-0 opacity-30 pointer-events-none"
+              style={{
+                backgroundImage: `url(${zodiacBgImage})`,
+                backgroundSize: 'contain',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+              }}
+              aria-hidden="true"
+            />
+          )}
 
-          {/* SVG 별자리 레이어 */}
           <div className="relative z-10">
-            {loading ? (
-              <div className="flex flex-col items-center justify-center min-h-[280px] space-y-4">
-                <p className="text-white/40 text-[13px] tracking-tight animate-pulse">
+            {loading || starPoints.length === 0 ? (
+              <div className="flex items-center justify-center min-h-[280px]">
+                <p className="text-white/40 text-[13px] animate-pulse">
                   별자리를 불러오고 있습니다...
                 </p>
               </div>
-            ) : anchorPoints.length > 0 ? (
+            ) : (
               <ConstellationSvg
-                anchorPoints={anchorPoints}
-                daysCount={daysInMonth}
-                entries={entriesRecord}
+                starPoints={starPoints}
+                entries={entries}
                 dates={dates}
                 todayDate={todayStr}
                 onStarClick={handleStarClick}
-                theme="lumi" // 새로 추가한 'test' 테마(별 온도 기반) 적용
+                theme="default"
               />
-            ) : (
-              <div className="flex items-center justify-center min-h-[280px]">
-                <p className="text-white/40 text-sm">
-                  별자리 데이터를 찾을 수 없습니다.
-                </p>
-              </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* 안내 문구 */}
-      <p className="text-center text-[12px] text-white/40 pt-2">
+      <p className="text-center text-[12px] text-white/40 pt-1">
         별을 눌러 그날의 기록을 확인하거나 수정할 수 있어요.
       </p>
 
-      {/* 상세 확인 및 수정 모달 */}
       <EntryModal
         isOpen={isModalOpen}
         date={selectedDate}
         entry={selectedEntry}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedDate(null);
+          setSelectedEntry(null);
+        }}
         onEdit={handleEdit}
       />
     </div>
