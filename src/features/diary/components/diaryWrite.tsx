@@ -93,7 +93,7 @@ export default function DiaryWrite({ diaryId }: { diaryId?: string }) {
     if (!canSubmit) return;
 
     mutate({
-      entry_date: new Date().toISOString().slice(0, 10),
+      entry_date: new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10),
       polarity,
       content: text,
       intensity,

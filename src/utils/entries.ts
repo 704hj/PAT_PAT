@@ -9,10 +9,11 @@ export type Entry = {
   createdAt?: string;
   updatedAt?: string;
   diary_id?: number;
-  diary_type?: "star" | "worry"; // 추가: diary_type
-  tag_ids?: number[]; // 추가: 태그 ID 배열
+  diary_type?: "star" | "worry";
+  tag_ids?: number[];
   emotion_polarity?: string; // "POSITIVE" | "NEGATIVE" | "UNSET"
   emotion_intensity?: number | null; // 1~5
+  star_color_hex?: string; // DB에서 계산된 별 색상
 };
 
 /**
@@ -32,10 +33,10 @@ export async function loadEntriesByRange(
     const startStr = toDateString(start);
     const endStr = toDateString(end);
 
-    // diary 테이블에서 날짜 범위로 조회
+    // diary + star 조인으로 색상 포함
     const { data: diaries, error } = await supabase
       .from("diary")
-      .select("diary_id, content, entry_date, created_at, updated_at, emotion_polarity, emotion_intensity")
+      .select("diary_id, content, entry_date, created_at, updated_at, emotion_polarity, emotion_intensity, star(star_color_hex)")
       .eq("auth_user_id", auth.user.id)
       .is("deleted_at", null)
       .gte("entry_date", startStr)
@@ -51,6 +52,7 @@ export async function loadEntriesByRange(
     const result: Record<string, Entry> = {};
     diaries?.forEach((diary) => {
       const dateStr = diary.entry_date;
+      const starRow = Array.isArray(diary.star) ? diary.star[0] : diary.star;
       result[dateStr] = {
         date: dateStr,
         content: diary.content || "",
@@ -59,6 +61,7 @@ export async function loadEntriesByRange(
         diary_id: diary.diary_id,
         emotion_polarity: diary.emotion_polarity ?? undefined,
         emotion_intensity: diary.emotion_intensity ?? null,
+        star_color_hex: starRow?.star_color_hex ?? undefined,
       };
     });
 
@@ -81,10 +84,10 @@ export async function getEntryByDate(
       return null;
     }
 
-    // 해당 날짜의 일기 조회
+    // 해당 날짜의 일기 + star 조인
     const { data: diaries, error } = await supabase
       .from("diary")
-      .select("diary_id, content, entry_date, created_at, updated_at")
+      .select("diary_id, content, entry_date, created_at, updated_at, emotion_polarity, emotion_intensity, star(star_color_hex)")
       .eq("auth_user_id", auth.user.id)
       .eq("entry_date", dateString)
       .is("deleted_at", null)
@@ -101,6 +104,7 @@ export async function getEntryByDate(
     }
 
     const diary = diaries[0];
+    const starRow = Array.isArray(diary.star) ? diary.star[0] : diary.star;
 
     // 태그 가져오기
     const { data: diaryTags } = await supabase
@@ -118,6 +122,9 @@ export async function getEntryByDate(
       diary_id: diary.diary_id,
       diary_type: "star" as const,
       tag_ids: tagIds,
+      emotion_polarity: diary.emotion_polarity ?? undefined,
+      emotion_intensity: diary.emotion_intensity ?? null,
+      star_color_hex: starRow?.star_color_hex ?? undefined,
     };
   } catch (error) {
     console.error("Error getting entry:", error);

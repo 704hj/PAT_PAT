@@ -25,6 +25,7 @@ type TDiaryItem = {
   entry_date: string;
   tags: TTag[];
   updated_at: string | null;
+  star_color_hex?: string | null;
 };
 
 type UpsertDiaryInput = {
