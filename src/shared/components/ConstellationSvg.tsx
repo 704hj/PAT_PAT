@@ -6,20 +6,22 @@ import { useMemo } from 'react';
 export type StarThemeType = 'default' | 'healing' | 'warm' | 'deep' | 'lumi';
 
 type ConstellationSvgProps = {
-  anchorPoints: Pt[]; // 앵커 포인트 (염소자리 등)
-  daysCount: number; // 시즌 일수
+  anchorPoints?: Pt[];
+  starPoints?: Pt[];   // DB에서 가져온 좌표 (있으면 anchorPoints 대신 사용)
+  daysCount?: number;
   entries: Record<
     string,
     {
       content: string;
       emotion_polarity?: string;
       emotion_intensity?: number | null;
+      star_color_hex?: string;
     }
-  >; // 날짜별 글
-  dates: string[]; // 날짜 리스트 (순서대로)
-  todayDate: string; // "YYYY-MM-DD" 형식의 오늘 날짜
+  >;
+  dates: string[];
+  todayDate: string;
   onStarClick?: (date: string, index: number) => void;
-  theme?: StarThemeType; // 추가된 테마 prop
+  theme?: StarThemeType;
 };
 
 const THEMES: Record<StarThemeType, { positive: string; negative: string }> = {
@@ -33,15 +35,16 @@ const THEMES: Record<StarThemeType, { positive: string; negative: string }> = {
 function getStarColor(
   polarity: string | undefined,
   intensity: number | null | undefined,
-  theme: StarThemeType
+  theme: StarThemeType,
+  starColorHex?: string,
 ): string {
+  if (starColorHex) return starColorHex;
   if (!polarity || polarity === 'UNSET') return 'rgba(255,255,255,1)';
 
   const colors = THEMES[theme];
   const baseColor = polarity === 'POSITIVE' ? colors.positive : colors.negative;
 
   if (theme === 'default') {
-    // 기존 로직 유지 (파랑/빨강 대비)
     if (polarity === 'POSITIVE') {
       if (intensity != null && intensity >= 4) return '#1E3A8A';
       if (intensity === 3) return '#2563EB';
@@ -54,15 +57,13 @@ function getStarColor(
     }
   }
 
-  // 다른 테마들은 기본 컬러를 기준으로 투명도나 밝기만 조절하여 일관성 유지
   return baseColor;
 }
 
-// 색상별, 강도별 글로우 필터 ID 반환
 function getGlowFilterId(
   polarity: string | undefined,
   intensity: number | null | undefined,
-  theme: StarThemeType
+  theme: StarThemeType,
 ): string {
   if (!polarity || polarity === 'UNSET') return 'defaultGlow';
   const intensityLevel =
@@ -76,6 +77,7 @@ function getGlowFilterId(
 
 export default function ConstellationSvg({
   anchorPoints,
+  starPoints: starPointsProp,
   daysCount,
   entries,
   dates,
@@ -84,10 +86,10 @@ export default function ConstellationSvg({
   theme = 'default',
 }: ConstellationSvgProps) {
   const starPoints = useMemo(() => {
-    if (!anchorPoints || anchorPoints.length === 0 || daysCount === 0)
-      return [];
+    if (starPointsProp && starPointsProp.length > 0) return starPointsProp;
+    if (!anchorPoints || anchorPoints.length === 0 || !daysCount) return [];
     return samplePolyline(anchorPoints, daysCount);
-  }, [anchorPoints, daysCount]);
+  }, [starPointsProp, anchorPoints, daysCount]);
 
   const starStates = useMemo(() => {
     return dates.map((date, index) => {
@@ -95,7 +97,7 @@ export default function ConstellationSvg({
       const hasEntry = !!entry;
       const isToday = date === todayDate;
       const starColor = hasEntry
-        ? getStarColor(entry.emotion_polarity, entry.emotion_intensity, theme)
+        ? getStarColor(entry.emotion_polarity, entry.emotion_intensity, theme, entry.star_color_hex)
         : 'rgba(255,255,255,1)';
       return {
         date,
@@ -109,7 +111,6 @@ export default function ConstellationSvg({
     });
   }, [dates, entries, todayDate, theme]);
 
-  // 테마별 컬러 추출
   const themeColors = THEMES[theme];
 
   return (
@@ -127,7 +128,6 @@ export default function ConstellationSvg({
           </feMerge>
         </filter>
 
-        {/* 테마별 동적 필터 생성 */}
         {(['POSITIVE', 'NEGATIVE'] as const).map((pol) =>
           (['strong', 'medium', 'weak'] as const).map((lv) => {
             const color =
@@ -145,17 +145,8 @@ export default function ConstellationSvg({
                 height="400%"
               >
                 <feGaussianBlur stdDeviation={stdDev} result="blur" />
-                <feFlood
-                  floodColor={color}
-                  floodOpacity={opacity}
-                  result="color"
-                />
-                <feComposite
-                  in="color"
-                  in2="blur"
-                  operator="in"
-                  result="glow"
-                />
+                <feFlood floodColor={color} floodOpacity={opacity} result="color" />
+                <feComposite in="color" in2="blur" operator="in" result="glow" />
                 <feMerge>
                   <feMergeNode in="glow" />
                   <feMergeNode in="SourceGraphic" />
@@ -169,13 +160,17 @@ export default function ConstellationSvg({
           const state = starStates[index];
           const entry = entries[state.date];
           const intensity = entry?.emotion_intensity;
-          let op = !state.hasEntry
-            ? 0.5
+          // 기록 있는 별: 흰 코어 → 감정색 → 투명 (실제 별의 코로나 효과)
+          // 기록 없는 별: 흰색 → 옅은 흰색 → 투명
+          const colorStop = state.hasEntry ? state.starColor : 'rgba(200,230,255,1)';
+          // 강도에 비례한 외곽 opacity (강할수록 색상이 더 진하게 퍼짐)
+          const outerOp = !state.hasEntry
+            ? 0.0
             : intensity != null && intensity >= 4
-              ? 1
+              ? 0.5
               : intensity === 3
-                ? 0.8
-                : 0.6;
+                ? 0.35
+                : 0.2;
 
           return (
             <radialGradient
@@ -185,28 +180,39 @@ export default function ConstellationSvg({
               cy="50%"
               r="50%"
             >
-              <stop offset="0%" stopColor={state.starColor} stopOpacity={op} />
-              <stop offset="100%" stopColor={state.starColor} stopOpacity="0" />
+              {/* 코어: 항상 흰색 → 실제 별처럼 중심이 밝음 */}
+              <stop offset="0%"   stopColor="white"     stopOpacity="1" />
+              <stop offset="20%"  stopColor="white"     stopOpacity="0.9" />
+              {/* 외곽: 감정 색상으로 자연스럽게 퍼짐 */}
+              <stop offset="60%"  stopColor={colorStop} stopOpacity={outerOp} />
+              <stop offset="100%" stopColor={colorStop} stopOpacity="0" />
             </radialGradient>
           );
         })}
       </defs>
 
-      {/* 연결선 */}
+      {/* 연결선: 글로우 + 코어 */}
       {starPoints.slice(0, -1).map((p, i) => {
         const q = starPoints[i + 1];
         const isActive = starStates[i].isActive && starStates[i + 1].isActive;
         return (
-          <line
-            key={`line-${i}`}
-            x1={p.x}
-            y1={p.y}
-            x2={q.x}
-            y2={q.y}
-            stroke="white"
-            strokeWidth={isActive ? 0.3 : 0.1}
-            strokeOpacity={isActive ? 0.6 : 0.2}
-          />
+          <g key={`line-${i}`}>
+            {/* 글로우 레이어 */}
+            <line
+              x1={p.x} y1={p.y} x2={q.x} y2={q.y}
+              stroke="white"
+              strokeWidth={isActive ? 1.2 : 0.4}
+              strokeOpacity={isActive ? 0.12 : 0.05}
+              filter="url(#defaultGlow)"
+            />
+            {/* 코어 레이어 */}
+            <line
+              x1={p.x} y1={p.y} x2={q.x} y2={q.y}
+              stroke="white"
+              strokeWidth={isActive ? 0.3 : 0.1}
+              strokeOpacity={isActive ? 0.6 : 0.2}
+            />
+          </g>
         );
       })}
 
@@ -215,17 +221,16 @@ export default function ConstellationSvg({
         const state = starStates[index];
         const entry = entries[state.date];
         const glowId = state.hasEntry
-          ? getGlowFilterId(
-              entry.emotion_polarity,
-              entry.emotion_intensity,
-              theme
-            )
+          ? getGlowFilterId(entry.emotion_polarity, entry.emotion_intensity, theme)
           : 'defaultGlow';
+        // 감정 강도에 비례한 크기
         const r = !state.hasEntry
           ? 1.2
           : entry.emotion_intensity != null && entry.emotion_intensity >= 4
             ? 3.5
-            : 2.5;
+            : entry.emotion_intensity === 3
+              ? 2.5
+              : 1.8;
 
         return (
           <g

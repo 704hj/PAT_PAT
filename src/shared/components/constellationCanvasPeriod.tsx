@@ -87,7 +87,7 @@ export default function ConstellationCanvasPeriod({
       );
       const json = await res.json();
       if (!json.ok) return setRevealedCount(0);
-      setRevealedCount(Number(json.entry_count ?? 0));
+      setRevealedCount(Number(json.data?.entry_count ?? 0));
     })();
   }, [periodId]);
 

@@ -2,11 +2,9 @@
 
 import {
   getZodiacBackgroundImage,
-  getZodiacNameKo,
-  getZodiacSign,
-  loadTemplates,
-  Pt,
   toDateString,
+  type Pt,
+  type ZodiacSign,
 } from '@/lib/zodiac';
 import ConstellationSvg from '@/shared/components/ConstellationSvg';
 import EntryModal from '@/shared/components/EntryModal';
@@ -26,58 +24,78 @@ type Props = {
 export function ConstellationView({ month, diaryList }: Props) {
   const router = useRouter();
 
-  // 연도와 월 추출
   const [year, m] = useMemo(() => month.split('-').map(Number), [month]);
 
-  // 해당 월의 마지막 날 계산
-  const daysInMonth = useMemo(() => new Date(year, m, 0).getDate(), [year, m]);
+  // 해당 월 중간 날짜를 기준으로 별자리 시즌 조회 (15일 사용)
+  const representativeDate = useMemo(
+    () => `${year}-${String(m).padStart(2, '0')}-15`,
+    [year, m],
+  );
 
-  // 해당 월의 날짜 리스트 생성 (YYYY-MM-DD)
-  const dates = useMemo(() => {
-    return Array.from({ length: daysInMonth }, (_, i) => {
-      const day = i + 1;
-      return `${year}-${String(m).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    });
-  }, [year, m, daysInMonth]);
-
-  // 해당 월의 대표 별자리 결정 (월의 중간 날짜 기준)
-  const sign = useMemo(() => {
-    const middleDate = new Date(year, m - 1, 15);
-    return getZodiacSign(middleDate);
-  }, [year, m]);
-
-  const zodiacName = getZodiacNameKo(sign);
-  const zodiacBgImage = getZodiacBackgroundImage(sign);
-
-  // 앵커 포인트 (별자리 모양을 결정하는 지점들)
-  const [anchorPoints, setAnchorPoints] = useState<Pt[]>([]);
+  // DB에서 가져오는 시즌 정보
+  const [zodiacName, setZodiacName] = useState('');
+  const [zodiacCode, setZodiacCode] = useState<ZodiacSign | null>(null);
+  const [startDate, setStartDate] = useState<string | null>(null);
+  const [endDate, setEndDate] = useState<string | null>(null);
+  const [starPoints, setStarPoints] = useState<Pt[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // 별자리 템플릿 로드
-  useEffect(() => {
-    const fetchTemplate = async () => {
-      setLoading(true);
-      try {
-        const templates = await loadTemplates();
-        const template = templates.find(
-          (t: any) => t.zodiac_code === sign || t.star_code === sign
-        );
+  const zodiacBgImage = useMemo(
+    () => (zodiacCode ? getZodiacBackgroundImage(zodiacCode) : ''),
+    [zodiacCode],
+  );
 
-        if (template && template.points && template.points.length > 0) {
-          const path = template.path_index
-            ? template.path_index.map((i: number) => template.points[i])
-            : template.points;
-          setAnchorPoints(path);
-        }
-      } catch (error) {
-        console.error('Failed to load zodiac template:', error);
+  // 시즌 날짜 배열 (start_date ~ end_date)
+  const dates = useMemo(() => {
+    if (!startDate || !endDate) return [];
+    const result: string[] = [];
+    const current = new Date(startDate);
+    const end = new Date(endDate);
+    while (current <= end) {
+      result.push(toDateString(current));
+      current.setDate(current.getDate() + 1);
+    }
+    return result;
+  }, [startDate, endDate]);
+
+  // 시즌 정보 + 좌표 로드
+  useEffect(() => {
+    setLoading(true);
+    (async () => {
+      try {
+        const periodRes = await fetch(
+          `/api/constellation/period/by-date?date=${representativeDate}`,
+          { cache: 'no-store' },
+        );
+        const periodJson = await periodRes.json();
+        if (!periodJson.ok) return;
+
+        const { period_id, start_date, end_date, constellation_master } =
+          periodJson.data;
+        setZodiacName(constellation_master?.name_ko ?? '');
+        setZodiacCode((constellation_master?.code as ZodiacSign) ?? null);
+        setStartDate(start_date);
+        setEndDate(end_date);
+
+        const pointsRes = await fetch(
+          `/api/constellation/period/${period_id}/points`,
+          { cache: 'no-store' },
+        );
+        const pointsJson = await pointsRes.json();
+        if (!pointsJson.ok) return;
+
+        const pts: Pt[] = (pointsJson.data ?? []).map(
+          (r: { day_index: number; x: number; y: number }) => ({
+            x: r.x,
+            y: r.y,
+          }),
+        );
+        setStarPoints(pts);
       } finally {
         setLoading(false);
       }
-    };
-
-    fetchTemplate();
-  }, [sign]);
+    })();
+  }, [representativeDate]);
 
   // diaryList를 ConstellationSvg가 기대하는 Record 형식으로 변환
   const entriesRecord = useMemo(() => {
@@ -87,6 +105,7 @@ export function ConstellationView({ month, diaryList }: Props) {
         content: diary.content,
         emotion_polarity: diary.emotion_polarity,
         emotion_intensity: diary.emotion_intensity,
+        star_color_hex: diary.star_color_hex ?? undefined,
       };
     });
     return record;
@@ -97,7 +116,6 @@ export function ConstellationView({ month, diaryList }: Props) {
   const [selectedEntry, setSelectedEntry] = useState<Entry | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // 별 클릭 핸들러
   const handleStarClick = useCallback(
     (date: string) => {
       const diary = diaryList.find((d) => d.entry_date === date);
@@ -107,23 +125,34 @@ export function ConstellationView({ month, diaryList }: Props) {
           content: diary.content,
           emotion_polarity: diary.emotion_polarity,
           emotion_intensity: diary.emotion_intensity,
+          star_color_hex: diary.star_color_hex ?? undefined,
         } as Entry);
       } else {
         setSelectedEntry(null);
       }
       setIsModalOpen(true);
     },
-    [diaryList]
+    [diaryList],
   );
 
-  // 수정하기 핸들러 (다이어리 에디터로 이동)
   const handleEdit = useCallback(() => {
     if (selectedDate) {
       router.push(`/diary/editor?date=${selectedDate}`);
     }
   }, [selectedDate, router]);
 
-  const todayStr = useMemo(() => toDateString(new Date()), []);
+  const todayStr = useMemo(
+    () => new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10),
+    [],
+  );
+
+  const progressCount = useMemo(
+    () =>
+      diaryList.filter(
+        (d) => dates.includes(d.entry_date),
+      ).length,
+    [diaryList, dates],
+  );
 
   return (
     <div className="space-y-4">
@@ -138,14 +167,13 @@ export function ConstellationView({ month, diaryList }: Props) {
           </p>
         </div>
         <div className="chip chip-glow text-[11px]">
-          기록 {diaryList.length}/{daysInMonth}
+          기록 {progressCount}/{dates.length}
         </div>
       </div>
 
       {/* 별자리 카드 영역 */}
       <div className="hero-card overflow-hidden">
         <div className="hero-inner p-4 min-h-[320px] relative">
-          {/* 별자리 배경 (starLoad와 동일한 스타일 답습) */}
           <div
             className="absolute inset-0 opacity-20 pointer-events-none"
             style={{
@@ -153,52 +181,46 @@ export function ConstellationView({ month, diaryList }: Props) {
               backgroundSize: 'cover',
               backgroundPosition: 'center',
             }}
+            aria-hidden="true"
           />
-          <div
-            className="absolute inset-0 opacity-30 pointer-events-none"
-            style={{
-              backgroundImage: `url(${zodiacBgImage})`,
-              backgroundSize: 'contain',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat',
-            }}
-          />
+          {zodiacBgImage && (
+            <div
+              className="absolute inset-0 opacity-30 pointer-events-none"
+              style={{
+                backgroundImage: `url(${zodiacBgImage})`,
+                backgroundSize: 'contain',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+              }}
+              aria-hidden="true"
+            />
+          )}
 
-          {/* SVG 별자리 레이어 */}
           <div className="relative z-10">
-            {loading ? (
-              <div className="flex flex-col items-center justify-center min-h-[280px] space-y-4">
+            {loading || starPoints.length === 0 ? (
+              <div className="flex flex-col items-center justify-center min-h-[280px]">
                 <p className="text-white/40 text-[13px] tracking-tight animate-pulse">
                   별자리를 불러오고 있습니다...
                 </p>
               </div>
-            ) : anchorPoints.length > 0 ? (
+            ) : (
               <ConstellationSvg
-                anchorPoints={anchorPoints}
-                daysCount={daysInMonth}
+                starPoints={starPoints}
                 entries={entriesRecord}
                 dates={dates}
                 todayDate={todayStr}
                 onStarClick={handleStarClick}
-                theme="lumi" // 새로 추가한 'test' 테마(별 온도 기반) 적용
+                theme="default"
               />
-            ) : (
-              <div className="flex items-center justify-center min-h-[280px]">
-                <p className="text-white/40 text-sm">
-                  별자리 데이터를 찾을 수 없습니다.
-                </p>
-              </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* 안내 문구 */}
       <p className="text-center text-[12px] text-white/40 pt-2">
         별을 눌러 그날의 기록을 확인하거나 수정할 수 있어요.
       </p>
 
-      {/* 상세 확인 및 수정 모달 */}
       <EntryModal
         isOpen={isModalOpen}
         date={selectedDate}

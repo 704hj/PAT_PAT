@@ -1,62 +1,48 @@
-import { createServerSupabaseClientReadOnly } from "@/utils/supabase/server";
-import { NextRequest, NextResponse } from "next/server";
+import { Errors, jsonError, jsonOk, makeRequestId, mapSupabaseError } from '@/lib';
+import { createServerSupabaseClientReadOnly } from '@/utils/supabase/server';
+import { NextRequest } from 'next/server';
 
-export const dynamic = "force-dynamic"; // (선택) 캐시/정적화 간섭 방지
+export const dynamic = 'force-dynamic';
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: Promise<{ periodId: string }> } // ✅ 여기 중요
+  { params }: { params: Promise<{ periodId: string }> },
 ) {
-  const { periodId: periodIdStr } = await params; // ✅ 반드시 await
-  const periodId = Number(periodIdStr);
+  const requestId = makeRequestId();
+  try {
+    const { periodId: periodIdStr } = await params;
+    const periodId = Number(periodIdStr);
 
-  if (!Number.isFinite(periodId)) {
-    return NextResponse.json(
-      { ok: false, error: "invalid_period_id" },
-      { status: 400 }
+    if (!Number.isFinite(periodId)) throw Errors.invalid('유효하지 않은 periodId');
+
+    const supabase = await createServerSupabaseClientReadOnly();
+
+    const { data: auth, error: authErr } = await supabase.auth.getUser();
+    if (authErr || !auth?.user) throw Errors.unauthorized();
+
+    const { data, error } = await supabase
+      .from('user_constellation_period')
+      .select('entry_count, positive_count, negative_count, has_light, glow_level, first_entry_at, last_entry_at')
+      .eq('auth_user_id', auth.user.id)
+      .eq('period_id', periodId)
+      .maybeSingle();
+
+    if (error) throw mapSupabaseError(error);
+
+    return jsonOk(
+      data ?? {
+        entry_count: 0,
+        positive_count: 0,
+        negative_count: 0,
+        has_light: false,
+        glow_level: 0,
+        first_entry_at: null,
+        last_entry_at: null,
+      },
+      null,
+      requestId,
     );
+  } catch (err) {
+    return jsonError(err as Error, requestId);
   }
-
-  const supabase = await createServerSupabaseClientReadOnly();
-
-  // 인증
-  const { data: auth, error: authErr } = await supabase.auth.getUser();
-  if (authErr || !auth?.user) {
-    return NextResponse.json(
-      { ok: false, error: "unauthorized" },
-      { status: 401 }
-    );
-  }
-
-  // 내부 user_id 조회
-  const { data: userRow, error: userErr } = await supabase
-    .from("users")
-    .select("user_id")
-    .eq("auth_user_id", auth.user.id)
-    .is("deleted_at", null)
-    .single();
-
-  if (userErr || !userRow) {
-    return NextResponse.json(
-      { ok: false, error: "user_not_found" },
-      { status: 404 }
-    );
-  }
-
-  // entry_count 조회 (없으면 0)
-  const { data, error } = await supabase
-    .from("user_constellation_period")
-    .select("entry_count")
-    .eq("user_id", userRow.user_id)
-    .eq("period_id", periodId)
-    .maybeSingle();
-
-  if (error) {
-    return NextResponse.json(
-      { ok: false, error: error.message },
-      { status: 500 }
-    );
-  }
-
-  return NextResponse.json({ ok: true, entry_count: data?.entry_count ?? 0 });
 }

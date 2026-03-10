@@ -1,32 +1,30 @@
-import { createServerSupabaseClientReadOnly } from "@/utils/supabase/server";
-import { NextRequest, NextResponse } from "next/server";
+import { Errors, jsonError, jsonOk, makeRequestId, mapSupabaseError } from '@/lib';
+import { createServerSupabaseClientReadOnly } from '@/utils/supabase/server';
+import { NextRequest } from 'next/server';
 
 export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const date = searchParams.get("date"); // YYYY-MM-DD
+  const requestId = makeRequestId();
+  try {
+    const date = req.nextUrl.searchParams.get('date');
 
-  if (!date) {
-    return NextResponse.json(
-      { ok: false, error: "missing_date" },
-      { status: 400 }
-    );
+    if (!date) throw Errors.invalid('date 파라미터가 필요합니다');
+
+    const supabase = await createServerSupabaseClientReadOnly();
+
+    const { data, error } = await supabase
+      .from('constellation_period')
+      .select(
+        'period_id, constellation_id, start_date, end_date, constellation_master!constellation_id(name_ko, code)',
+      )
+      .lte('start_date', date)
+      .gte('end_date', date)
+      .single();
+
+    if (error) throw mapSupabaseError(error);
+    if (!data) throw Errors.notFound('해당 날짜의 별자리 시즌을 찾을 수 없습니다');
+
+    return jsonOk(data, null, requestId);
+  } catch (err) {
+    return jsonError(err as Error, requestId);
   }
-
-  const supabase = await createServerSupabaseClientReadOnly();
-
-  const { data, error } = await supabase
-    .from("constellation_period")
-    .select("period_id, constellation_id, start_date, end_date")
-    .lte("start_date", date)
-    .gte("end_date", date)
-    .single();
-
-  if (error || !data) {
-    return NextResponse.json(
-      { ok: false, error: "period_not_found" },
-      { status: 404 }
-    );
-  }
-
-  return NextResponse.json({ ok: true, data });
 }
