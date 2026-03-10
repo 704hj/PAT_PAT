@@ -158,6 +158,7 @@ export default function ConstellationSvg({
 
         {starPoints.map((_, index) => {
           const state = starStates[index];
+          if (!state) return null;
           const entry = entries[state.date];
           const intensity = entry?.emotion_intensity;
           // 기록 있는 별: 흰 코어 → 감정색 → 투명 (실제 별의 코로나 효과)
@@ -194,7 +195,7 @@ export default function ConstellationSvg({
       {/* 연결선: 글로우 + 코어 */}
       {starPoints.slice(0, -1).map((p, i) => {
         const q = starPoints[i + 1];
-        const isActive = starStates[i].isActive && starStates[i + 1].isActive;
+        const isActive = (starStates[i]?.isActive ?? false) && (starStates[i + 1]?.isActive ?? false);
         return (
           <g key={`line-${i}`}>
             {/* 글로우 레이어 */}
@@ -219,6 +220,7 @@ export default function ConstellationSvg({
       {/* 별들 */}
       {starPoints.map((point, index) => {
         const state = starStates[index];
+        if (!state) return null;
         const entry = entries[state.date];
         const glowId = state.hasEntry
           ? getGlowFilterId(entry.emotion_polarity, entry.emotion_intensity, theme)
