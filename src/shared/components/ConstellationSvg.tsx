@@ -9,6 +9,7 @@ type ConstellationSvgProps = {
   anchorPoints?: Pt[];
   starPoints?: Pt[];   // DB에서 가져온 좌표 (있으면 anchorPoints 대신 사용)
   daysCount?: number;
+  bgImage?: string;
   entries: Record<
     string,
     {
@@ -79,6 +80,7 @@ export default function ConstellationSvg({
   anchorPoints,
   starPoints: starPointsProp,
   daysCount,
+  bgImage,
   entries,
   dates,
   todayDate,
@@ -192,6 +194,19 @@ export default function ConstellationSvg({
         })}
       </defs>
 
+      {/* 별자리 배경 이미지 - 별 좌표와 동일한 SVG 좌표계 */}
+      {bgImage && (
+        <image
+          href={bgImage}
+          x="0"
+          y="0"
+          width="100"
+          height="100"
+          preserveAspectRatio="xMidYMid slice"
+          opacity={0.3}
+        />
+      )}
+
       {/* 연결선: 글로우 + 코어 */}
       {starPoints.slice(0, -1).map((p, i) => {
         const q = starPoints[i + 1];
@@ -227,12 +242,16 @@ export default function ConstellationSvg({
           : 'defaultGlow';
         // 감정 강도에 비례한 크기
         const r = !state.hasEntry
-          ? 1.2
+          ? 1.5
           : entry.emotion_intensity != null && entry.emotion_intensity >= 4
             ? 3.5
             : entry.emotion_intensity === 3
               ? 2.5
               : 1.8;
+
+        // 반짝임 주기: 별마다 살짝 다른 타이밍 (길게 해서 은은하게)
+        const pulseDuration = 4 + (index % 7) * 0.6;
+        const pulseDelay = (index % 11) * 0.5;
 
         return (
           <g
@@ -240,6 +259,33 @@ export default function ConstellationSvg({
             onClick={() => onStarClick?.(state.date, index)}
             style={{ cursor: 'pointer' }}
           >
+            {/* 반짝임 후광 - 기록 있는 별만 */}
+            {state.hasEntry && (
+              <circle
+                cx={point.x}
+                cy={point.y}
+                r={r * 1.8}
+                fill={state.starColor}
+                fillOpacity={0}
+                filter={`url(#${glowId})`}
+              >
+                <animate
+                  attributeName="fill-opacity"
+                  values="0;0.12;0"
+                  dur={`${pulseDuration}s`}
+                  begin={`${pulseDelay}s`}
+                  repeatCount="indefinite"
+                />
+                <animate
+                  attributeName="r"
+                  values={`${r * 1.4};${r * 1.8};${r * 1.4}`}
+                  dur={`${pulseDuration}s`}
+                  begin={`${pulseDelay}s`}
+                  repeatCount="indefinite"
+                />
+              </circle>
+            )}
+
             <circle
               cx={point.x}
               cy={point.y}
@@ -252,7 +298,7 @@ export default function ConstellationSvg({
               cy={point.y}
               r={r * 0.2}
               fill="white"
-              fillOpacity={state.hasEntry ? 1 : 0.5}
+              fillOpacity={state.hasEntry ? 1 : 0.7}
             />
           </g>
         );

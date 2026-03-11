@@ -209,19 +209,6 @@ export function ConstellationView() {
             }}
             aria-hidden="true"
           />
-          {zodiacBgImage && (
-            <div
-              className="absolute inset-0 opacity-30 pointer-events-none"
-              style={{
-                backgroundImage: `url(${zodiacBgImage})`,
-                backgroundSize: 'contain',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
-              }}
-              aria-hidden="true"
-            />
-          )}
-
           <div className="relative z-10">
             {loading || starPoints.length === 0 ? (
               <div className="flex items-center justify-center min-h-[280px]">
@@ -231,6 +218,7 @@ export function ConstellationView() {
               </div>
             ) : (
               <ConstellationSvg
+                bgImage={zodiacBgImage}
                 starPoints={starPoints}
                 entries={entries}
                 dates={dates}
