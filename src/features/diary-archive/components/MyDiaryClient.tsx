@@ -6,11 +6,14 @@ import { ConstellationView } from '@/features/diary-archive/components/Constella
 import { MonthPicker } from '@/features/diary-archive/components/monthPicker';
 import { ViewToggle } from '@/features/diary-archive/components/viewToggle';
 import { useDiaryList } from '@/features/diary/hooks/useDiaryList';
+import EntryModal from '@/shared/components/EntryModal';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { DiaryCollectionPageSkeleton } from './skeleton/skeleton';
 
 export default function MyDiaryClient() {
   const router = useRouter();
+  const [modalDiary, setModalDiary] = useState<TDiaryItem | null>(null);
   const {
     selectedDate,
     setSelectedDate,
@@ -62,11 +65,27 @@ export default function MyDiaryClient() {
                 diaryList={items}
                 selectedDate={selectedDate}
                 onSelectDate={setSelectedDate}
+                onCardClick={setModalDiary}
               />
             )
           )}
         </div>
       </section>
+
+      <EntryModal
+        isOpen={!!modalDiary}
+        date={modalDiary?.entry_date ?? null}
+        entry={modalDiary ? {
+          date: modalDiary.entry_date,
+          content: modalDiary.content,
+          diary_id: Number(modalDiary.diary_id),
+          emotion_polarity: modalDiary.emotion_polarity,
+          emotion_intensity: modalDiary.emotion_intensity,
+          star_color_hex: modalDiary.star_color_hex ?? undefined,
+        } : null}
+        onClose={() => setModalDiary(null)}
+        onEdit={() => router.push(`/diary/editor?diaryId=${modalDiary?.diary_id}`)}
+      />
 
       <ErrorModal
         open={isError && view === 'calendar'}

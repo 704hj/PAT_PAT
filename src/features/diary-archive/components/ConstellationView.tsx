@@ -9,7 +9,7 @@ import {
 } from '@/lib/zodiac';
 import ConstellationSvg from '@/shared/components/ConstellationSvg';
 import EntryModal from '@/shared/components/EntryModal';
-import { Entry, getEntryByDate, loadEntriesByRange } from '@/utils/entries';
+import { Entry, loadEntriesByRange } from '@/utils/entries';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -143,20 +143,34 @@ export function ConstellationView() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleStarClick = useCallback(
-    async (date: string) => {
+    (date: string) => {
+      const entry = entries[date];
+
+      // 기록 없는 별 처리
+      if (!entry) {
+        if (date === todayStr) {
+          router.push('/diary/editor');
+        }
+        return;
+      }
+
       setSelectedDate(date);
-      const entry = entries[date] || (await getEntryByDate(date));
       setSelectedEntry(entry);
       setIsModalOpen(true);
     },
-    [entries],
+    [entries, todayStr, router],
   );
 
   const handleEdit = useCallback(() => {
-    router.push(
-      selectedDate ? `/diary/editor?date=${selectedDate}` : '/diary/editor',
-    );
-  }, [selectedDate, router]);
+    const diaryId = selectedEntry?.diary_id;
+    if (diaryId) {
+      router.push(`/diary/editor?diaryId=${diaryId}`);
+    } else if (selectedDate) {
+      router.push(`/diary/editor?date=${selectedDate}`);
+    } else {
+      router.push('/diary/editor');
+    }
+  }, [selectedEntry, selectedDate, router]);
 
   const progressCount = useMemo(() => Object.keys(entries).length, [entries]);
 

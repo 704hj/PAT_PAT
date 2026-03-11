@@ -7,6 +7,7 @@ type Props = {
   diaryList: TDiaryItem[];
   selectedDate: string | null;
   onSelectDate: (date: string) => void;
+  onCardClick?: (diary: TDiaryItem) => void;
 };
 
 export function CalendarView({
@@ -14,6 +15,7 @@ export function CalendarView({
   diaryList,
   selectedDate,
   onSelectDate,
+  onCardClick,
 }: Props) {
   const [year, m] = month.split("-").map(Number);
 
@@ -82,7 +84,7 @@ export function CalendarView({
 
           <div className="space-y-2">
             {selectedDiaries.map((d) => (
-              <JournalCard key={d.diary_id} diary={d} />
+              <JournalCard key={d.diary_id} diary={d} onClick={() => onCardClick?.(d)} />
             ))}
 
             {selectedDiaries.length === 0 && (

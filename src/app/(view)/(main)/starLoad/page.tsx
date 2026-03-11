@@ -10,7 +10,7 @@ import {
 import BackButton from '@/shared/components/BackButton';
 import ConstellationSvg from '@/shared/components/ConstellationSvg';
 import EntryModal from '@/shared/components/EntryModal';
-import { Entry, getEntryByDate, loadEntriesByRange } from '@/utils/entries';
+import { Entry, loadEntriesByRange } from '@/utils/entries';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -113,13 +113,21 @@ export default function Page() {
   }, [startDate, endDate]);
 
   const handleStarClick = useCallback(
-    async (date: string) => {
+    (date: string) => {
+      const entry = entries[date];
+
+      if (!entry) {
+        if (date === todayStr) {
+          router.push('/diary/editor');
+        }
+        return;
+      }
+
       setSelectedDate(date);
-      const entry = entries[date] || (await getEntryByDate(date));
       setSelectedEntry(entry);
       setIsModalOpen(true);
     },
-    [entries],
+    [entries, todayStr, router],
   );
 
   const handleCloseModal = useCallback(() => {
@@ -129,10 +137,15 @@ export default function Page() {
   }, []);
 
   const handleEdit = useCallback(() => {
-    router.push(
-      selectedDate ? `/diary/editor?date=${selectedDate}` : '/diary/editor',
-    );
-  }, [selectedDate, router]);
+    const diaryId = selectedEntry?.diary_id;
+    if (diaryId) {
+      router.push(`/diary/editor?diaryId=${diaryId}`);
+    } else if (selectedDate) {
+      router.push(`/diary/editor?date=${selectedDate}`);
+    } else {
+      router.push('/diary/editor');
+    }
+  }, [selectedEntry, selectedDate, router]);
 
   const progressCount = useMemo(() => Object.keys(entries).length, [entries]);
 
@@ -192,19 +205,6 @@ export default function Page() {
               }}
               aria-hidden="true"
             />
-            {zodiacBgImage && (
-              <div
-                className="absolute inset-0 opacity-40 pointer-events-none"
-                style={{
-                  backgroundImage: `url(${zodiacBgImage})`,
-                  backgroundSize: 'contain',
-                  backgroundPosition: 'center',
-                  backgroundRepeat: 'no-repeat',
-                }}
-                aria-hidden="true"
-              />
-            )}
-
             <div className="relative z-10">
               {loading || starPoints.length === 0 ? (
                 <div className="flex flex-col items-center justify-center min-h-[280px]">
@@ -214,6 +214,7 @@ export default function Page() {
                 </div>
               ) : (
                 <ConstellationSvg
+                  bgImage={zodiacBgImage}
                   starPoints={starPoints}
                   entries={entries}
                   dates={dates}
