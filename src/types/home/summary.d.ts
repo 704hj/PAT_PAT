@@ -4,4 +4,5 @@ type HomeSummary = {
   diaryCount: number;
   isDiary: boolean;
   diaryId?: string;
+  collectedCount: number;
 };

@@ -43,7 +43,7 @@ export async function getHomeSummaryServer(): Promise<HomeSummary> {
   const todayKst = nowKst.toISOString().split('T')[0];
 
   // 2. 비동기 작업을 병렬로 실행 (속도 향상)
-  const [starRes, diaryWeekRes, diaryTodayRes] = await Promise.all([
+  const [starRes, diaryWeekRes, diaryTodayRes, collectedRes] = await Promise.all([
     // 이번 주 별 개수 (created_at 기준, 월~일 00:00~23:59 KST)
     supabase
       .from('star')
@@ -65,15 +65,19 @@ export async function getHomeSummaryServer(): Promise<HomeSummary> {
     supabase
       .from('diary')
       .select('diary_id')
-      .eq('entry_date', todayKst) // entry_date가 날짜 형식이면 KST 기준이 안전
+      .eq('entry_date', todayKst)
       .eq('auth_user_id', authUser.id)
       .is('deleted_at', null),
+
+    // 수집된 별자리 수 (entry_count / 총일수 >= 0.8)
+    supabase.rpc('get_collected_constellation_count', { p_auth_user_id: authUser.id }),
   ]);
 
   // 3. 에러 핸들링
   if (starRes.error) throw mapSupabaseError(starRes.error);
   if (diaryWeekRes.error) throw mapSupabaseError(diaryWeekRes.error);
   if (diaryTodayRes.error) throw mapSupabaseError(diaryTodayRes.error);
+  if (collectedRes.error) throw mapSupabaseError(collectedRes.error);
 
   // 4. 데이터 결과 조합
   const homeData = {
@@ -82,6 +86,7 @@ export async function getHomeSummaryServer(): Promise<HomeSummary> {
     diaryCount: diaryWeekRes.count ?? 0,
     isDiary: (diaryTodayRes.data?.length ?? 0) > 0,
     diaryId: diaryTodayRes.data?.[0]?.diary_id,
+    collectedCount: (collectedRes.data as number) ?? 0,
   };
 
   // 런타임 검증 (DB 데이터 이상/컬럼 타입 이상 즉시 감지)
