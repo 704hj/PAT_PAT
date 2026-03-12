@@ -215,6 +215,7 @@ export default function Page() {
               ) : (
                 <ConstellationSvg
                   bgImage={zodiacBgImage}
+                  zodiacCode={zodiacCode ?? undefined}
                   starPoints={starPoints}
                   entries={entries}
                   dates={dates}

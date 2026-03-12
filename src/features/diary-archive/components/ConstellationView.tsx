@@ -233,6 +233,7 @@ export function ConstellationView() {
             ) : (
               <ConstellationSvg
                 bgImage={zodiacBgImage}
+                zodiacCode={period?.code}
                 starPoints={starPoints}
                 entries={entries}
                 dates={dates}
