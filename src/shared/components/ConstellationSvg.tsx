@@ -7,9 +7,10 @@ export type StarThemeType = 'default' | 'healing' | 'warm' | 'deep' | 'lumi';
 
 type ConstellationSvgProps = {
   anchorPoints?: Pt[];
-  starPoints?: Pt[];   // DB에서 가져온 좌표 (있으면 anchorPoints 대신 사용)
+  starPoints?: Pt[]; // DB에서 가져온 좌표 (있으면 anchorPoints 대신 사용)
   daysCount?: number;
   bgImage?: string;
+  zodiacCode?: string; // 특정 별자리 처리를 위한 코드 (예: 'pisces')
   entries: Record<
     string,
     {
@@ -37,7 +38,7 @@ function getStarColor(
   polarity: string | undefined,
   intensity: number | null | undefined,
   theme: StarThemeType,
-  starColorHex?: string,
+  starColorHex?: string
 ): string {
   if (starColorHex) return starColorHex;
   if (!polarity || polarity === 'UNSET') return 'rgba(255,255,255,1)';
@@ -64,7 +65,7 @@ function getStarColor(
 function getGlowFilterId(
   polarity: string | undefined,
   intensity: number | null | undefined,
-  theme: StarThemeType,
+  theme: StarThemeType
 ): string {
   if (!polarity || polarity === 'UNSET') return 'defaultGlow';
   const intensityLevel =
@@ -81,6 +82,7 @@ export default function ConstellationSvg({
   starPoints: starPointsProp,
   daysCount,
   bgImage,
+  zodiacCode,
   entries,
   dates,
   todayDate,
@@ -99,7 +101,12 @@ export default function ConstellationSvg({
       const hasEntry = !!entry;
       const isToday = date === todayDate;
       const starColor = hasEntry
-        ? getStarColor(entry.emotion_polarity, entry.emotion_intensity, theme, entry.star_color_hex)
+        ? getStarColor(
+            entry.emotion_polarity,
+            entry.emotion_intensity,
+            theme,
+            entry.star_color_hex
+          )
         : 'rgba(255,255,255,1)';
       return {
         date,
@@ -114,6 +121,11 @@ export default function ConstellationSvg({
   }, [dates, entries, todayDate, theme]);
 
   const themeColors = THEMES[theme];
+
+  // 물고기자리(pisces)인 경우 왼쪽으로 45도 회전
+  const isPisces = zodiacCode?.toLowerCase().includes('pisces');
+  const imageTransform = isPisces ? 'rotate(-25 50 40)' : undefined;
+  // const imageTransform = isPisces ? 'rotate(-0)' : undefined;
 
   return (
     <svg
@@ -147,8 +159,17 @@ export default function ConstellationSvg({
                 height="400%"
               >
                 <feGaussianBlur stdDeviation={stdDev} result="blur" />
-                <feFlood floodColor={color} floodOpacity={opacity} result="color" />
-                <feComposite in="color" in2="blur" operator="in" result="glow" />
+                <feFlood
+                  floodColor={color}
+                  floodOpacity={opacity}
+                  result="color"
+                />
+                <feComposite
+                  in="color"
+                  in2="blur"
+                  operator="in"
+                  result="glow"
+                />
                 <feMerge>
                   <feMergeNode in="glow" />
                   <feMergeNode in="SourceGraphic" />
@@ -165,7 +186,9 @@ export default function ConstellationSvg({
           const intensity = entry?.emotion_intensity;
           // 기록 있는 별: 흰 코어 → 감정색 → 투명 (실제 별의 코로나 효과)
           // 기록 없는 별: 흰색 → 옅은 흰색 → 투명
-          const colorStop = state.hasEntry ? state.starColor : 'rgba(200,230,255,1)';
+          const colorStop = state.hasEntry
+            ? state.starColor
+            : 'rgba(200,230,255,1)';
           // 강도에 비례한 외곽 opacity (강할수록 색상이 더 진하게 퍼짐)
           const outerOp = !state.hasEntry
             ? 0.0
@@ -184,10 +207,10 @@ export default function ConstellationSvg({
               r="50%"
             >
               {/* 코어: 항상 흰색 → 실제 별처럼 중심이 밝음 */}
-              <stop offset="0%"   stopColor="white"     stopOpacity="1" />
-              <stop offset="20%"  stopColor="white"     stopOpacity="0.9" />
+              <stop offset="0%" stopColor="white" stopOpacity="1" />
+              <stop offset="20%" stopColor="white" stopOpacity="0.9" />
               {/* 외곽: 감정 색상으로 자연스럽게 퍼짐 */}
-              <stop offset="60%"  stopColor={colorStop} stopOpacity={outerOp} />
+              <stop offset="60%" stopColor={colorStop} stopOpacity={outerOp} />
               <stop offset="100%" stopColor={colorStop} stopOpacity="0" />
             </radialGradient>
           );
@@ -204,18 +227,24 @@ export default function ConstellationSvg({
           height="100"
           preserveAspectRatio="xMidYMid slice"
           opacity={0.3}
+          transform={imageTransform}
         />
       )}
 
       {/* 연결선: 글로우 + 코어 */}
       {starPoints.slice(0, -1).map((p, i) => {
         const q = starPoints[i + 1];
-        const isActive = (starStates[i]?.isActive ?? false) && (starStates[i + 1]?.isActive ?? false);
+        const isActive =
+          (starStates[i]?.isActive ?? false) &&
+          (starStates[i + 1]?.isActive ?? false);
         return (
           <g key={`line-${i}`}>
             {/* 글로우 레이어 */}
             <line
-              x1={p.x} y1={p.y} x2={q.x} y2={q.y}
+              x1={p.x}
+              y1={p.y}
+              x2={q.x}
+              y2={q.y}
               stroke="white"
               strokeWidth={isActive ? 1.2 : 0.4}
               strokeOpacity={isActive ? 0.12 : 0.05}
@@ -223,7 +252,10 @@ export default function ConstellationSvg({
             />
             {/* 코어 레이어 */}
             <line
-              x1={p.x} y1={p.y} x2={q.x} y2={q.y}
+              x1={p.x}
+              y1={p.y}
+              x2={q.x}
+              y2={q.y}
               stroke="white"
               strokeWidth={isActive ? 0.3 : 0.1}
               strokeOpacity={isActive ? 0.6 : 0.2}
@@ -238,7 +270,11 @@ export default function ConstellationSvg({
         if (!state) return null;
         const entry = entries[state.date];
         const glowId = state.hasEntry
-          ? getGlowFilterId(entry.emotion_polarity, entry.emotion_intensity, theme)
+          ? getGlowFilterId(
+              entry.emotion_polarity,
+              entry.emotion_intensity,
+              theme
+            )
           : 'defaultGlow';
         // 감정 강도에 비례한 크기
         const r = !state.hasEntry

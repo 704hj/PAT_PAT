@@ -513,6 +513,7 @@ export default function ConstellationTestPage() {
                 </div>
               ) : (
                 <ConstellationSvg
+                  zodiacCode={period.code}
                   starPoints={starPoints}
                   entries={entries}
                   dates={dates}
