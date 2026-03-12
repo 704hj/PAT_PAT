@@ -27,7 +27,8 @@ type ConstellationSvgProps = {
 };
 
 const THEMES: Record<StarThemeType, { positive: string; negative: string }> = {
-  default: { positive: '#2563EB', negative: '#DC2626' },
+  // default: { positive: '#2563EB', negative: '#DC2626' },
+  default: { positive: '#A6CAF6', negative: '#E78F3D' },
   healing: { positive: '#2DD4BF', negative: '#A78BFA' }, // 에메랄드 민트 & 라벤더 퍼플
   warm: { positive: '#FDE68A', negative: '#FB7185' }, // 샴페인 골드 & 소프트 로즈
   deep: { positive: '#22D3EE', negative: '#94A3B8' }, // 시안 아쿠아 & 인디고 실버
@@ -41,21 +42,28 @@ function getStarColor(
   starColorHex?: string
 ): string {
   if (starColorHex) return starColorHex;
-  if (!polarity || polarity === 'UNSET') return 'rgba(255,255,255,1)';
+  // if (!polarity || polarity === 'UNSET') return 'rgba(255,255,255,1)';
+  if (!polarity || polarity === 'UNSET') return '#FEF9C3'; // 연한 노랑 (감정 미선택)
 
   const colors = THEMES[theme];
   const baseColor = polarity === 'POSITIVE' ? colors.positive : colors.negative;
 
   if (theme === 'default') {
     if (polarity === 'POSITIVE') {
-      if (intensity != null && intensity >= 4) return '#1E3A8A';
-      if (intensity === 3) return '#2563EB';
-      return '#93C5FD';
+      // if (intensity != null && intensity >= 4) return '#1E3A8A';
+      // if (intensity === 3) return '#2563EB';
+      // return '#93C5FD';
+      if (intensity != null && intensity >= 4) return '#4B9CE8'; // 진한 파랑
+      if (intensity === 3) return '#A6CAF6'; // 기본 파랑
+      return '#D8EDFB'; // 연한 파랑
     }
     if (polarity === 'NEGATIVE') {
-      if (intensity != null && intensity >= 4) return '#991B1B';
-      if (intensity === 3) return '#DC2626';
-      return '#FCA5A5';
+      // if (intensity != null && intensity >= 4) return '#991B1B';
+      // if (intensity === 3) return '#DC2626';
+      // return '#FCA5A5';
+      if (intensity != null && intensity >= 4) return '#B5601A'; // 진한 오렌지
+      if (intensity === 3) return '#E78F3D'; // 기본 오렌지
+      return '#F5C897'; // 연한 오렌지
     }
   }
 
