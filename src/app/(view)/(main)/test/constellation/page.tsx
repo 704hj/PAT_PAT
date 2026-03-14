@@ -205,7 +205,7 @@ export default function ConstellationTestPage() {
     if (coordSource !== 'json') return;
     setLoadingPoints(true);
     setJsonPoints([]);
-    fetch('/mock/star.json', { cache: 'force-cache' })
+    fetch('/mock/star.json', { cache: 'no-store' })
       .then((r) => r.json())
       .then((data: any[]) => {
         const star = data.find((s) => s.starCode === period.code);
