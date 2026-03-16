@@ -20,7 +20,8 @@ export default function BottomNav() {
               <li key={href} className="flex-1">
                 <Link
                   href={href}
-                  className={`flex flex-col items-center gap-1.5 py-2 transition-all active:scale-90 ${
+                  style={{ touchAction: 'manipulation' }}
+                  className={`flex flex-col items-center gap-1.5 py-2 transition-all duration-150 active:scale-90 ${
                     isActive
                       ? 'text-white'
                       : 'text-white/40 hover:text-white/60'
@@ -53,7 +54,7 @@ function HomeIcon({ isActive }: IconProps) {
       height="20"
       viewBox="0 0 24 24"
       aria-hidden
-      className="transition-all duration-300"
+      className="transition-all duration-150"
     >
       <path
         d="M4 10.5 12 4l8 6.5V20a1.5 1.5 0 0 1-1.5 1.5H5.5A1.5 1.5 0 0 1 4 20v-9.5Z"
@@ -81,7 +82,7 @@ function NoteIcon({ isActive }: IconProps) {
       height="20"
       viewBox="0 0 24 24"
       aria-hidden
-      className="transition-all duration-300"
+      className="transition-all duration-150"
     >
       <path
         d="M7 3.5h7.5L20.5 9v11A1.5 1.5 0 0 1 19 21.5H7A1.5 1.5 0 0 1 5.5 20V5A1.5 1.5 0 0 1 7 3.5Z"
@@ -116,7 +117,7 @@ function UserIcon({ isActive }: IconProps) {
       height="20"
       viewBox="0 0 24 24"
       aria-hidden
-      className="transition-all duration-300"
+      className="transition-all duration-150"
     >
       <path
         d="M12 12.2a4.2 4.2 0 1 0-4.2-4.2 4.2 4.2 0 0 0 4.2 4.2Z"
