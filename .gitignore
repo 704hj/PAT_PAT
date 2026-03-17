@@ -81,3 +81,7 @@ Thumbs.db
 CLAUDE.md
 .mcp.json
 settings.Local.json
+
+# ohmyclaude
+.claude
+.omc/
