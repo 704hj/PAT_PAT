@@ -100,7 +100,19 @@
 
   /* Shadow */
   --shadow-glass: 0 10px 30px rgba(6, 19, 42, 0.45);
+
+  /* Safe Area (iOS notch / home indicator) */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
 }
+
+/* ---------------- Safe Area Utilities (iOS) ---------------- */
+.pt-safe { padding-top: var(--safe-top); }
+.pb-safe { padding-bottom: var(--safe-bottom); }
+.pl-safe { padding-left: var(--safe-left); }
+.pr-safe { padding-right: var(--safe-right); }
 
 /* ---------------- Font Utility (minimal) ---------------- */
 .font-surround {

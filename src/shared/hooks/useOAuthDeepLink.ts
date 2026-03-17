@@ -12,6 +12,8 @@ import { supabase } from '@/utils/supabase/client';
  * 네이티브 앱에서 OAuth 딥링크 콜백을 처리합니다.
  * com.patpat.app://auth/callback?code=xxx 형태의 URL을 수신하면
  * code를 세션으로 교환하고 /home으로 이동합니다.
+ *
+ * 앱이 포그라운드로 복귀할 때 세션을 갱신하여 토큰 만료를 방지합니다.
  */
 export function useOAuthDeepLink() {
   const router = useRouter();
@@ -19,7 +21,7 @@ export function useOAuthDeepLink() {
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return;
 
-    const listenerPromise = App.addListener('appUrlOpen', async ({ url }) => {
+    const deepLinkPromise = App.addListener('appUrlOpen', async ({ url }) => {
       if (!url.includes('auth/callback')) return;
 
       const urlObj = new URL(url);
@@ -48,8 +50,18 @@ export function useOAuthDeepLink() {
       router.replace(existingUser ? '/home' : '/auth/terms');
     });
 
+    // 포그라운드 복귀 시 세션 갱신 (토큰 만료 방지)
+    const appStatePromise = App.addListener('appStateChange', async ({ isActive }) => {
+      if (!isActive) return;
+      const { error } = await supabase.auth.refreshSession();
+      if (error) {
+        console.warn('[AppState] Session refresh failed:', error.message);
+      }
+    });
+
     return () => {
-      listenerPromise.then((l) => l.remove());
+      deepLinkPromise.then((l) => l.remove());
+      appStatePromise.then((l) => l.remove());
     };
   }, [router]);
 }
