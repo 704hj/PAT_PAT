@@ -68,6 +68,7 @@ export default function HomeClient() {
   const filledDays = weekDiaries.length;
   const collectedCount = result?.collectedCount ?? 0;
   const [popoverIndex, setPopoverIndex] = useState<number | null>(null);
+  const [shakingIndex, setShakingIndex] = useState<number | null>(null);
 
   const diaryByDate = useMemo(
     () => Object.fromEntries(weekDiaries.map((d) => [d.entry_date, d])),
@@ -113,6 +114,11 @@ export default function HomeClient() {
         @keyframes soft-glow {
           0%, 100% { opacity: 0.15; }
           50% { opacity: 0.28; }
+        }
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          30% { transform: translateX(-2px); }
+          70% { transform: translateX(2px); }
         }
       `}</style>
 
@@ -225,7 +231,7 @@ export default function HomeClient() {
                   <p className="mt-1.5 text-white/30 text-[13px] font-light">
                     {isDiary
                       ? '언제든 다시 수정할 수 있어요'
-                      : '하루가 지나가기 전 한 줄을 남겨보세요'}
+                      : '오늘의 별은 오늘만 담을 수 있어요'}
                   </p>
                 </div>
 
@@ -323,10 +329,22 @@ export default function HomeClient() {
                   <div key={i} className="flex flex-col items-center gap-2.5">
                     <button
                       type="button"
-                      disabled={!isFilled}
-                      onClick={() => setPopoverIndex(popoverIndex === i ? null : i)}
+                      onClick={() => {
+                        if (isFilled) {
+                          setPopoverIndex(popoverIndex === i ? null : i);
+                        } else if (!isFuture) {
+                          // 과거 빈 별: 진동 + 흔들림
+                          navigator.vibrate?.(30);
+                          setShakingIndex(i);
+                          setTimeout(() => setShakingIndex(null), 500);
+                        }
+                      }}
                       className="relative flex items-center justify-center"
-                      style={{ width: 32, height: 32 }}
+                      style={{
+                        width: 32,
+                        height: 32,
+                        animation: shakingIndex === i ? 'shake 0.5s ease' : 'none',
+                      }}
                     >
                       {isFilled && (
                         <div
