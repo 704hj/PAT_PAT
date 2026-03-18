@@ -11,4 +11,6 @@ type HomeSummary = {
   isDiary: boolean;
   diaryId?: string;
   collectedCount: number;
+  periodDiaryCount: number;
+  periodTotalDays: number;
 };

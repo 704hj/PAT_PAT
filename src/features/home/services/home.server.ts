@@ -42,8 +42,9 @@ export async function getHomeSummaryServer(): Promise<HomeSummary> {
   // KST 기준 오늘 날짜 (YYYY-MM-DD)
   const todayKst = nowKst.toISOString().split('T')[0];
 
+
   // 2. 비동기 작업을 병렬로 실행 (속도 향상)
-  const [starRes, diaryWeekRes, diaryTodayRes, collectedRes] = await Promise.all([
+  const [starRes, diaryWeekRes, diaryTodayRes, collectedRes, periodRes] = await Promise.all([
     // 이번 주 별 개수 (created_at 기준, 월~일 00:00~23:59 KST)
     supabase
       .from('star')
@@ -61,16 +62,24 @@ export async function getHomeSummaryServer(): Promise<HomeSummary> {
       .eq('auth_user_id', authUser.id)
       .is('deleted_at', null),
 
-    // 오늘 일기 작성 여부
+    // 오늘 일기 작성 여부 + period_id
     supabase
       .from('diary')
-      .select('diary_id')
+      .select('diary_id, period_id')
       .eq('entry_date', todayKst)
       .eq('auth_user_id', authUser.id)
       .is('deleted_at', null),
 
     // 수집된 별자리 수 (entry_count / 총일수 >= 0.8)
     supabase.rpc('get_collected_constellation_count', { p_auth_user_id: authUser.id }),
+
+    // 현재 별자리 시즌 기간 (오늘 날짜로 조회)
+    supabase
+      .from('constellation_period')
+      .select('period_id, start_date, end_date')
+      .lte('start_date', todayKst)
+      .gte('end_date', todayKst)
+      .maybeSingle(),
   ]);
 
   // 3. 에러 핸들링
@@ -78,8 +87,41 @@ export async function getHomeSummaryServer(): Promise<HomeSummary> {
   if (diaryWeekRes.error) throw mapSupabaseError(diaryWeekRes.error);
   if (diaryTodayRes.error) throw mapSupabaseError(diaryTodayRes.error);
   if (collectedRes.error) throw mapSupabaseError(collectedRes.error);
+  // constellation_period는 시즌 사이 공백이 있을 수 있으므로 에러 무시
 
-  // 4. 데이터 결과 조합
+  // 4. 현재 시즌 사용자 기록 수 조회 (period_id 필요해서 순차 실행)
+  // constellation_period 날짜 쿼리가 null이면 오늘 일기의 period_id로 폴백
+  let currentPeriod = periodRes.data;
+  const fallbackPeriodId = diaryTodayRes.data?.[0]?.period_id;
+
+  if (!currentPeriod && fallbackPeriodId) {
+    const { data: fallbackPeriod } = await supabase
+      .from('constellation_period')
+      .select('period_id, start_date, end_date')
+      .eq('period_id', fallbackPeriodId)
+      .maybeSingle();
+    currentPeriod = fallbackPeriod;
+  }
+
+  let periodDiaryCount = 0;
+  let periodTotalDays = 0;
+
+  if (currentPeriod) {
+    const start = new Date(currentPeriod.start_date);
+    const end = new Date(currentPeriod.end_date);
+    periodTotalDays = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+
+    const { data: userPeriod } = await supabase
+      .from('user_constellation_period')
+      .select('entry_count')
+      .eq('period_id', currentPeriod.period_id)
+      .eq('auth_user_id', authUser.id)
+      .maybeSingle();
+
+    periodDiaryCount = userPeriod?.entry_count ?? 0;
+  }
+
+  // 5. 데이터 결과 조합
   const homeData = {
     profile: { nickname: profile.nickname, email: profile.email },
     starCount: starRes.count ?? 0,
@@ -93,6 +135,8 @@ export async function getHomeSummaryServer(): Promise<HomeSummary> {
     isDiary: (diaryTodayRes.data?.length ?? 0) > 0,
     diaryId: diaryTodayRes.data?.[0]?.diary_id,
     collectedCount: (collectedRes.data as number) ?? 0,
+    periodDiaryCount,
+    periodTotalDays,
   };
 
   // 런타임 검증 (DB 데이터 이상/컬럼 타입 이상 즉시 감지)

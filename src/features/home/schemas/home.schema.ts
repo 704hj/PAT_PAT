@@ -18,6 +18,8 @@ export const HomeSummarySchema = z.object({
   isDiary: z.boolean(),
   diaryId: z.string().min(1).optional(),
   collectedCount: z.number().min(0),
+  periodDiaryCount: z.number().min(0),
+  periodTotalDays: z.number().min(0),
 });
 
 export type HomeSummary = z.infer<typeof HomeSummarySchema>;

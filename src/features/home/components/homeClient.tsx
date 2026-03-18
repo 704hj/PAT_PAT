@@ -6,12 +6,6 @@ import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import HomeSkeleton from './homeSkeleton';
 
-function getTimeMessage(hour: number) {
-  if (hour >= 5 && hour < 11) return '오늘이 천천히 시작되고 있어요.';
-  if (hour >= 11 && hour < 17) return '오늘이 차분히 흘러가고 있어요.';
-  if (hour >= 17 && hour < 22) return '오늘이 정리되는 시간이에요.';
-  return '오늘이 조용히 마무리되고 있어요.';
-}
 
 const WEEK_LABELS = ['월', '화', '수', '목', '금', '토', '일'];
 
@@ -20,53 +14,21 @@ function getTodayIndex() {
   return (day + 6) % 7;
 }
 
-const LUMI_IMAGE_MAP: Record<string, string> = {
-  POSITIVE_high: '/images/icon/lumi/lumi_happy.png',
-  POSITIVE_mid: '/images/icon/lumi/lumi_calm.png',
-  POSITIVE_low: '/images/icon/lumi/lumi_serene.png',
-  NEGATIVE_high: '/images/icon/lumi/lumi_overwhelmed.png',
-  NEGATIVE_mid: '/images/icon/lumi/lumi_tired.png',
-  NEGATIVE_low: '/images/icon/lumi/lumi_heavy.png',
-};
-
-function getLumiImage(polarity: string, intensity: number | null): string | null {
-  if (!polarity || polarity === 'UNSET') return null;
-  const level =
-    intensity != null && intensity >= 4 ? 'high' : intensity === 3 ? 'mid' : 'low';
-  return LUMI_IMAGE_MAP[`${polarity}_${level}`] ?? null;
-}
 
 const STAR_POINTS =
   '12,2 13.8,8.6 20.5,8.6 15.4,12.8 17.2,19.4 12,15.2 6.8,19.4 8.6,12.8 3.5,8.6 10.2,8.6';
 
-const ZODIAC_BY_MONTH: Record<number, string> = {
-  1: '1_aquarius',
-  2: '2_pisces',
-  3: '3_aries',
-  4: '4_taurus',
-  5: '5_gemini',
-  6: '6_cancer',
-  7: '7_leo',
-  8: '8_virgo',
-  9: '9_libra',
-  10: '10_scorpio',
-  11: '11_sagittarius',
-  12: '12_capricorn',
-};
-
-function getZodiacPreviewSrc() {
-  const month = new Date().getMonth() + 1;
-  return `/images/bg/zodiac/${ZODIAC_BY_MONTH[month]}.png`;
-}
 
 export default function HomeClient() {
   const { data: result, isPending, isError, error } = useHomeSummary();
   const router = useRouter();
-  const hour = new Date().getHours();
   const todayIndex = getTodayIndex();
   const weekDiaries = result?.weekDiaries ?? [];
   const filledDays = weekDiaries.length;
-  const collectedCount = result?.collectedCount ?? 0;
+  const periodDiaryCount = result?.periodDiaryCount ?? 0;
+  const periodTotalDays = result?.periodTotalDays ?? 0;
+  const periodProgress = periodTotalDays > 0 ? Math.round((periodDiaryCount / periodTotalDays) * 100) : 0;
+  const isCollected = periodProgress >= 80;
   const [popoverIndex, setPopoverIndex] = useState<number | null>(null);
   const [shakingIndex, setShakingIndex] = useState<number | null>(null);
 
@@ -180,30 +142,18 @@ export default function HomeClient() {
           />
         ))}
 
-        <section className="mx-auto w-full max-w-[480px] px-5 pb-[120px]">
-          {/* ── 헤더 ── */}
-          <header className="pt-14 mb-12">
-            <p className="text-white/25 text-[11px] tracking-[0.2em]">
-              {getTimeMessage(hour)}
+        <section className="mx-auto w-full max-w-[480px] px-5 pt-12 pb-[120px]">
+          {/* ── 날짜 헤더 ── */}
+          <header className="mb-5 flex items-center justify-between">
+            <p className="text-white/30 text-[13px] font-light">
+              {new Date().toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' })}
             </p>
-            <div className="mt-5 flex items-center justify-between">
-              <div>
-                <h1 className="text-white/90 text-[26px] font-light tracking-[-0.01em]">
-                  {result?.profile?.nickname ?? '사용자'} 님
-                </h1>
-                <p className="mt-1.5 text-white/35 text-[13px] font-light">
-                  {isDiary
-                    ? '오늘의 별을 남겼어요'
-                    : '오늘의 별을 기다리고 있어요'}
-                </p>
-              </div>
-              <img
-                src="/images/icon/lumi/lumi_main.svg"
-                alt="루미"
-                className="w-11 h-11 object-contain flex-shrink-0 opacity-80"
-                style={{ animation: 'float 4s ease-in-out infinite' }}
-              />
-            </div>
+            <img
+              src="/images/icon/lumi/lumi_main.svg"
+              alt="루미"
+              className="w-9 h-9 object-contain opacity-70"
+              style={{ animation: 'float 4s ease-in-out infinite' }}
+            />
           </header>
 
           {/* ── Today 카드 ── */}
@@ -220,9 +170,6 @@ export default function HomeClient() {
               {/* 상태 + 별 */}
               <div className="flex items-start justify-between gap-4 mb-5">
                 <div>
-                  <p className="text-white/20 text-[10px] tracking-[0.25em] uppercase mb-3">
-                    Today
-                  </p>
                   <p className="text-white/85 text-[17px] font-light leading-snug">
                     {isDiary
                       ? '오늘의 감정이 담겼어요'
@@ -270,9 +217,11 @@ export default function HomeClient() {
                 className="w-full flex items-center justify-center gap-2 rounded-[12px] transition-opacity duration-150 active:opacity-50"
                 style={{
                   height: 44,
-                  background: 'rgba(255,255,255,0.04)',
+                  background: isDiary
+                    ? 'rgba(255,255,255,0.05)'
+                    : 'rgba(255,255,255,0.04)',
                   border: isDiary
-                    ? '1px solid rgba(255,255,255,0.08)'
+                    ? '1px solid rgba(255,255,255,0.13)'
                     : '1px solid rgba(160,185,255,0.22)',
                 }}
               >
@@ -280,7 +229,7 @@ export default function HomeClient() {
                   className="text-[13px]"
                   style={{
                     color: isDiary
-                      ? 'rgba(180,205,255,0.5)'
+                      ? 'rgba(180,205,255,0.7)'
                       : 'rgba(190,210,255,0.8)',
                     fontWeight: 300,
                     letterSpacing: '0.02em',
@@ -310,6 +259,7 @@ export default function HomeClient() {
           {/* ── 이번 주 별자리 ── */}
           <div
             className="rounded-2xl mb-3 overflow-hidden"
+            onClick={() => setPopoverIndex(null)}
             style={{
               background: 'rgba(255,255,255,0.025)',
               border: '1px solid rgba(255,255,255,0.06)',
@@ -329,7 +279,8 @@ export default function HomeClient() {
                   <div key={i} className="flex flex-col items-center gap-2.5">
                     <button
                       type="button"
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation();
                         if (isFilled) {
                           setPopoverIndex(popoverIndex === i ? null : i);
                         } else if (!isFuture) {
@@ -460,7 +411,9 @@ export default function HomeClient() {
                 return (
                   <div
                     key={popoverIndex}
-                    className="mt-5 rounded-[14px] p-4"
+                    role="button"
+                    onClick={() => setPopoverIndex(null)}
+                    className="mt-5 rounded-[14px] p-4 cursor-pointer active:opacity-70 transition-opacity"
                     style={{
                       background: theme.bg,
                       border: theme.border,
@@ -508,102 +461,88 @@ export default function HomeClient() {
             </div>
           </div>
 
-          {/* ── 수집된 별자리 ── */}
-          {collectedCount > 0 ? (
-            <div
-              className="rounded-2xl overflow-hidden"
-              style={{
-                background: 'rgba(255,255,255,0.025)',
-                border: '1px solid rgba(160,120,255,0.12)',
-              }}
+          {/* ── 이번 달 진행률 ── */}
+          <div
+            className="rounded-2xl overflow-hidden relative"
+            style={{
+              background: 'rgba(255,255,255,0.025)',
+              border: isCollected
+                ? '1px solid rgba(160,120,255,0.2)'
+                : '1px solid rgba(255,255,255,0.06)',
+            }}
+          >
+            {/* 별자리 점/선 장식 */}
+            <svg
+              className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none"
+              width="64" height="64" viewBox="0 0 64 64" fill="none"
+              style={{ opacity: isCollected ? 0.35 : 0.18 }}
             >
-              <div className="p-6 flex items-center justify-between">
-                <div>
-                  <p className="text-white/20 text-[10px] tracking-[0.25em] uppercase mb-3">
-                    Collection
-                  </p>
-                  <p className="text-white/80 text-[17px] font-light">
-                    <span className="text-white/90">{collectedCount}개</span>의
-                    별자리를 수집했어요
-                  </p>
-                </div>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                  <circle
-                    cx="4"
-                    cy="18"
-                    r="2"
-                    fill="rgba(185,155,255,0.7)"
-                    style={{
-                      filter: 'drop-shadow(0 0 4px rgba(170,130,255,0.8))',
-                    }}
-                  />
-                  <circle
-                    cx="12"
-                    cy="7"
-                    r="2"
-                    fill="rgba(185,155,255,0.7)"
-                    style={{
-                      filter: 'drop-shadow(0 0 4px rgba(170,130,255,0.8))',
-                    }}
-                  />
-                  <circle
-                    cx="20"
-                    cy="14"
-                    r="2"
-                    fill="rgba(185,155,255,0.7)"
-                    style={{
-                      filter: 'drop-shadow(0 0 4px rgba(170,130,255,0.8))',
-                    }}
-                  />
-                  <line
-                    x1="4"
-                    y1="18"
-                    x2="12"
-                    y2="7"
-                    stroke="rgba(170,130,255,0.3)"
-                    strokeWidth="0.8"
-                  />
-                  <line
-                    x1="12"
-                    y1="7"
-                    x2="20"
-                    y2="14"
-                    stroke="rgba(170,130,255,0.3)"
-                    strokeWidth="0.8"
-                  />
-                </svg>
-              </div>
-            </div>
-          ) : (
-            // 수집 없음: zodiac 이미지 프리뷰
-            <div
-              className="rounded-2xl overflow-hidden relative"
-              style={{
-                background: 'rgba(255,255,255,0.025)',
-                border: '1px solid rgba(255,255,255,0.06)',
-              }}
-            >
-              {/* zodiac 이미지 — 우측에 반투명하게 */}
-              <img
-                src={getZodiacPreviewSrc()}
-                alt=""
-                className="absolute right-[-30px] top-0 h-full w-auto object-contain pointer-events-none"
-                style={{ opacity: 0.18 }}
-              />
-              {/* 컨텐츠 */}
-              <div className="relative px-5 py-4">
-                <p className="text-white/20 text-[10px] tracking-[0.25em] uppercase mb-3">
-                  Collection
+              <circle cx="12" cy="52" r="2.5" fill={isCollected ? 'rgba(185,155,255,0.9)' : 'rgba(180,200,255,0.9)'} />
+              <circle cx="32" cy="16" r="2.5" fill={isCollected ? 'rgba(185,155,255,0.9)' : 'rgba(180,200,255,0.9)'} />
+              <circle cx="54" cy="40" r="2.5" fill={isCollected ? 'rgba(185,155,255,0.9)' : 'rgba(180,200,255,0.9)'} />
+              <circle cx="44" cy="22" r="1.5" fill={isCollected ? 'rgba(185,155,255,0.7)' : 'rgba(180,200,255,0.7)'} />
+              <circle cx="22" cy="38" r="1.5" fill={isCollected ? 'rgba(185,155,255,0.7)' : 'rgba(180,200,255,0.7)'} />
+              <line x1="12" y1="52" x2="32" y2="16" stroke={isCollected ? 'rgba(185,155,255,0.3)' : 'rgba(180,200,255,0.3)'} strokeWidth="0.8" />
+              <line x1="32" y1="16" x2="54" y2="40" stroke={isCollected ? 'rgba(185,155,255,0.3)' : 'rgba(180,200,255,0.3)'} strokeWidth="0.8" />
+              <line x1="32" y1="16" x2="44" y2="22" stroke={isCollected ? 'rgba(185,155,255,0.2)' : 'rgba(180,200,255,0.2)'} strokeWidth="0.6" />
+              <line x1="12" y1="52" x2="22" y2="38" stroke={isCollected ? 'rgba(185,155,255,0.2)' : 'rgba(180,200,255,0.2)'} strokeWidth="0.6" />
+            </svg>
+            <div className="relative px-5 pt-4 pb-5">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-white/20 text-[10px] tracking-[0.15em]">
+                  이번 달 별자리
                 </p>
-                <p className="text-white/50 text-[14px] font-light leading-snug">
-                  아직 수집된 별자리가 없어요
-                </p>
-                <p className="mt-1 text-white/28 text-[11px] font-light">
-                  기간의 80%를 채우면 이런 별자리가 수집돼요
+                <p className="text-white/30 text-[11px] font-light">
+                  <span className="text-white/60">{periodDiaryCount}</span> / {periodTotalDays}일
                 </p>
               </div>
+
+              <p className="text-white/70 text-[15px] font-light leading-snug mb-4">
+                {isCollected
+                  ? '이번 달 별자리를 수집했어요'
+                  : periodProgress >= 50
+                    ? `별자리까지 ${80 - periodProgress}% 남았어요`
+                    : '매일 기록하면 별자리가 완성돼요'}
+              </p>
+
+              {/* 프로그레스 바 */}
+              <div
+                className="relative w-full rounded-full overflow-hidden"
+                style={{ height: 4, background: 'rgba(255,255,255,0.07)' }}
+              >
+                {/* 80% 목표선 */}
+                <div
+                  className="absolute top-0 bottom-0 w-px"
+                  style={{
+                    left: '80%',
+                    background: 'rgba(255,255,255,0.2)',
+                  }}
+                />
+                {/* 진행 */}
+                <div
+                  className="h-full rounded-full transition-all duration-700"
+                  style={{
+                    width: `${Math.min(periodProgress, 100)}%`,
+                    background: isCollected
+                      ? 'linear-gradient(90deg, rgba(160,120,255,0.8), rgba(200,160,255,0.9))'
+                      : 'linear-gradient(90deg, rgba(100,150,255,0.7), rgba(140,180,255,0.85))',
+                    boxShadow: isCollected
+                      ? '0 0 8px rgba(160,120,255,0.5)'
+                      : '0 0 6px rgba(120,160,255,0.4)',
+                  }}
+                />
+              </div>
+              <div className="flex justify-between mt-1.5">
+                <span className="text-white/35 text-[9px]">{periodProgress}%</span>
+                <span
+                  className="text-[9px]"
+                  style={{ color: isCollected ? 'rgba(180,140,255,0.5)' : 'rgba(255,255,255,0.2)' }}
+                >
+                  80% 달성 시 수집
+                </span>
+              </div>
             </div>
-          )}
+          </div>
         </section>
 
         <ErrorModal
