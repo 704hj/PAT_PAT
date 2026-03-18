@@ -69,7 +69,7 @@ export default function ProfileClientPage() {
   if (isError) {
     const code = (error as any)?.code;
     if (code === 'AUTH_UNAUTHORIZED') {
-      router.push('/start');
+      router.replace('/start');
       return null;
     }
     return (

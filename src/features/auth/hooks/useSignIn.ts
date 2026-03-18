@@ -131,7 +131,7 @@ export function useSignIn(): UseSignInReturn {
 
       if (data.session) {
         // 로그인 성공 - 홈으로 이동
-        router.push("/home");
+        router.replace("/home");
         return true;
       }
 
