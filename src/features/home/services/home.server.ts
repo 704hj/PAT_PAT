@@ -52,10 +52,10 @@ export async function getHomeSummaryServer(): Promise<HomeSummary> {
       .lte('created_at', `${weekEndKst}T23:59:59+09:00`)
       .eq('auth_user_id', authUser.id),
 
-    // 이번 주 일기 날짜 목록 (entry_date 기준, KST 월~일)
+    // 이번 주 일기 목록 (entry_date 기준, KST 월~일)
     supabase
       .from('diary')
-      .select('entry_date')
+      .select('diary_id, entry_date, content, emotion_polarity, emotion_intensity')
       .gte('entry_date', weekStartKst)
       .lte('entry_date', weekEndKst)
       .eq('auth_user_id', authUser.id)
@@ -83,7 +83,13 @@ export async function getHomeSummaryServer(): Promise<HomeSummary> {
   const homeData = {
     profile: { nickname: profile.nickname, email: profile.email },
     starCount: starRes.count ?? 0,
-    weekDiaryDates: (diaryWeekRes.data ?? []).map((r) => r.entry_date as string),
+    weekDiaries: (diaryWeekRes.data ?? []).map((r) => ({
+      diary_id: r.diary_id as string,
+      entry_date: r.entry_date as string,
+      content: r.content as string,
+      emotion_polarity: r.emotion_polarity as string,
+      emotion_intensity: r.emotion_intensity as number | null,
+    })),
     isDiary: (diaryTodayRes.data?.length ?? 0) > 0,
     diaryId: diaryTodayRes.data?.[0]?.diary_id,
     collectedCount: (collectedRes.data as number) ?? 0,

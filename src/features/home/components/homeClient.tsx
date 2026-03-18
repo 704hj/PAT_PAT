@@ -3,7 +3,7 @@
 import ErrorModal from '@/features/common/ErrorModal';
 import { useHomeSummary } from '@/features/home/hooks/useHomeSummary';
 import { useRouter } from 'next/navigation';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import HomeSkeleton from './homeSkeleton';
 
 function getTimeMessage(hour: number) {
@@ -18,6 +18,22 @@ const WEEK_LABELS = ['월', '화', '수', '목', '금', '토', '일'];
 function getTodayIndex() {
   const day = new Date().getDay();
   return (day + 6) % 7;
+}
+
+const LUMI_IMAGE_MAP: Record<string, string> = {
+  POSITIVE_high: '/images/icon/lumi/lumi_happy.png',
+  POSITIVE_mid: '/images/icon/lumi/lumi_calm.png',
+  POSITIVE_low: '/images/icon/lumi/lumi_serene.png',
+  NEGATIVE_high: '/images/icon/lumi/lumi_overwhelmed.png',
+  NEGATIVE_mid: '/images/icon/lumi/lumi_tired.png',
+  NEGATIVE_low: '/images/icon/lumi/lumi_heavy.png',
+};
+
+function getLumiImage(polarity: string, intensity: number | null): string | null {
+  if (!polarity || polarity === 'UNSET') return null;
+  const level =
+    intensity != null && intensity >= 4 ? 'high' : intensity === 3 ? 'mid' : 'low';
+  return LUMI_IMAGE_MAP[`${polarity}_${level}`] ?? null;
 }
 
 const STAR_POINTS =
@@ -48,9 +64,15 @@ export default function HomeClient() {
   const router = useRouter();
   const hour = new Date().getHours();
   const todayIndex = getTodayIndex();
-  const weekDiaryDates = result?.weekDiaryDates ?? [];
-  const filledDays = weekDiaryDates.length;
+  const weekDiaries = result?.weekDiaries ?? [];
+  const filledDays = weekDiaries.length;
   const collectedCount = result?.collectedCount ?? 0;
+  const [popoverIndex, setPopoverIndex] = useState<number | null>(null);
+
+  const diaryByDate = useMemo(
+    () => Object.fromEntries(weekDiaries.map((d) => [d.entry_date, d])),
+    [weekDiaries]
+  );
 
   const weekStars = useMemo(() => {
     const now = new Date();
@@ -67,10 +89,11 @@ export default function HomeClient() {
 
       const isToday = i === todayIndex;
       const isFuture = i > todayIndex;
-      const isFilled = weekDiaryDates.includes(dateStr);
-      return { label, dateNumber, isToday, isFuture, isFilled };
+      const diary = diaryByDate[dateStr] ?? null;
+      const isFilled = !!diary;
+      return { label, dateNumber, isToday, isFuture, isFilled, diary };
     });
-  }, [todayIndex, weekDiaryDates]);
+  }, [todayIndex, diaryByDate]);
 
   if (isPending) return <HomeSkeleton />;
 
@@ -238,21 +261,39 @@ export default function HomeClient() {
                       : '/diary/editor'
                   )
                 }
-                className="flex items-center gap-1.5 text-[13px] font-light transition-opacity duration-150 active:opacity-50"
+                className="w-full flex items-center justify-center gap-2 rounded-[12px] transition-opacity duration-150 active:opacity-50"
                 style={{
-                  color: isDiary
-                    ? 'rgba(160,195,255,0.75)'
-                    : 'rgba(255,255,255,0.45)',
+                  height: 44,
+                  background: 'rgba(255,255,255,0.04)',
+                  border: isDiary
+                    ? '1px solid rgba(255,255,255,0.08)'
+                    : '1px solid rgba(160,185,255,0.22)',
                 }}
               >
-                <span>{isDiary ? '기록 수정하기' : '기록 남기기'}</span>
+                <span
+                  className="text-[13px]"
+                  style={{
+                    color: isDiary
+                      ? 'rgba(180,205,255,0.5)'
+                      : 'rgba(190,210,255,0.8)',
+                    fontWeight: 300,
+                    letterSpacing: '0.02em',
+                  }}
+                >
+                  {isDiary ? '기록 수정하기' : '기록 남기기'}
+                </span>
                 <svg
                   width="12"
                   height="12"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="1.5"
+                  strokeWidth="1.6"
+                  style={{
+                    color: isDiary
+                      ? 'rgba(180,205,255,0.4)'
+                      : 'rgba(190,210,255,0.6)',
+                  }}
                 >
                   <path d="M9 18l6-6-6-6" />
                 </svg>
@@ -278,9 +319,12 @@ export default function HomeClient() {
 
               {/* 별 7개 */}
               <div className="flex justify-between items-center px-0.5">
-                {weekStars.map(({ label, dateNumber, isToday, isFuture, isFilled }, i) => (
+                {weekStars.map(({ label, dateNumber, isToday, isFuture, isFilled, diary }, i) => (
                   <div key={i} className="flex flex-col items-center gap-2.5">
-                    <div
+                    <button
+                      type="button"
+                      disabled={!isFilled}
+                      onClick={() => setPopoverIndex(popoverIndex === i ? null : i)}
                       className="relative flex items-center justify-center"
                       style={{ width: 32, height: 32 }}
                     >
@@ -288,7 +332,12 @@ export default function HomeClient() {
                         <div
                           className="absolute inset-0 rounded-full"
                           style={{
-                            background: 'rgba(140,180,255,0.12)',
+                            background:
+                              diary?.emotion_polarity === 'NEGATIVE'
+                                ? 'rgba(180,140,255,0.12)'
+                                : diary?.emotion_polarity === 'UNSET'
+                                  ? 'rgba(200,210,220,0.08)'
+                                  : 'rgba(140,180,255,0.12)',
                             filter: 'blur(8px)',
                           }}
                         />
@@ -300,7 +349,11 @@ export default function HomeClient() {
                           height: isFilled ? 20 : 13,
                           position: 'relative',
                           filter: isFilled
-                            ? 'drop-shadow(0 0 4px rgba(160,200,255,0.6))'
+                            ? diary?.emotion_polarity === 'NEGATIVE'
+                              ? 'drop-shadow(0 0 4px rgba(180,140,255,0.7))'
+                              : diary?.emotion_polarity === 'UNSET'
+                                ? 'drop-shadow(0 0 3px rgba(200,210,220,0.4))'
+                                : 'drop-shadow(0 0 4px rgba(160,200,255,0.6))'
                             : 'none',
                           animation:
                             isFilled && isToday
@@ -314,12 +367,16 @@ export default function HomeClient() {
                           points={STAR_POINTS}
                           fill={
                             isFilled
-                              ? 'rgba(195,218,255,0.92)'
+                              ? diary?.emotion_polarity === 'NEGATIVE'
+                                ? 'rgba(210,190,255,0.92)'
+                                : diary?.emotion_polarity === 'UNSET'
+                                  ? 'rgba(200,210,220,0.6)'
+                                  : 'rgba(195,218,255,0.92)'
                               : 'rgba(255,255,255,0.14)'
                           }
                         />
                       </svg>
-                    </div>
+                    </button>
 
                     <div className="flex flex-col items-center gap-0.5">
                       <span
@@ -349,7 +406,81 @@ export default function HomeClient() {
                 ))}
               </div>
 
-              {filledDays > 0 && (
+              {/* 선택된 별 미리보기 패널 */}
+              {popoverIndex !== null && weekStars[popoverIndex]?.diary && (() => {
+                const selected = weekStars[popoverIndex];
+                const d = selected.diary!;
+                const polarity = d.emotion_polarity; // 'POSITIVE' | 'NEGATIVE' | 'UNSET'
+                const theme =
+                  polarity === 'POSITIVE'
+                    ? {
+                        bg: 'linear-gradient(135deg, rgba(80,120,255,0.07), rgba(100,160,255,0.04))',
+                        border: '1px solid rgba(120,170,255,0.18)',
+                        shadow: '0 0 24px rgba(100,160,255,0.06)',
+                        dot: 'rgba(140,200,255,0.9)',
+                        dotGlow: '0 0 6px 2px rgba(140,200,255,0.5)',
+                        label: 'rgba(160,200,255,0.45)',
+                      }
+                    : polarity === 'NEGATIVE'
+                      ? {
+                          bg: 'linear-gradient(135deg, rgba(140,80,255,0.07), rgba(180,120,255,0.04))',
+                          border: '1px solid rgba(170,120,255,0.18)',
+                          shadow: '0 0 24px rgba(160,100,255,0.06)',
+                          dot: 'rgba(190,150,255,0.9)',
+                          dotGlow: '0 0 6px 2px rgba(190,150,255,0.5)',
+                          label: 'rgba(200,160,255,0.45)',
+                        }
+                      : {
+                          bg: 'rgba(255,255,255,0.03)',
+                          border: '1px solid rgba(255,255,255,0.09)',
+                          shadow: 'none',
+                          dot: 'rgba(200,210,220,0.5)',
+                          dotGlow: 'none',
+                          label: 'rgba(200,210,220,0.35)',
+                        };
+                const preview = d.content.split('\n')[0].slice(0, 50);
+                return (
+                  <div
+                    key={popoverIndex}
+                    className="mt-5 rounded-[14px] p-4"
+                    style={{
+                      background: theme.bg,
+                      border: theme.border,
+                      boxShadow: theme.shadow,
+                    }}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div
+                        className="shrink-0"
+                        style={{
+                          width: 6,
+                          height: 6,
+                          marginTop: 5,
+                          borderRadius: '50%',
+                          background: theme.dot,
+                          boxShadow: theme.dotGlow,
+                        }}
+                      />
+                      <div className="flex flex-col gap-1 min-w-0">
+                        <span
+                          className="text-[10px] tracking-[0.06em]"
+                          style={{ color: theme.label }}
+                        >
+                          {selected.dateNumber}일 · {selected.label}요일
+                        </span>
+                        <p
+                          className="text-[13px] leading-relaxed break-keep"
+                          style={{ color: 'rgba(220,230,255,0.7)', fontWeight: 300 }}
+                        >
+                          {preview}{d.content.length > 50 ? '…' : ''}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {filledDays > 0 && popoverIndex === null && (
                 <p className="mt-6 text-white/20 text-[11px] text-center tracking-[0.05em]">
                   {filledDays === 7
                     ? '이번 주 별자리를 완성했어요'
