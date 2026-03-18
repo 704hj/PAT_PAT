@@ -10,7 +10,7 @@ export function JournalCard({
       onClick={onClick}
       className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 transition-colors hover:bg-white/8 active:scale-[0.99] cursor-pointer"
     >
-      <p className="text-[14px] leading-relaxed whitespace-pre-wrap">
+      <p className="text-[14px] leading-relaxed whitespace-pre-wrap break-all">
         {diary.content}
       </p>
 
