@@ -48,26 +48,29 @@ export default function HomeClient() {
   const router = useRouter();
   const hour = new Date().getHours();
   const todayIndex = getTodayIndex();
-  const filledDays = result?.diaryCount ?? 0;
+  const weekDiaryDates = result?.weekDiaryDates ?? [];
+  const filledDays = weekDiaryDates.length;
   const collectedCount = result?.collectedCount ?? 0;
 
-  const weekStars = useMemo(
-    () =>
-      WEEK_LABELS.map((label, i) => {
-        const isToday = i === todayIndex;
-        const isFuture = i > todayIndex;
-        const isFilled =
-          filledDays > 0 &&
-          (!isFuture &&
-          i >= todayIndex - filledDays + (result?.isDiary ? 1 : 0) &&
-          i <= todayIndex
-            ? true
-            : i < todayIndex &&
-              todayIndex - i <= filledDays - (result?.isDiary ? 1 : 0));
-        return { label, isToday, isFuture, isFilled };
-      }),
-    [todayIndex, filledDays, result?.isDiary]
-  );
+  const weekStars = useMemo(() => {
+    const now = new Date();
+    const nowKst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+    const kstDay = nowKst.getUTCDay();
+    const mondayKst = new Date(nowKst);
+    mondayKst.setUTCDate(nowKst.getUTCDate() - ((kstDay + 6) % 7));
+
+    return WEEK_LABELS.map((label, i) => {
+      const dayKst = new Date(mondayKst);
+      dayKst.setUTCDate(mondayKst.getUTCDate() + i);
+      const dateStr = dayKst.toISOString().split('T')[0];
+      const dateNumber = dayKst.getUTCDate();
+
+      const isToday = i === todayIndex;
+      const isFuture = i > todayIndex;
+      const isFilled = weekDiaryDates.includes(dateStr);
+      return { label, dateNumber, isToday, isFuture, isFilled };
+    });
+  }, [todayIndex, weekDiaryDates]);
 
   if (isPending) return <HomeSkeleton />;
 
@@ -275,7 +278,7 @@ export default function HomeClient() {
 
               {/* 별 7개 */}
               <div className="flex justify-between items-center px-0.5">
-                {weekStars.map(({ label, isToday, isFuture, isFilled }, i) => (
+                {weekStars.map(({ label, dateNumber, isToday, isFuture, isFilled }, i) => (
                   <div key={i} className="flex flex-col items-center gap-2.5">
                     <div
                       className="relative flex items-center justify-center"
@@ -318,17 +321,30 @@ export default function HomeClient() {
                       </svg>
                     </div>
 
-                    <span
-                      className="text-[10px]"
-                      style={{
-                        color: isToday
-                          ? 'rgba(175,205,255,0.7)'
-                          : 'rgba(255,255,255,0.2)',
-                        fontWeight: isToday ? 500 : 300,
-                      }}
-                    >
-                      {label}
-                    </span>
+                    <div className="flex flex-col items-center gap-0.5">
+                      <span
+                        className="text-[10px]"
+                        style={{
+                          color: isToday
+                            ? 'rgba(175,205,255,0.7)'
+                            : 'rgba(255,255,255,0.2)',
+                          fontWeight: isToday ? 500 : 300,
+                        }}
+                      >
+                        {label}
+                      </span>
+                      <span
+                        className="text-[9px]"
+                        style={{
+                          color: isToday
+                            ? 'rgba(175,205,255,0.5)'
+                            : 'rgba(255,255,255,0.12)',
+                          fontWeight: 300,
+                        }}
+                      >
+                        {dateNumber}
+                      </span>
+                    </div>
                   </div>
                 ))}
               </div>

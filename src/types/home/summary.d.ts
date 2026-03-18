@@ -1,7 +1,7 @@
 type HomeSummary = {
   profile: { nickname: string; email: string };
   starCount: number;
-  diaryCount: number;
+  weekDiaryDates: string[];
   isDiary: boolean;
   diaryId?: string;
   collectedCount: number;

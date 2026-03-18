@@ -6,7 +6,7 @@ export const HomeSummarySchema = z.object({
     email: z.string().min(1),
   }),
   starCount: z.number().min(0),
-  diaryCount: z.number().min(0),
+  weekDiaryDates: z.array(z.string()),
   isDiary: z.boolean(),
   diaryId: z.string().min(1).optional(),
   collectedCount: z.number().min(0),
