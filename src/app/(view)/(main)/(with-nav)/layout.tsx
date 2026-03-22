@@ -21,7 +21,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           className="
             relative min-h-screen
             overflow-y-auto
-            pb-[96px] 
+            pt-[env(safe-area-inset-top)]
+            pb-[96px]
           "
         >
           {children}
