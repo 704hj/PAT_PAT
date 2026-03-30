@@ -3,6 +3,7 @@
 import ErrorModal from '@/features/common/ErrorModal';
 import BackButton from '@/shared/components/BackButton';
 import GlassCard from '@/shared/components/glassCard';
+import { getLumiImage } from '@/utils/getLumiImage';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { useDiaryDetail } from '../hooks/useDiaryDetail';
@@ -10,6 +11,7 @@ import { useTags } from '../hooks/useTags';
 import { useUpsertDiaryMutation } from '../hooks/useUpsertDiaryMutation';
 
 type Polarity = 'POSITIVE' | 'NEGATIVE' | 'UNSET';
+
 
 function getSliderGradient(polarity: Polarity) {
   if (polarity === 'POSITIVE')
@@ -143,9 +145,9 @@ export default function DiaryWrite({ diaryId }: { diaryId?: string }) {
 
               <div className="relative flex items-center gap-3">
                 <img
-                  src="/images/icon/lumi/lumi_main.svg"
+                  src={getLumiImage(polarity, intensity)}
                   alt="루미"
-                  className="w-14 h-14 object-contain flex-shrink-0"
+                  className="w-14 h-14 object-contain flex-shrink-0 transition-all duration-300"
                 />
 
                 <div className="min-w-0">

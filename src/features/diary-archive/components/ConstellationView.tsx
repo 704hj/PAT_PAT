@@ -225,10 +225,24 @@ export function ConstellationView() {
           />
           <div className="relative z-10">
             {loading || starPoints.length === 0 ? (
-              <div className="flex items-center justify-center min-h-[280px]">
-                <p className="text-white/40 text-[13px] animate-pulse">
-                  별자리를 불러오고 있습니다...
-                </p>
+              <div className="flex flex-col items-center justify-center min-h-[280px] gap-5">
+                <style>{`
+                  @keyframes starSequence {
+                    0%, 60%, 100% { opacity: 0.08; transform: scale(0.85); }
+                    30% { opacity: 0.45; transform: scale(1.05); filter: drop-shadow(0 0 3px rgba(180,210,255,0.4)); }
+                  }
+                `}</style>
+                <div className="flex items-center gap-4">
+                  {[0, 0.35, 0.7].map((delay, i) => (
+                    <svg key={i} viewBox="0 0 24 24" width={i === 1 ? 18 : 13} height={i === 1 ? 18 : 13}
+                      style={{ animation: `starSequence 1.4s ease-in-out ${delay}s infinite` }}>
+                      <polygon
+                        points="12,2 13.8,8.6 20.5,8.6 15.4,12.8 17.2,19.4 12,15.2 6.8,19.4 8.6,12.8 3.5,8.6 10.2,8.6"
+                        fill="rgba(200,220,255,0.95)"
+                      />
+                    </svg>
+                  ))}
+                </div>
               </div>
             ) : (
               <ConstellationSvg

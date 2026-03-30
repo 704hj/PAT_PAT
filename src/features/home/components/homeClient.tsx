@@ -2,6 +2,7 @@
 
 import ErrorModal from '@/features/common/ErrorModal';
 import { useHomeSummary } from '@/features/home/hooks/useHomeSummary';
+import { getLumiImage } from '@/utils/getLumiImage';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import HomeSkeleton from './homeSkeleton';
@@ -15,6 +16,7 @@ function getTodayIndex() {
 
 const STAR_POINTS =
   '12,2 13.8,8.6 20.5,8.6 15.4,12.8 17.2,19.4 12,15.2 6.8,19.4 8.6,12.8 3.5,8.6 10.2,8.6';
+
 
 export default function HomeClient() {
   const { data: result, isPending, isError, error } = useHomeSummary();
@@ -61,6 +63,8 @@ export default function HomeClient() {
   if (isPending) return <HomeSkeleton />;
 
   const isDiary = result?.isDiary ?? false;
+  const todayDiary = weekStars.find((s) => s.isToday)?.diary;
+  const lumiImage = getLumiImage(todayDiary?.emotion_polarity, todayDiary?.emotion_intensity);
 
   return (
     <>
@@ -158,7 +162,7 @@ export default function HomeClient() {
               </p>
             </div>
             <img
-              src="/images/icon/lumi/lumi_main.svg"
+              src={lumiImage}
               alt="루미"
               className="w-20 h-20 object-contain opacity-90"
               style={{ animation: 'float 4s ease-in-out infinite' }}

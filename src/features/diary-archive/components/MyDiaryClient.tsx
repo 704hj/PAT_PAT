@@ -21,8 +21,6 @@ export default function MyDiaryClient() {
     setSelectedMonth,
     diaryMonthData,
     diaryMonthLoading,
-    q,
-    setQ,
     view,
     setView,
     isError,
@@ -40,16 +38,10 @@ export default function MyDiaryClient() {
 
         <ViewToggle value={view} onChange={setView} />
 
-        {/* 캘린더 뷰일 때만 월 선택 + 검색 표시 */}
+        {/* 캘린더 뷰일 때만 월 선택 표시 */}
         {view === 'calendar' && (
-          <div className="mt-3 space-y-2">
+          <div className="mt-3">
             <MonthPicker value={selectedMonth} onChange={setSelectedMonth} />
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="기록 검색"
-              className="w-full h-10 rounded-xl bg-white/5 border border-white/10 px-3 text-[13px]"
-            />
           </div>
         )}
 

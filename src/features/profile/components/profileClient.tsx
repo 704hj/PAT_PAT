@@ -135,15 +135,15 @@ export default function ProfileClientPage() {
 
             <div className="mt-4 grid grid-cols-3 divide-x divide-white/10 rounded-[12px] overflow-hidden border border-white/10">
               <StatCell
-                label="긍정 기록"
+                label="좋았던 날"
                 value={String(data?.totalStars ?? 0)}
               />
               <StatCell
-                label="버거운 기록"
+                label="힘들었던 날"
                 value={String(data?.totalWorries ?? 0)}
               />
               <StatCell
-                label="전체 기록"
+                label="기록한 별들"
                 value={String(data?.totalDiaries ?? 0)}
               />
             </div>
@@ -302,19 +302,19 @@ export default function ProfileClientPage() {
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col items-center gap-4">
               <button
                 type="button"
                 onClick={handleLogout}
                 disabled={logoutPending}
-                className="h-11 rounded-[12px] text-[13px] font-medium text-white/85 bg-white/6 border border-white/12 hover:bg-white/10 transition disabled:opacity-40"
+                className="w-full h-11 rounded-[12px] text-[13px] font-medium text-white/85 bg-white/6 border border-white/12 hover:bg-white/10 transition disabled:opacity-40"
               >
                 {logoutPending ? '로그아웃 중...' : '로그아웃'}
               </button>
               <button
                 type="button"
                 onClick={() => setDeleteConfirm(true)}
-                className="h-11 rounded-[12px] text-[13px] font-medium text-white/80 bg-white/6 border border-white/12 hover:border-red-400/40 hover:text-red-300 hover:bg-red-500/10 transition"
+                className="text-[12px] text-white/25 hover:text-red-300/60 transition"
               >
                 계정 삭제
               </button>
