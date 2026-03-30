@@ -1,100 +1,38 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { supabase } from "@/utils/supabase/client";
-import type { User } from "@supabase/supabase-js";
-
-interface UseAuthOptions {
-  redirectTo?: string; // 로그인 안 되어 있을 때 이동할 경로
-  required?: boolean; // true면 로그인 필수, false면 선택적
-}
+import { useEffect, useState } from 'react';
+import { supabase } from '@/utils/supabase/client';
+import type { User } from '@supabase/supabase-js';
 
 interface UseAuthReturn {
   user: User | null;
   loading: boolean;
-  session: any | null;
 }
 
 /**
- * 인증 상태를 관리하는 공통 훅
+ * 인증 상태를 반환하는 훅.
+ * 라우트 보호는 미들웨어(src/middleware.ts)가 담당하므로
+ * 이 훅은 redirect 없이 상태만 제공합니다.
  *
  * @example
- * // 로그인 필수 페이지
- * const { user, loading } = useAuth({ required: true })
- * if (loading) return <div>Loading...</div>
- *
- * @example
- * // 로그인 선택적 페이지
- * const { user } = useAuth({ required: false })
+ * const { user, loading } = useAuth()
  */
-export function useAuth(options: UseAuthOptions = {}): UseAuthReturn {
-  const { redirectTo = "/auth/signin", required = true } = options;
-
-  const router = useRouter();
+export function useAuth(_options: { required?: boolean } = {}): UseAuthReturn {
   const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function checkAuth() {
-      try {
-        const { data, error } = await supabase.auth.getSession();
-
-        if (error) {
-          console.error("[useAuth] Session check error:", error);
-          await supabase.auth.signOut();
-          router.replace("/start");
-          setLoading(false);
-          return;
-        }
-
-        // 세션 없음
-        if (!data.session) {
-          if (required) {
-            // 로그인 필수인 경우 → 로그인 페이지로 리다이렉트
-            router.replace(redirectTo);
-          } else {
-            // 로그인 선택적인 경우 → 그냥 로딩 끝
-            setLoading(false);
-          }
-          return;
-        }
-
-        // 세션 있음
-        setSession(data.session);
-        setUser(data.session.user);
-        setLoading(false);
-      } catch (err) {
-        console.error("[useAuth] Unexpected error:", err);
-        setLoading(false);
-      }
-    }
-
-    checkAuth();
-
-    // 세션 변경 감지 (로그아웃 등)
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) {
-        setSession(session);
-        setUser(session.user);
-      } else {
-        setSession(null);
-        setUser(null);
-        if (required) {
-          router.replace(redirectTo);
-        }
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+      if (event === 'INITIAL_SESSION') {
+        setLoading(false);
       }
     });
 
-    // 클린업
-    return () => {
-      subscription.unsubscribe();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [required, redirectTo]);
+    return () => subscription.unsubscribe();
+  }, []);
 
-  return { user, loading, session };
+  return { user, loading };
 }

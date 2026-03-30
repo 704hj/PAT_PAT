@@ -54,23 +54,25 @@ export default function AuthLayout({
         }}
       />
 
-      {/* Header: Fixed Height (56px) */}
-      <header className="shrink-0 z-50 mx-auto flex h-14 w-full max-w-[480px] items-center px-4 border-b border-white/5 bg-[rgba(5,11,28,0.85)] backdrop-blur-md">
-        <div className="relative flex w-full items-center">
-          {!hideBack && (
-            <button
-              onClick={() => router.back()}
-              className="flex items-center justify-center rounded-full p-2 transition-colors hover:bg-white/10"
-              aria-label="뒤로가기"
-            >
-              <ChevronLeft size={22} />
-            </button>
-          )}
-          {title && (
-            <h1 className="absolute left-1/2 -translate-x-1/2 text-[15px] font-semibold tracking-tight text-white/90">
-              {title}
-            </h1>
-          )}
+      {/* Header: 상단 safe area + 56px 콘텐츠 영역 */}
+      <header className="shrink-0 z-50 mx-auto w-full max-w-[480px] border-b border-white/5 bg-[rgba(5,11,28,0.85)] backdrop-blur-md pt-[env(safe-area-inset-top)]">
+        <div className="flex h-14 items-center px-4">
+          <div className="relative flex w-full items-center">
+            {!hideBack && (
+              <button
+                onClick={() => router.back()}
+                className="flex items-center justify-center rounded-full p-2 transition-colors hover:bg-white/10"
+                aria-label="뒤로가기"
+              >
+                <ChevronLeft size={22} />
+              </button>
+            )}
+            {title && (
+              <h1 className="absolute left-1/2 -translate-x-1/2 text-[15px] font-semibold tracking-tight text-white/90">
+                {title}
+              </h1>
+            )}
+          </div>
         </div>
       </header>
 

@@ -52,8 +52,11 @@ storybook-static
 android/.idea/
 android/.gradle/
 android/app/build/
+android/app/release/
 android/build/
 android/local.properties
+*.keystore
+*.jks
 
 # Capacitor - iOS
 ios/App/Pods/
@@ -78,3 +81,7 @@ Thumbs.db
 CLAUDE.md
 .mcp.json
 settings.Local.json
+
+# ohmyclaude
+.claude
+.omc/

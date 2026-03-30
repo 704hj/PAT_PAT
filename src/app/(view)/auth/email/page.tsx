@@ -290,7 +290,7 @@ export default function EmailSignupPage() {
       {signupDone && (
         <SignupSuccessModal
           nickname={nickname}
-          onConfirm={() => router.push('/home')}
+          onConfirm={() => router.replace('/home')}
         />
       )}
     </>

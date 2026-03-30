@@ -48,19 +48,25 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  const isSplash = request.nextUrl.pathname === '/';
+
   const isAuthPage =
     request.nextUrl.pathname.startsWith('/auth') ||
     request.nextUrl.pathname.startsWith('/start') ||
-    request.nextUrl.pathname.startsWith('/privacy') ||
-    request.nextUrl.pathname === '/';
+    request.nextUrl.pathname.startsWith('/privacy');
 
-  // 4. 로직 처리: 로그인 안 된 유저가 보호된 페이지 접근 시
+  // 4. 로직 처리: 로그인 여부 무관하게 항상 허용 (스플레시, 문의)
+  const isPublic =
+    isSplash || request.nextUrl.pathname.startsWith('/lumi/contact');
+  if (isPublic) return response;
+
+  // 5. 로직 처리: 로그인 안 된 유저가 보호된 페이지 접근 시
   if (!user && !isAuthPage) {
     // 로그인이 안 되어 있고, 허용된 페이지(/start, /auth)가 아니면 로그인으로 보냄
     return NextResponse.redirect(new URL('/start', request.url));
   }
 
-  // 5. 로직 처리: 이미 로그인된 유저가 로그인/시작 페이지 접근 시
+  // 6. 로직 처리: 이미 로그인된 유저가 로그인/시작 페이지 접근 시
   if (user && isAuthPage) {
     // [예외] 약관 동의 페이지(/auth/terms)는 신규 가입자가 세션을 가진 채로 머물러야 하므로 제외
     if (request.nextUrl.pathname === '/auth/terms') {

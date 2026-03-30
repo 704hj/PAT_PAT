@@ -288,7 +288,7 @@ export default function EntryModal({
                 {/* 내용 */}
                 <div className="min-h-[72px] mb-6">
                   {entry?.content ? (
-                    <p className="text-white/75 text-[14px] leading-[1.85] tracking-[-0.01em] whitespace-pre-wrap font-light">
+                    <p className="text-white/75 text-[14px] leading-[1.85] tracking-[-0.01em] whitespace-pre-wrap break-all font-light">
                       {entry.content}
                     </p>
                   ) : (

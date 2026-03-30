@@ -102,7 +102,7 @@ export default function DiaryDetailClient({ diaryId }: { diaryId: string }) {
               }} />
 
               <div className="px-5 py-5">
-                <p className="text-[14px] leading-[1.85] whitespace-pre-wrap text-white/75 font-light">
+                <p className="text-[14px] leading-[1.85] whitespace-pre-wrap break-all text-white/75 font-light">
                   {diary.content}
                 </p>
 

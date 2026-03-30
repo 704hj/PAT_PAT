@@ -1,15 +1,17 @@
 'use client';
 
+import { Browser } from '@capacitor/browser';
+import { Capacitor } from '@capacitor/core';
 import ErrorModal from '@/features/common/ErrorModal';
 import LoginButton from '@/shared/components/loginBtn';
+import { supabase } from '@/utils/supabase/client';
 import { signInWithGoogle } from '@/utils/supabase/signInWithGoogle';
 import { signInWithKakao } from '@/utils/supabase/signInWithKakao';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
 
 function OnboardingContent() {
   const router = useRouter();
-  const pathname = usePathname();
   const [loaded, setLoaded] = useState(false);
   const [busy, setBusy] = useState(false);
 
@@ -26,29 +28,49 @@ function OnboardingContent() {
     ? messages[errorCode] || '알 수 없는 오류가 발생했습니다.'
     : null;
 
-  const onGoogle = async () => {
-    if (busy) return;
-    setBusy(true);
-    try {
-      await signInWithGoogle('/home');
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const onKakao = async () => {
-    if (busy) return;
-    setBusy(true);
-    try {
-      await signInWithKakao('/home');
-    } finally {
-      setBusy(false);
-    }
-  };
-
   useEffect(() => {
     setLoaded(true);
-  }, []);
+
+    // 이미 로그인된 상태라면 즉시 홈으로
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) router.replace('/home');
+    });
+
+    // OAuth 완료 후 SIGNED_IN 이벤트로 홈 이동
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_IN') router.replace('/home');
+    });
+
+    return () => subscription.unsubscribe();
+  }, [router]);
+
+  const startOAuth = async (signIn: (path: string) => Promise<void>) => {
+    if (busy) return;
+    setBusy(true);
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) { router.replace('/home'); return; }
+
+    if (Capacitor.isNativePlatform()) {
+      // Native: Browser.open()은 브라우저가 열릴 때 resolve됨 (닫힐 때 아님)
+      // browserFinished 이벤트가 올 때까지 busy 유지 → 버튼 비활성화 상태 유지
+      const listener = await Browser.addListener('browserFinished', () => {
+        setBusy(false);
+        listener.remove();
+      });
+      await signIn('/home');
+      // busy는 해제하지 않음 — browserFinished 또는 SIGNED_IN(→ /home 이동)에서 처리
+    } else {
+      // Web: signInWithOAuth가 페이지를 OAuth로 리다이렉트하므로 finally는 무해
+      try {
+        await signIn('/home');
+      } finally {
+        setBusy(false);
+      }
+    }
+  };
+
+  const onGoogle = () => startOAuth(signInWithGoogle);
+  const onKakao = () => startOAuth(signInWithKakao);
 
   return (
     <main className="relative min-h-[100svh] w-full overflow-hidden flex justify-center">
@@ -111,7 +133,11 @@ function OnboardingContent() {
           />
           <LoginButton
             title="이메일로 시작하기"
-            onClickEvent={() => router.push('/auth/signin')}
+            onClickEvent={async () => {
+              const { data: { session } } = await supabase.auth.getSession();
+              if (session) { router.replace('/home'); return; }
+              router.push('/auth/signin');
+            }}
             style="bg-[#1E2843] text-[#FBFBFB]"
             disable={busy}
           />

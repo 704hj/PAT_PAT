@@ -95,7 +95,7 @@ function TermsContent() {
   const handleCompleteSignup = async () => {
     if (!canProceed) return;
     if (isEmailFlow) {
-      router.push('/auth/email');
+      router.replace('/auth/email');
       return;
     }
     setIsSubmitting(true);
@@ -106,7 +106,7 @@ function TermsContent() {
         setIsSubmitting(false);
         return;
       }
-      router.push('/home');
+      router.replace('/home');
     } catch (err: any) {
       setErrorMsg(err.message || '가입 처리 중 오류가 발생했습니다.');
       setIsSubmitting(false);
