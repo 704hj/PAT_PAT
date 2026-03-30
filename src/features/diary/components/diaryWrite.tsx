@@ -11,22 +11,24 @@ import { useUpsertDiaryMutation } from '../hooks/useUpsertDiaryMutation';
 
 type Polarity = 'POSITIVE' | 'NEGATIVE' | 'UNSET';
 
+function getSliderGradient(polarity: Polarity) {
+  if (polarity === 'POSITIVE')
+    return 'linear-gradient(90deg, #93C5FD 0%, #2563EB 50%, #1E3A8A 100%)';
+  if (polarity === 'NEGATIVE')
+    return 'linear-gradient(90deg, #F9D4D4 0%, #D88080 50%, #A84848 100%)';
+  return 'linear-gradient(90deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.6) 100%)';
+}
+
 const POLARITIES: Array<{
   key: Polarity;
   label: string;
 }> = [
-  { key: 'POSITIVE', label: '괜찮았어요' },
-  { key: 'NEGATIVE', label: '버거웠어요' },
+  { key: 'POSITIVE', label: '좋았어요' },
+  { key: 'NEGATIVE', label: '힘들었어요' },
 ];
 
 const LIMIT = 200;
 const MAX_TAGS = 3;
-
-function intensityLabel(v: number) {
-  if (v <= 2) return '잔잔한 편이에요';
-  if (v === 3) return '조금 남아 있어요';
-  return '꽤 크게 남아 있어요';
-}
 
 function clampTags(next: string[]) {
   return Array.from(new Set(next)).slice(0, MAX_TAGS);
@@ -59,6 +61,7 @@ export default function DiaryWrite({ diaryId }: { diaryId?: string }) {
   const [intensity, setIntensity] = useState<number>(3);
   const [text, setText] = useState('');
   const [tagOpen, setTagOpen] = useState(false);
+  const [intensityInfo, setIntensityInfo] = useState(false);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   // diary 데이터가 로드된 후 폼 상태 동기화
@@ -104,6 +107,12 @@ export default function DiaryWrite({ diaryId }: { diaryId?: string }) {
 
   return (
     <div className="relative min-h-[100svh] overflow-y-auto">
+      <style>{`
+        @keyframes twinkle {
+          0%, 100% { opacity: 0.35; }
+          50% { opacity: 0.8; }
+        }
+      `}</style>
       {/* 배경 */}
       <div
         className="pointer-events-none absolute inset-0 -z-10
@@ -116,7 +125,7 @@ export default function DiaryWrite({ diaryId }: { diaryId?: string }) {
           <header className="pt-6 flex items-center justify-between">
             <BackButton />
             <h1 className="text-white text-[18px] font-semibold">
-              오늘 정리하기
+              오늘의 별 남기기
             </h1>
             <span className="w-10" />
           </header>
@@ -136,16 +145,16 @@ export default function DiaryWrite({ diaryId }: { diaryId?: string }) {
                 <img
                   src="/images/icon/lumi/lumi_main.svg"
                   alt="루미"
-                  className="w-10 h-10 object-contain"
+                  className="w-14 h-14 object-contain flex-shrink-0"
                 />
 
                 <div className="min-w-0">
                   <p className="text-white/90 text-[14px] font-medium">
-                    {polarity
-                      ? polarity === 'POSITIVE'
-                        ? '좋았던 건 더 선명해져요.'
-                        : '무거웠던 건 가볍게 정리해도 돼요.'
-                      : '오늘도 여기까지 왔어요.'}
+                    {polarity === 'POSITIVE'
+                      ? '좋았던 순간을 남겨요.'
+                      : polarity === 'NEGATIVE'
+                        ? '힘들었던 하루를 정리해요.'
+                        : '오늘 하루를 기록해요.'}
                   </p>
                   <p className="mt-0.5 text-white/55 text-[12.5px]">
                     {text.trim().length === 0
@@ -161,8 +170,8 @@ export default function DiaryWrite({ diaryId }: { diaryId?: string }) {
 
           {/* 상태 선택 */}
           <div className="mt-4">
-            <GlassCard className="p-4">
-              <p className="text-white/85 text-[14px] mb-3">이 하루는</p>
+            <GlassCard className="p-5">
+              <p className="text-white/85 text-[14px] mb-4">이 하루는</p>
               <div className="grid grid-cols-2 gap-3">
                 {POLARITIES.map((p) => {
                   const selected = polarity === p.key;
@@ -187,12 +196,28 @@ export default function DiaryWrite({ diaryId }: { diaryId?: string }) {
 
           {/* 강도 */}
           <div className="mt-4">
-            <GlassCard className="p-4">
-              <p className="text-white/85 text-[14px] mb-1">지금 이 하루는</p>
-              <p className="text-white/55 text-[13px] mb-3">
-                {intensityLabel(intensity)}
-              </p>
-
+            <GlassCard className="p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <p className="text-white/85 text-[14px]">감정의 세기</p>
+                <button
+                  type="button"
+                  onClick={() => setIntensityInfo((v) => !v)}
+                  className="flex items-center justify-center w-4 h-4 rounded-full transition-all text-[10px] font-light"
+                  style={{
+                    color: intensityInfo ? 'rgba(180,205,255,0.9)' : 'rgba(255,255,255,0.3)',
+                    border: intensityInfo
+                      ? '1px solid rgba(180,205,255,0.4)'
+                      : '1px solid rgba(255,255,255,0.2)',
+                  }}
+                >
+                  ?
+                </button>
+              </div>
+              {intensityInfo && (
+                <p className="text-[12px] text-white/50 mb-3 leading-relaxed">
+                  세기가 클수록 별이 더 크고 밝게 빛나요
+                </p>
+              )}
               <input
                 type="range"
                 min={1}
@@ -200,7 +225,12 @@ export default function DiaryWrite({ diaryId }: { diaryId?: string }) {
                 value={intensity}
                 onChange={(e) => setIntensity(Number(e.target.value))}
                 className="w-full slider-star"
+                style={{ background: getSliderGradient(polarity) }}
               />
+              <div className="flex justify-between mt-2 text-[11px] text-white/35">
+                <span>약하게</span>
+                <span>강하게</span>
+              </div>
             </GlassCard>
           </div>
 
@@ -228,9 +258,9 @@ export default function DiaryWrite({ diaryId }: { diaryId?: string }) {
 "
               />
 
-              <div className="mt-2 flex justify-between text-[12px] text-white/50">
-                <span>이 기록은 하나의 별이 됩니다</span>
-                <span>
+              <div className="mt-3 flex justify-between items-center text-[12px]">
+                <span className="text-white/60">이 기록은 하나의 별이 됩니다</span>
+                <span className="text-white/40">
                   {text.length}/{LIMIT}
                 </span>
               </div>
@@ -244,7 +274,7 @@ export default function DiaryWrite({ diaryId }: { diaryId?: string }) {
                            rounded-xl border border-white/10 bg-white/4
                            px-3 py-2 text-[13px] text-white/70"
                 >
-                  분류하고 싶다면 (선택)
+                  태그 추가 (선택)
                   <span>{tagOpen ? '▴' : '▾'}</span>
                 </button>
 
@@ -300,7 +330,7 @@ export default function DiaryWrite({ diaryId }: { diaryId?: string }) {
                   canSubmit ? '' : 'opacity-40',
                 ].join(' ')}
               >
-                오늘 정리하기
+                오늘의 별 남기기
               </button>
             </div>
           </div>
