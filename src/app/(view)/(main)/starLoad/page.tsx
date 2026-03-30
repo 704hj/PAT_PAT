@@ -7,7 +7,6 @@ import {
   type Pt,
   type ZodiacSign,
 } from '@/lib/zodiac';
-import BackButton from '@/shared/components/BackButton';
 import ConstellationSvg from '@/shared/components/ConstellationSvg';
 import EntryModal from '@/shared/components/EntryModal';
 import { Entry, loadEntriesByRange } from '@/utils/entries';
@@ -59,6 +58,13 @@ export default function Page() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedEntry, setSelectedEntry] = useState<Entry | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [showStarEffect, setShowStarEffect] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowStarEffect(false), 2200);
+    return () => clearTimeout(timer);
+  }, []);
 
   // 1) 시즌 정보 + 좌표 로드
   useEffect(() => {
@@ -151,6 +157,61 @@ export default function Page() {
 
   return (
     <main className="min-h-[100svh] text-white">
+      {/* 별 생성 인트로 오버레이 */}
+      <style>{`
+        @keyframes starBirth {
+          0%   { transform: scale(0.2); opacity: 0; filter: drop-shadow(0 0 0px rgba(180,210,255,0)); }
+          30%  { transform: scale(1.3); opacity: 1; filter: drop-shadow(0 0 20px rgba(180,210,255,0.9)); }
+          60%  { transform: scale(1.0); opacity: 1; filter: drop-shadow(0 0 30px rgba(180,210,255,1)); }
+          100% { transform: scale(1.6); opacity: 0; filter: drop-shadow(0 0 0px rgba(180,210,255,0)); }
+        }
+        @keyframes overlayFade {
+          0%   { opacity: 1; }
+          70%  { opacity: 1; }
+          100% { opacity: 0; }
+        }
+        @keyframes textReveal {
+          0%   { opacity: 0; transform: translateY(6px); }
+          40%  { opacity: 0; transform: translateY(6px); }
+          70%  { opacity: 1; transform: translateY(0); }
+          100% { opacity: 0; }
+        }
+        @keyframes ripple {
+          0%   { transform: scale(0.5); opacity: 0.6; }
+          100% { transform: scale(3);   opacity: 0; }
+        }
+      `}</style>
+      {showStarEffect && (
+        <div
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center"
+          style={{
+            background: 'rgba(5,11,28,0.92)',
+            animation: 'overlayFade 2.2s ease-in-out forwards',
+            pointerEvents: 'none',
+          }}
+        >
+          <div className="relative flex items-center justify-center">
+            {/* 파문 효과 */}
+            <div className="absolute w-20 h-20 rounded-full border border-white/20"
+              style={{ animation: 'ripple 1.5s ease-out 0.2s forwards' }} />
+            <div className="absolute w-20 h-20 rounded-full border border-white/10"
+              style={{ animation: 'ripple 1.5s ease-out 0.5s forwards' }} />
+            {/* 별 */}
+            <svg viewBox="0 0 24 24" width="48" height="48"
+              style={{ animation: 'starBirth 2.2s ease-in-out forwards' }}>
+              <polygon
+                points="12,2 13.8,8.6 20.5,8.6 15.4,12.8 17.2,19.4 12,15.2 6.8,19.4 8.6,12.8 3.5,8.6 10.2,8.6"
+                fill="rgba(200,220,255,0.95)"
+              />
+            </svg>
+          </div>
+          <p className="mt-6 text-[14px] font-light text-white/70 tracking-wide"
+            style={{ animation: 'textReveal 2.2s ease-in-out forwards' }}>
+            오늘의 별이 생겼어요
+          </p>
+        </div>
+      )}
+
       {/* 배경 */}
       <div className="fixed inset-0 -z-10 bg-space">
         <div className="nebula nebula-a opacity-30" />
@@ -163,33 +224,24 @@ export default function Page() {
       <section className="mx-auto w-full max-w-[480px] px-5 pt-5 pb-28">
         {/* Top bar */}
         <header className="flex items-center justify-between">
-          <BackButton />
+          <button
+            onClick={() => router.push('/home')}
+            className="h-10 w-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center transition active:opacity-50"
+            aria-label="홈으로"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="text-white/70">
+              <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z" />
+              <path d="M9 21V12h6v9" />
+            </svg>
+          </button>
           <div className="text-center">
             <div className="text-[16px] font-semibold tracking-[-0.01em]">
               {zodiacName}
             </div>
             <div className="text-[12px] text-white/65">{rangeDisplay}</div>
           </div>
-          <button
-            className="h-10 w-10 rounded-xl bg-white/5 border border-white/10 hover:bg-white/8 transition"
-            aria-label="정보"
-          >
-            i
-          </button>
+          <span className="w-10" />
         </header>
-
-        {/* Progress row */}
-        <div className="mt-4 flex items-center justify-between">
-          <div className="inline-flex items-center gap-2">
-            <span className="chip">이달의 별자리</span>
-            <span className="chip chip-soft">
-              {new Date(todayStr).toLocaleDateString('ko-KR')}
-            </span>
-          </div>
-          <span className="chip chip-glow">
-            진행 {progressCount}/{dates.length}
-          </span>
-        </div>
 
         {/* Hero constellation card */}
         <div className="mt-4 hero-card">
@@ -227,6 +279,21 @@ export default function Page() {
             </div>
           </div>
         </div>
+        {/* 안내 문구 */}
+        <div className="mt-5 text-center">
+          <p className="text-white/80 text-[15px] font-light">오늘의 별이 담겼어요</p>
+          <p className="text-white/40 text-[12px] mt-1">
+            {progressCount}/{dates.length}개 · 별자리를 채워가고 있어요
+          </p>
+        </div>
+
+        {/* 홈 링크 */}
+        <button
+          onClick={() => router.push('/home')}
+          className="mt-4 w-full text-center text-[13px] text-white/35 active:opacity-50 transition-opacity"
+        >
+          홈으로 →
+        </button>
       </section>
 
       <EntryModal
