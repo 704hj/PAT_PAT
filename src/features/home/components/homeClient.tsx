@@ -1,10 +1,13 @@
 'use client';
 
+import { getZodiacMessage } from '@/data/zodiacMessages';
 import ErrorModal from '@/features/common/ErrorModal';
 import { useHomeSummary } from '@/features/home/hooks/useHomeSummary';
+import { getZodiacNameKo, getZodiacSign } from '@/lib/zodiac';
 import { getLumiImage } from '@/utils/getLumiImage';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
+import BirthdayOverlay, { isBirthdayToday } from './BirthdayOverlay';
 import HomeSkeleton from './homeSkeleton';
 
 const WEEK_LABELS = ['월', '화', '수', '목', '금', '토', '일'];
@@ -66,8 +69,36 @@ export default function HomeClient() {
   const todayDiary = weekStars.find((s) => s.isToday)?.diary;
   const lumiImage = getLumiImage(todayDiary?.emotion_polarity, todayDiary?.emotion_intensity);
 
+  const birthSign = useMemo(() => {
+    const bd = result?.profile.birth_date;
+    if (!bd) return null;
+    return getZodiacSign(new Date(bd));
+  }, [result?.profile.birth_date]);
+
+  const zodiacMessage = useMemo(() => {
+    if (!birthSign) return null;
+    return getZodiacMessage(birthSign);
+  }, [birthSign]);
+
+  const isMySeason = useMemo(() => {
+    if (!birthSign) return false;
+    return getZodiacSign(new Date()) === birthSign;
+  }, [birthSign]);
+
+  const showBirthdayOverlay = useMemo(() => {
+    const bd = result?.profile.birth_date;
+    if (!bd) return false;
+    return isBirthdayToday(bd);
+  }, [result?.profile.birth_date]);
+
   return (
     <>
+      {showBirthdayOverlay && birthSign && (
+        <BirthdayOverlay
+          nickname={result?.profile.nickname ?? '별빛 기록가'}
+          zodiacNameKo={getZodiacNameKo(birthSign)}
+        />
+      )}
       <style>{`
         @keyframes float {
           0%, 100% { transform: translateY(0); }
@@ -160,6 +191,11 @@ export default function HomeClient() {
                   weekday: 'short',
                 })}
               </p>
+              {zodiacMessage && (
+                <p className="text-white/40 text-[12px] font-light mt-1.5 italic">
+                  {zodiacMessage}
+                </p>
+              )}
             </div>
             <img
               src={lumiImage}
@@ -606,9 +642,16 @@ export default function HomeClient() {
             </svg>
             <div className="relative px-5 pt-4 pb-5">
               <div className="flex items-center justify-between mb-3">
-                <p className="text-white/40 text-[10px] tracking-[0.15em]">
-                  이번 달 별자리
-                </p>
+                <div className="flex items-center gap-2">
+                  <p className="text-white/40 text-[10px] tracking-[0.15em]">
+                    이번 달 별자리
+                  </p>
+                  {isMySeason && (
+                    <span className="px-1.5 py-0.5 rounded-full text-[9px] bg-amber-400/15 text-amber-300/80 border border-amber-400/25">
+                      나의 별자리
+                    </span>
+                  )}
+                </div>
                 <p className="text-white/50 text-[11px] font-light">
                   <span className="text-white/60">{periodDiaryCount}</span> /{' '}
                   {periodTotalDays}일
@@ -617,10 +660,14 @@ export default function HomeClient() {
 
               <p className="text-white/85 text-[15px] font-light leading-snug mb-4">
                 {isCollected
-                  ? '이번 달 별자리를 수집했어요'
-                  : periodProgress >= 50
-                  ? `별자리까지 ${80 - periodProgress}% 남았어요`
-                  : '매일 기록하면 별자리가 완성돼요'}
+                  ? isMySeason
+                    ? '나의 별자리를 수집했어요!'
+                    : '이번 달 별자리를 수집했어요'
+                  : isMySeason
+                    ? '나의 별자리를 채우고 있어요'
+                    : periodProgress >= 50
+                    ? `별자리까지 ${80 - periodProgress}% 남았어요`
+                    : '매일 기록하면 별자리가 완성돼요'}
               </p>
 
               {/* 프로그레스 바 */}
@@ -643,10 +690,14 @@ export default function HomeClient() {
                     width: `${Math.min(periodProgress, 100)}%`,
                     background: isCollected
                       ? 'linear-gradient(90deg, rgba(160,120,255,0.8), rgba(200,160,255,0.9))'
-                      : 'linear-gradient(90deg, rgba(100,150,255,0.7), rgba(140,180,255,0.85))',
+                      : isMySeason
+                        ? 'linear-gradient(90deg, rgba(255,200,60,0.7), rgba(255,170,40,0.85))'
+                        : 'linear-gradient(90deg, rgba(100,150,255,0.7), rgba(140,180,255,0.85))',
                     boxShadow: isCollected
                       ? '0 0 8px rgba(160,120,255,0.5)'
-                      : '0 0 6px rgba(120,160,255,0.4)',
+                      : isMySeason
+                        ? '0 0 8px rgba(255,190,50,0.4)'
+                        : '0 0 6px rgba(120,160,255,0.4)',
                   }}
                 />
               </div>

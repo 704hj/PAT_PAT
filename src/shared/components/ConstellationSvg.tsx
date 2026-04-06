@@ -3,7 +3,7 @@
 import { Pt, samplePolyline } from '@/lib/zodiac';
 import { useMemo } from 'react';
 
-export type StarThemeType = 'default' | 'healing' | 'warm' | 'deep' | 'lumi';
+export type StarThemeType = 'default' | 'healing' | 'warm' | 'deep' | 'lumi' | 'birthday';
 
 type ConstellationSvgProps = {
   anchorPoints?: Pt[];
@@ -33,6 +33,7 @@ const THEMES: Record<StarThemeType, { positive: string; negative: string }> = {
   warm: { positive: '#FDE68A', negative: '#FB7185' }, // 샴페인 골드 & 소프트 로즈
   deep: { positive: '#22D3EE', negative: '#94A3B8' }, // 시안 아쿠아 & 인디고 실버
   lumi: { positive: '#A6CAF6', negative: '#E78F3D' }, // 실제 별의 온도 기반
+  birthday: { positive: '#FFD700', negative: '#E8A317' }, // 금색 생일 별자리 테마
 };
 
 function getStarColor(
@@ -47,6 +48,19 @@ function getStarColor(
 
   const colors = THEMES[theme];
   const baseColor = polarity === 'POSITIVE' ? colors.positive : colors.negative;
+
+  if (theme === 'birthday') {
+    if (polarity === 'POSITIVE') {
+      if (intensity != null && intensity >= 4) return '#FFD700'; // 진한 금색
+      if (intensity === 3) return '#FFE44D'; // 중간 금색
+      return '#FFF1A3'; // 연한 금색
+    }
+    if (polarity === 'NEGATIVE') {
+      if (intensity != null && intensity >= 4) return '#E8A317'; // 진한 호박색
+      if (intensity === 3) return '#F0C050'; // 중간 호박색
+      return '#F5D88A'; // 연한 호박색
+    }
+  }
 
   if (theme === 'default') {
     if (polarity === 'POSITIVE') {

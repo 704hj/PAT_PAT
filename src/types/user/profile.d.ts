@@ -3,6 +3,7 @@ type UserProfile = {
   auth_user_id: string; // users.auth_user_id uuid
   email: string | null;
   nickname: string | null;
+  birth_date: string | null; // YYYY-MM-DD
   signup_method: string | null;
   created_at: string;
   updated_at: string;

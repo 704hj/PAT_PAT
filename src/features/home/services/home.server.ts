@@ -13,7 +13,7 @@ export async function getHomeSummaryServer(): Promise<HomeSummary> {
 
   const { data: profile, error: profileErr } = await supabase
     .from('users')
-    .select('user_id, auth_user_id, email, nickname')
+    .select('user_id, auth_user_id, email, nickname, birth_date')
     .eq('auth_user_id', authUser.id)
     .is('deleted_at', null)
     .single();
@@ -123,7 +123,7 @@ export async function getHomeSummaryServer(): Promise<HomeSummary> {
 
   // 5. 데이터 결과 조합
   const homeData = {
-    profile: { nickname: profile.nickname, email: profile.email },
+    profile: { nickname: profile.nickname, email: profile.email, birth_date: profile.birth_date },
     starCount: starRes.count ?? 0,
     weekDiaries: (diaryWeekRes.data ?? []).map((r) => ({
       diary_id: r.diary_id as string,

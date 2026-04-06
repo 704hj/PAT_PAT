@@ -5,13 +5,16 @@ import { useAuth } from '@/features/auth/hooks/useAuth';
 import ErrorModal from '@/features/common/ErrorModal';
 import {
   deleteAccountAction,
+  updateBirthDateAction,
   updateNicknameAction,
 } from '@/features/profile/actions/profile.actions';
 import ProfileSkeleton from '@/features/profile/components/skeleton';
 import { useUserProfile } from '@/features/profile/hooks/useUserProfile';
 import { profileKeys } from '@/features/profile/queries/profile';
+import { getZodiacNameKo, getZodiacSeasonRange, getZodiacSign, loadTemplates, resolveZodiacByDate } from '@/lib/zodiac';
 import GlassCard from '@/shared/components/glassCard';
-import { useQueryClient } from '@tanstack/react-query';
+import ZodiacBadge from '@/shared/components/ZodiacBadge';
+import { useQueryClient, useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -28,6 +31,9 @@ export default function ProfileClientPage() {
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deletePending, setDeletePending] = useState(false);
   const [logoutPending, setLogoutPending] = useState(false);
+  const [editingBirth, setEditingBirth] = useState(false);
+  const [birthInput, setBirthInput] = useState('');
+  const [birthPending, setBirthPending] = useState(false);
 
   const handleLogout = async () => {
     if (logoutPending) return;
@@ -43,6 +49,68 @@ export default function ProfileClientPage() {
     setDeletePending(false);
     if (res.ok) {
       router.replace('/start');
+    }
+  };
+
+  const birthDate = data?.profile.birth_date
+    ? new Date(data.profile.birth_date)
+    : null;
+  const birthZodiac = birthDate
+    ? getZodiacNameKo(getZodiacSign(birthDate))
+    : null;
+
+  const { data: templates } = useQuery({
+    queryKey: ['zodiac-templates'],
+    queryFn: loadTemplates,
+    staleTime: Infinity,
+  });
+
+  const birthTemplate = birthDate && templates
+    ? resolveZodiacByDate(birthDate, templates)
+    : null;
+
+  const birthSignKey = birthDate ? getZodiacSign(birthDate) : null;
+  const birthSeason = birthDate && birthSignKey
+    ? getZodiacSeasonRange(new Date(), birthSignKey)
+    : null;
+
+  const { data: birthSeasonStats } = useQuery({
+    queryKey: ['birth-season-stats', birthSeason?.start?.toISOString()],
+    queryFn: async () => {
+      if (!birthSeason) return null;
+      const dateStr = birthSeason.start.toISOString().split('T')[0];
+      const periodRes = await fetch(`/api/constellation/period/by-date?date=${dateStr}`);
+      if (!periodRes.ok) return null;
+      const periodJson = await periodRes.json();
+      const periodId = periodJson.data?.period_id;
+      if (!periodId) return null;
+
+      const progressRes = await fetch(`/api/constellation/period/${periodId}/progress`);
+      if (!progressRes.ok) return null;
+      const progressJson = await progressRes.json();
+      return {
+        periodId,
+        totalDays: birthSeason.daysCount,
+        ...(progressJson.data ?? { entry_count: 0, positive_count: 0, negative_count: 0 }),
+      };
+    },
+    enabled: !!birthSeason,
+    staleTime: 1000 * 60 * 30,
+  });
+
+  const openBirthEdit = () => {
+    setBirthInput(data?.profile.birth_date ?? '');
+    setEditingBirth(true);
+  };
+
+  const saveBirthDate = async () => {
+    if (!birthInput || birthPending) return;
+    setBirthPending(true);
+    const res = await updateBirthDateAction(birthInput);
+    setBirthPending(false);
+    if (res.ok) {
+      setEditingBirth(false);
+      await qc.invalidateQueries({ queryKey: profileKeys.all });
     }
   };
 
@@ -129,6 +197,13 @@ export default function ProfileClientPage() {
                 </p>
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   <Badge>총 {data?.totalDiaries ?? 0}개 기록</Badge>
+                  {birthTemplate && birthZodiac && (
+                    <ZodiacBadge
+                      nameKo={birthZodiac}
+                      points={birthTemplate.points}
+                      edges={birthTemplate.edges}
+                    />
+                  )}
                 </div>
               </div>
             </div>
@@ -189,6 +264,48 @@ export default function ProfileClientPage() {
                     className="text-[12px] text-white/60 px-2.5 py-1.5 rounded-lg bg-white/6 border border-white/10 hover:bg-white/10 transition"
                   >
                     수정
+                  </button>
+                }
+              />
+            )}
+            {editingBirth ? (
+              <div className="px-4 py-3 flex items-center gap-2 border-t border-white/8">
+                <span className="text-white/90 text-[14px] shrink-0">생일</span>
+                <input
+                  type="date"
+                  className="flex-1 min-w-0 bg-white/6 border border-white/20 rounded-lg px-2 py-1 text-[14px] text-white focus:outline-none focus:border-white/40 [color-scheme:dark]"
+                  value={birthInput}
+                  onChange={(e) => setBirthInput(e.target.value)}
+                  autoFocus
+                />
+                <button
+                  onClick={saveBirthDate}
+                  disabled={birthPending || !birthInput}
+                  className="shrink-0 text-[12px] text-white/85 px-2.5 py-1.5 rounded-lg bg-white/10 border border-white/15 disabled:opacity-40"
+                >
+                  {birthPending ? '저장 중' : '저장'}
+                </button>
+                <button
+                  onClick={() => setEditingBirth(false)}
+                  className="shrink-0 text-[12px] text-white/55"
+                >
+                  취소
+                </button>
+              </div>
+            ) : (
+              <SettingRow
+                label="생일"
+                desc={
+                  data?.profile.birth_date
+                    ? `${data.profile.birth_date} · ${birthZodiac}`
+                    : '설정되지 않음'
+                }
+                right={
+                  <button
+                    onClick={openBirthEdit}
+                    className="text-[12px] text-white/60 px-2.5 py-1.5 rounded-lg bg-white/6 border border-white/10 hover:bg-white/10 transition"
+                  >
+                    {data?.profile.birth_date ? '수정' : '설정'}
                   </button>
                 }
               />
@@ -260,6 +377,81 @@ export default function ProfileClientPage() {
               desc="다른 앱에서 이동"
             />
           </GlassCard> */}
+
+          {/* 나의 별자리 컬렉션 */}
+          {birthZodiac && birthSeasonStats && (
+            <GlassCard className="p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <p className="text-white/85 text-[14px] font-medium">
+                  나의 별자리 · {birthZodiac}
+                </p>
+                {birthSeasonStats.entry_count > 0 &&
+                  birthSeasonStats.entry_count / birthSeasonStats.totalDays >= 0.8 && (
+                    <span className="px-1.5 py-0.5 rounded-full text-[9px] bg-purple-400/15 text-purple-300/80 border border-purple-400/25">
+                      수집 완료
+                    </span>
+                  )}
+              </div>
+
+              {/* 통계 */}
+              <div className="grid grid-cols-3 gap-3 mb-4">
+                <div className="text-center p-2 rounded-xl bg-white/4">
+                  <p className="text-white text-[18px] font-semibold">
+                    {birthSeasonStats.entry_count}
+                  </p>
+                  <p className="text-white/50 text-[11px] mt-0.5">
+                    / {birthSeasonStats.totalDays}일
+                  </p>
+                </div>
+                <div className="text-center p-2 rounded-xl bg-white/4">
+                  <p className="text-blue-300 text-[18px] font-semibold">
+                    {birthSeasonStats.positive_count ?? 0}
+                  </p>
+                  <p className="text-white/50 text-[11px] mt-0.5">좋았던 날</p>
+                </div>
+                <div className="text-center p-2 rounded-xl bg-white/4">
+                  <p className="text-orange-300 text-[18px] font-semibold">
+                    {birthSeasonStats.negative_count ?? 0}
+                  </p>
+                  <p className="text-white/50 text-[11px] mt-0.5">힘들었던 날</p>
+                </div>
+              </div>
+
+              {/* 진행률 바 */}
+              <div
+                className="relative w-full rounded-full overflow-hidden"
+                style={{ height: 4, background: 'rgba(255,255,255,0.07)' }}
+              >
+                <div
+                  className="absolute top-0 bottom-0 w-px"
+                  style={{ left: '80%', background: 'rgba(255,255,255,0.35)' }}
+                />
+                <div
+                  className="h-full rounded-full transition-all duration-700"
+                  style={{
+                    width: `${Math.min(
+                      Math.round(
+                        (birthSeasonStats.entry_count / birthSeasonStats.totalDays) * 100
+                      ),
+                      100
+                    )}%`,
+                    background:
+                      'linear-gradient(90deg, rgba(255,200,60,0.7), rgba(255,170,40,0.85))',
+                    boxShadow: '0 0 8px rgba(255,190,50,0.4)',
+                  }}
+                />
+              </div>
+              <div className="flex justify-between mt-1.5">
+                <span className="text-white/45 text-[9px]">
+                  {Math.round(
+                    (birthSeasonStats.entry_count / birthSeasonStats.totalDays) * 100
+                  )}
+                  %
+                </span>
+                <span className="text-white/35 text-[9px]">80% 달성 시 수집</span>
+              </div>
+            </GlassCard>
+          )}
 
           {/* 지원 */}
           <GlassCard className="p-1.5">

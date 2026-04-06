@@ -1,5 +1,5 @@
 type HomeSummary = {
-  profile: { nickname: string; email: string };
+  profile: { nickname: string; email: string; birth_date?: string | null };
   starCount: number;
   weekDiaries: {
     diary_id: string;

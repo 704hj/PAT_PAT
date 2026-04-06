@@ -4,6 +4,7 @@ export const HomeSummarySchema = z.object({
   profile: z.object({
     nickname: z.string().min(1),
     email: z.string().min(1),
+    birth_date: z.string().nullable().optional(),
   }),
   starCount: z.number().min(0),
   weekDiaries: z.array(

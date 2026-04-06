@@ -25,12 +25,24 @@ export async function updateNicknameAction(nickname: string) {
   });
 }
 
+export async function updateBirthDateAction(birthDate: string) {
+  return withAuthAction(async ({ supabase, authUser }) => {
+    const { error } = await supabase
+      .from('users')
+      .update({ birth_date: birthDate })
+      .eq('auth_user_id', authUser.id)
+      .is('deleted_at', null);
+
+    if (error) throw mapSupabaseError(error);
+  });
+}
+
 export async function getProfileAction() {
   return withAuthAction(async ({ supabase, authUser }) => {
     const [profileRes, starsRes, worriesRes, totalRes] = await Promise.all([
       supabase
         .from('users')
-        .select('nickname, email')
+        .select('nickname, email, birth_date')
         .eq('auth_user_id', authUser.id)
         .is('deleted_at', null)
         .single(),
