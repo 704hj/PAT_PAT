@@ -12,6 +12,8 @@ interface UseSignUpReturn {
   code: string;
   password: string;
   password2: string;
+  birthDate: string;
+  birthDateError: string;
 
   // 검증 상태
   nicknameChecking: boolean;
@@ -33,6 +35,7 @@ interface UseSignUpReturn {
   setCode: (value: string) => void;
   setPassword: (value: string) => void;
   setPassword2: (value: string) => void;
+  setBirthDate: (value: string) => void;
   checkNickname: () => Promise<void>;
   sendOtp: () => Promise<void>;
   verifyOtp: () => Promise<void>;
@@ -51,6 +54,8 @@ export function useSignUp(): UseSignUpReturn {
   const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
   const [password2, setPassword2] = useState("");
+  const [birthDate, setBirthDate] = useState("");
+  const [birthDateError, setBirthDateError] = useState("");
 
   // 검증 상태
   const [nicknameChecking, setNicknameChecking] = useState(false);
@@ -227,6 +232,34 @@ export function useSignUp(): UseSignUpReturn {
     }
   };
 
+  // 생일 변경 핸들러 (선택 입력, 형식 검증)
+  const handleBirthDateChange = (value: string) => {
+    setBirthDate(value);
+    if (!value) {
+      setBirthDateError("");
+      return;
+    }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      setBirthDateError("올바른 날짜 형식이 아닙니다.");
+      return;
+    }
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) {
+      setBirthDateError("올바른 날짜가 아닙니다.");
+      return;
+    }
+    const now = new Date();
+    if (d > now) {
+      setBirthDateError("미래 날짜는 입력할 수 없어요.");
+      return;
+    }
+    if (d.getFullYear() < 1900) {
+      setBirthDateError("1900년 이후 날짜를 입력해주세요.");
+      return;
+    }
+    setBirthDateError("");
+  };
+
   // 비밀번호 확인 실시간 검증
   const handlePassword2Change = (value: string) => {
     setPassword2(value);
@@ -259,6 +292,9 @@ export function useSignUp(): UseSignUpReturn {
       setPassword2Error("비밀번호가 일치하지 않습니다.");
       return;
     }
+    if (birthDateError) {
+      return;
+    }
 
     setBusy(true);
     try {
@@ -270,6 +306,7 @@ export function useSignUp(): UseSignUpReturn {
         body: JSON.stringify({
           password,
           nickname: nickname.trim(),
+          birth_date: birthDate || null,
         }),
       });
 
@@ -296,6 +333,8 @@ export function useSignUp(): UseSignUpReturn {
     code,
     password,
     password2,
+    birthDate,
+    birthDateError,
 
     // 검증 상태
     nicknameChecking,
@@ -317,6 +356,7 @@ export function useSignUp(): UseSignUpReturn {
     setCode: handleCodeChange,
     setPassword: handlePasswordChange,
     setPassword2: handlePassword2Change,
+    setBirthDate: handleBirthDateChange,
     checkNickname,
     sendOtp,
     verifyOtp,

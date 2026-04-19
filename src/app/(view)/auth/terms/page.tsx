@@ -9,6 +9,7 @@ import {
   TERMS_SECTIONS,
 } from '@/features/auth/constants/termsContent';
 import ErrorModal from '@/features/common/ErrorModal';
+import BirthDatePicker from '@/shared/components/BirthDatePicker';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useRef, useState } from 'react';
 
@@ -69,8 +70,37 @@ function TermsContent() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const [birthDate, setBirthDate] = useState('');
+  const [birthDateError, setBirthDateError] = useState('');
+
+  const handleBirthDateChange = (value: string) => {
+    setBirthDate(value);
+    if (!value) {
+      setBirthDateError('');
+      return;
+    }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      setBirthDateError('올바른 날짜 형식이 아닙니다.');
+      return;
+    }
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) {
+      setBirthDateError('올바른 날짜가 아닙니다.');
+      return;
+    }
+    if (d > new Date()) {
+      setBirthDateError('미래 날짜는 입력할 수 없어요.');
+      return;
+    }
+    if (d.getFullYear() < 1900) {
+      setBirthDateError('1900년 이후 날짜를 입력해주세요.');
+      return;
+    }
+    setBirthDateError('');
+  };
+
   const allAgreed = agreedTerms && agreedPrivacy;
-  const canProceed = allAgreed && !isSubmitting;
+  const canProceed = allAgreed && !isSubmitting && !birthDateError;
 
   const switchTab = (tab: Tab) => {
     setActiveTab(tab);
@@ -100,7 +130,9 @@ function TermsContent() {
     }
     setIsSubmitting(true);
     try {
-      const res = await completeSignupAction(new FormData());
+      const fd = new FormData();
+      if (birthDate) fd.append('birth_date', birthDate);
+      const res = await completeSignupAction(fd);
       if (!res.ok) {
         setErrorMsg(res.message);
         setIsSubmitting(false);
@@ -174,6 +206,28 @@ function TermsContent() {
       {/* 하단 동의 바 */}
       <div className="shrink-0 border-t border-white/8 bg-[rgba(5,11,28,0.95)] backdrop-blur-2xl px-5 pt-4 pb-[max(20px,env(safe-area-inset-bottom))]">
         <div className="space-y-2.5">
+          {/* 생일 입력 (소셜 가입자만) */}
+          {!isEmailFlow && (
+            <div>
+              <label className="block text-[12.5px] font-semibold text-white/80 mb-1.5 px-1">
+                생일{' '}
+                <span className="text-white/40 text-[11px] font-light">
+                  (선택 · 별자리 인사말)
+                </span>
+              </label>
+              <BirthDatePicker
+                value={birthDate}
+                onChange={handleBirthDateChange}
+                error={birthDateError}
+              />
+              {birthDateError && (
+                <p className="mt-1 text-[11px] text-rose-300 px-1">
+                  {birthDateError}
+                </p>
+              )}
+            </div>
+          )}
+
           {/* 전체 동의 */}
           <div
             role="checkbox"

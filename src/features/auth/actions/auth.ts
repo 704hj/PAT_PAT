@@ -85,6 +85,28 @@ export async function completeSignupAction(formData: FormData) {
   const nicknameInput = String(formData.get('nickname') ?? '');
   const nickname = pickNickname(user, nicknameInput);
 
+  // (선택) 생일 입력 - 형식/범위 검증
+  const birthDateInput = String(formData.get('birth_date') ?? '').trim();
+  let birthDate: string | null = null;
+  if (birthDateInput) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(birthDateInput)) {
+      return {
+        ok: false as const,
+        code: 'INVALID_BIRTH_DATE',
+        message: '생일 형식이 올바르지 않습니다.',
+      };
+    }
+    const d = new Date(birthDateInput);
+    if (Number.isNaN(d.getTime()) || d > new Date() || d.getFullYear() < 1900) {
+      return {
+        ok: false as const,
+        code: 'INVALID_BIRTH_DATE',
+        message: '유효하지 않은 생일입니다.',
+      };
+    }
+    birthDate = birthDateInput;
+  }
+
   // provider
   const provider = (user.app_metadata?.provider as string) || 'email';
 
@@ -96,6 +118,7 @@ export async function completeSignupAction(formData: FormData) {
       email: user.email,
       signup_method: provider,
       nickname,
+      birth_date: birthDate,
       terms_accepted_at: nowIso,
       updated_at: nowIso,
     },

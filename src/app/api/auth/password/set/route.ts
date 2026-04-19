@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
-    const { password, nickname } = await req.json();
+    const { password, nickname, birth_date } = await req.json();
 
     if (!password || password.length < 8) {
       return NextResponse.json(
@@ -20,6 +20,25 @@ export async function POST(req: NextRequest) {
         { ok: false, message: "닉네임은 2자 이상이어야 합니다." },
         { status: 400 }
       );
+    }
+
+    // 생일 유효성 검증 (선택 입력)
+    let normalizedBirthDate: string | null = null;
+    if (birth_date) {
+      if (typeof birth_date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(birth_date)) {
+        return NextResponse.json(
+          { ok: false, message: "생일 형식이 올바르지 않습니다." },
+          { status: 400 }
+        );
+      }
+      const d = new Date(birth_date);
+      if (Number.isNaN(d.getTime()) || d > new Date() || d.getFullYear() < 1900) {
+        return NextResponse.json(
+          { ok: false, message: "유효하지 않은 생일입니다." },
+          { status: 400 }
+        );
+      }
+      normalizedBirthDate = birth_date;
     }
 
     // 현재 로그인된 사용자 확인 (OTP 인증 완료된 상태)
@@ -67,6 +86,7 @@ export async function POST(req: NextRequest) {
         _email: user.email,
         _nickname: nickname.trim(),
         _signup_method: "email",
+        _birth_date: normalizedBirthDate,
       }
     );
 

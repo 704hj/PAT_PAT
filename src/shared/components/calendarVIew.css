@@ -80,3 +80,23 @@
 .pp-calendar .react-calendar__month-view__days__day--weekend {
   color: rgba(255, 255, 255, 0.78) !important;
 }
+
+/* 생일 선택용: 연도/월 뷰 타일을 더 크고 읽기 좋게 */
+.pp-birth-calendar .react-calendar__year-view__months,
+.pp-birth-calendar .react-calendar__decade-view__years,
+.pp-birth-calendar .react-calendar__century-view__decades {
+  gap: 8px;
+}
+
+.pp-birth-calendar .react-calendar__year-view .react-calendar__tile,
+.pp-birth-calendar .react-calendar__decade-view .react-calendar__tile,
+.pp-birth-calendar .react-calendar__century-view .react-calendar__tile {
+  height: 56px;
+  font-size: 14px;
+  padding: 8px 4px;
+}
+
+.pp-birth-calendar .react-calendar__navigation__label {
+  font-size: 14px;
+  font-weight: 600;
+}

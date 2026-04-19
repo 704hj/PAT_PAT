@@ -2,6 +2,7 @@
 
 import SignupSuccessModal from '@/features/auth/components/signupSuccessModal';
 import { useSignUp } from '@/features/auth/hooks/useSignUp';
+import BirthDatePicker from '@/shared/components/BirthDatePicker';
 import { useRouter } from 'next/navigation';
 
 export default function EmailSignupPage() {
@@ -12,6 +13,8 @@ export default function EmailSignupPage() {
     code,
     password,
     password2,
+    birthDate,
+    birthDateError,
     nicknameChecking,
     nicknameAvailable,
     nicknameError,
@@ -26,6 +29,7 @@ export default function EmailSignupPage() {
     setNickname,
     setEmail,
     setCode,
+    setBirthDate,
     checkNickname,
     sendOtp,
     verifyOtp,
@@ -57,6 +61,7 @@ export default function EmailSignupPage() {
     otpVerified &&
     !passwordError &&
     !password2Error &&
+    !birthDateError &&
     password.trim().length > 0 &&
     password2.trim().length > 0;
 
@@ -128,6 +133,26 @@ export default function EmailSignupPage() {
                 <p className="mt-1 text-xs text-emerald-300">
                   사용 가능한 닉네임입니다.
                 </p>
+              )}
+            </div>
+
+            {/* 생일 (선택) */}
+            <div>
+              <label className={labelBase}>
+                생일{' '}
+                <span className="text-white/35 text-[11px] font-light">
+                  (선택 · 별자리 인사말에 사용)
+                </span>
+              </label>
+
+              <BirthDatePicker
+                value={birthDate}
+                onChange={setBirthDate}
+                error={birthDateError}
+              />
+
+              {birthDateError && (
+                <p className="mt-1 text-xs text-rose-300">{birthDateError}</p>
               )}
             </div>
 
